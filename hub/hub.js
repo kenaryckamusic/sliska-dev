@@ -179,6 +179,7 @@
     }
     if (d.type === 'sliska-counts') { Object.keys(d).forEach(function (k) { if (k !== 'type') counts[k] = d[k]; }); paintCounts(); }
     if (d.type === 'sliska-me' && d.name) setMe(d.name, d.avatar);
+    if (d.type === 'sliska-modal') document.body.classList.toggle('is-dim', !!d.open);
     if (d.type === 'sliska-mail-unread') { counts.mail = d.n || 0; paintCounts(); }
     if (d === 'sliska-open-ads' && can('owner')) go('/reklamy');
     if (d === 'sliska-embed-close') go('/');
@@ -278,6 +279,8 @@
   $('#menu-btn').addEventListener('click', function () { document.body.classList.add('menu-open'); });
   $('#tab-menu').addEventListener('click', function () { document.body.classList.add('menu-open'); });
   $('#scrim').addEventListener('click', closeMenu);
+  var dim = document.createElement('div'); dim.className = 'shell-dim'; document.body.appendChild(dim);
+  dim.addEventListener('click', function () { Object.keys(frames).forEach(function (k) { try { frames[k].contentWindow.postMessage({ type: 'sliska-modal-close' }, location.origin); } catch (e) { /* ignoruj */ } }); });
 
   /* ---------- Powiadomienia: nowe tematy, błędy i reklamy (tylko Właściciel) ---------- */
   var N = { items: [], known: null, pop: null, timer: 0 };

@@ -1609,7 +1609,14 @@ const Shell = {
 window.addEventListener('message', e => {
   if (e.origin !== location.origin || !e.data) return;
   if (e.data.type === 'sliska-action' && e.data.action === 'quick-new' && Auth.isAdmin()) openQuickModal();
+  if (e.data.type === 'sliska-modal-close') $$('.modal').forEach(m => { if (!m.hidden && m.id) closeModal(m.id); });
 });
+/* okienko w studiu → powłoka przyciemnia też menu po lewej (całe okno wygląda jak jedno) */
+if (Shell.on) {
+  let modalOpen = false;
+  const syncModal = () => { const on = $$('.modal').some(m => !m.hidden); if (on !== modalOpen) { modalOpen = on; Shell.post({ type: 'sliska-modal', open: on }); } };
+  new MutationObserver(syncModal).observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ['hidden'] });
+}
 
 function adminButtons(id) {
   if (!Auth.isAdmin()) return '';

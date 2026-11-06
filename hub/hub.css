@@ -254,3 +254,8 @@ button { cursor: pointer; }
 .toast span { display: block; color: var(--muted); font-size: .84rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @keyframes tin { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @media (max-width: 1023px) { .side-top .bell { display: none !important; } .toasts { bottom: calc(var(--tab-h) + 16px + env(safe-area-inset-bottom, 0px)); right: 16px; } }
+
+/* okienko otwarte w narzędziu: przyciemnione też menu i nagłówek */
+.shell-dim { position: fixed; inset: 0; z-index: 55; background: rgba(16, 24, 40, .55); opacity: 0; pointer-events: none; transition: opacity .15s; }
+body.is-dim .shell-dim { opacity: 1; pointer-events: auto; }
+body.is-dim .stage { z-index: 56; }
