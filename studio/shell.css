@@ -132,3 +132,16 @@ html.is-embed #view-editor .dropzone:hover, html.is-embed #view-editor .dropzone
   html.is-embed #view-editor .se-toolbar { top: 112px; margin: 10px 8px 0; }
   html.is-embed #view-editor .editor-col-side { position: static; max-height: none; }
 }
+/* Zaplanuj (obok Opublikuj) + okienko z datą */
+#view-editor .ed-plan { gap: 6px; }
+#view-editor .ed-plan.on { border-color: #f59e0b; background: #fff7e6; color: #92400e; }
+:root[data-theme="dark"] #view-editor .ed-plan.on { background: rgba(245, 158, 11, .14); color: #fbbf24; }
+.plan-box { max-width: 460px; }
+.plan-box h2 { margin: 0 0 4px; }
+.plan-sub { margin: 0 0 16px; font-size: .9rem; }
+.plan-quick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0 0 14px; }
+.plan-chip { height: 40px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); color: var(--text); font: inherit; font-weight: 700; font-size: .86rem; cursor: pointer; }
+.plan-chip:hover { border-color: var(--muted); }
+.plan-chip.on { border-color: var(--accent); background: var(--chip-bg, #fdecee); color: var(--accent); }
+#plan-at { width: 100%; height: 46px; font-size: 1rem; }
+@media (max-width: 860px) { html.is-embed #view-editor .ed-plan span { font-size: .8rem; } .plan-quick { grid-template-columns: repeat(2, 1fr); } }

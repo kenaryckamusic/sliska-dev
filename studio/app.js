@@ -4002,6 +4002,15 @@ function updateSizeMeter() {
 }
 const updateSizeMeterSoon = Utils.debounce(updateSizeMeter, 700);
 
+/** Przycisk „Zaplanuj”: pokazuje wybraną datę, gdy publikacja jest zaplanowana. */
+function updatePlanBtn() {
+  const b = $('#btn-plan'); if (!b) return;
+  const on = $('#f-schedule-on').checked && $('#f-schedule-at').value;
+  const lbl = on ? new Date($('#f-schedule-at').value).toLocaleString('pl-PL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Zaplanuj';
+  b.querySelector('span').textContent = lbl; b.classList.toggle('on', !!on);
+  b.hidden = !on && !!(editor.existing && isPublished(editor.existing));      // już opublikowanego nie planujemy ponownie
+}
+
 function updatePublishUi() {
   const on = $('#f-schedule-on').checked;
   $('#schedule-field').hidden = !on;
@@ -4016,6 +4025,7 @@ function updatePublishUi() {
   }
   const existingPublished = editor.existing && isPublished(editor.existing);
   $('#editor-save').textContent = on ? 'Zaplanuj publikację' : (existingPublished ? 'Zapisz zmiany' : 'Opublikuj');
+  try { updatePlanBtn(); } catch { /* ignoruj */ }
   $('#publish-hint').textContent = on
     ? 'Artykuł pojawi się na stronie automatycznie o wskazanej godzinie.'
     : existingPublished
@@ -7586,6 +7596,35 @@ function bindEvents() {
   editor.setTab = setEdTab;
 
   $('#f-schedule-on').addEventListener('change', updatePublishUi);
+  /* Przycisk „Zaplanuj” obok „Opublikuj”: okienko z datą (szybkie wybory + własna data) */
+  const planQuick = () => {
+    const d = (h, m, add) => { const x = new Date(); x.setDate(x.getDate() + (add || 0)); x.setHours(h, m, 0, 0); return x; };
+    const hour = new Date(Date.now() + 3600e3); hour.setMinutes(Math.ceil(hour.getMinutes() / 5) * 5, 0, 0);
+    const opts = [['Za godzinę', hour], ['Dziś 18:00', d(18, 0)], ['Dziś 20:00', d(20, 0)], ['Jutro 9:00', d(9, 0, 1)], ['Jutro 12:00', d(12, 0, 1)], ['Jutro 18:00', d(18, 0, 1)]]
+      .filter(([, t]) => t.getTime() > Date.now() + 5 * 60e3);
+    $('#plan-quick').innerHTML = opts.map(([l, t]) => `<button type="button" class="plan-chip" data-plan="${Utils.toLocalInput(t)}">${l}</button>`).join('');
+  };
+  const markPlanChip = () => $$('#plan-quick .plan-chip').forEach(b => b.classList.toggle('on', b.dataset.plan === $('#plan-at').value));
+  $('#btn-plan').addEventListener('click', () => {
+    planQuick();
+    const at = $('#plan-at'), cur = $('#f-schedule-on').checked && $('#f-schedule-at').value;
+    at.min = Utils.toLocalInput(Date.now());
+    if (cur) at.value = cur; else { const t = new Date(); t.setDate(t.getDate() + 1); t.setHours(9, 0, 0, 0); at.value = Utils.toLocalInput(t); }
+    $('#plan-off').hidden = !$('#f-schedule-on').checked;
+    $('#plan-err').hidden = true; markPlanChip();
+    openModal('plan-modal');
+  });
+  $('#plan-quick').addEventListener('click', e => { const b = e.target.closest('[data-plan]'); if (!b) return; $('#plan-at').value = b.dataset.plan; markPlanChip(); });
+  $('#plan-at').addEventListener('input', markPlanChip);
+  $('#plan-off').addEventListener('click', () => { $('#f-schedule-on').checked = false; updatePublishUi(); updatePlanBtn(); closeModal('plan-modal'); toast('Artykuł opublikuje się od razu po kliknięciu „Opublikuj”.'); });
+  $('#plan-ok').addEventListener('click', () => {
+    const v = $('#plan-at').value, t = Date.parse(v);
+    if (!v || isNaN(t) || t < Date.now() + 60e3) { const er = $('#plan-err'); er.textContent = 'Wybierz datę i godzinę w przyszłości.'; er.hidden = false; return; }
+    $('#f-schedule-on').checked = true; $('#f-schedule-at').value = v;
+    updatePublishUi(); updatePlanBtn(); closeModal('plan-modal');
+    $('#editor-form').requestSubmit ? $('#editor-form').requestSubmit($('#editor-save')) : $('#editor-save').click();
+  });
+  $('#f-schedule-at').addEventListener('change', updatePlanBtn);
   $('#f-review-on').addEventListener('change', updateReviewUi);
   $('#f-review-cover-same').addEventListener('change', updateReviewUi);
   $('#f-review-cover-url').addEventListener('input', e => {
