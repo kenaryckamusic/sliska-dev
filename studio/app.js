@@ -1192,6 +1192,7 @@ function scheduledArticles() {
 function setArticles(list) {
   state.articles = Array.isArray(list) ? list : [];
   state.plain = new Map(state.articles.map(a => [a.id, Utils.stripHtml(a.content)]));
+  try { applySourceExamples(); } catch { /* ignoruj */ }
 }
 
 /** Kadr zdjęcia głównego (wybrany w edytorze): punkt ostrości i przybliżenie. Działa tylko dla zdjęcia głównego artykułu. */
@@ -3832,6 +3833,10 @@ function updateChecklist() {
     items.push({ ok: Utils.parseScore($('#f-review-score').value) !== null && !!$('#f-review-work').value.trim(), text: 'Recenzja: ocena i tytuł dzieła', req: true });
     items.push({ ok: $('#f-review-cover-same').checked ? !!editor.image : !!editor.cover, text: 'Recenzja: okładka', req: true });
   }
+  const need = items.filter(i => i.req), done = need.filter(i => i.ok).length;
+  const rb = $('#ready-bar'), rn = $('#ready-n');
+  if (rb) { rb.style.width = Math.round(done / Math.max(1, need.length) * 100) + '%'; rb.parentElement.classList.toggle('full', done === need.length); }
+  if (rn) { rn.textContent = done + '/' + need.length; rn.classList.toggle('full', done === need.length); }
   $('#checklist').innerHTML = items.map(i =>
     `<li class="${i.ok ? 'ok' : (i.req ? 'todo' : 'opt')}"><span class="ck" aria-hidden="true">${i.ok ? '✓' : (i.req ? '○' : '–')}</span>${Utils.esc(i.text)}</li>`).join('');
 }
@@ -5238,6 +5243,30 @@ function initQuill() {
 }
 
 /* ---------- Edytor: otwieranie ---------- */
+/** Przykłady w polach „Źródło”: najczęstsze źródła z opublikowanych artykułów (tylko podpowiedź w polu, nic się samo nie wpisuje). */
+function sourceExamples(kind, n = 2) {
+  const c = new Map(), add = v => { v = String(v || '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim(); if (v.length > 1 && v.length <= 40) c.set(v, (c.get(v) || 0) + 1); };
+  const rx = kind === 'quote' ? /class="q-source"[^>]*>([^<]{2,60})</g : /class="img-source"[^>]*>([^<]{2,60})</g;
+  (state.articles || []).forEach(a => {
+    if (kind === 'image') { add(a.imageSource); String(a.content || '').replace(rx, (m, v) => add(v)); }
+    else if (kind === 'quote') String(a.content || '').replace(rx, (m, v) => add(v));
+    else if (kind === 'quick' && a.quick) add(a.sourceName);
+  });
+  return [...c.entries()].sort((x, y) => y[1] - x[1]).slice(0, n).map(x => x[0]);
+}
+function applySourceExamples() {
+  const set = (sel, kind, fallback, tail) => {
+    const el = $(sel); if (!el) return;
+    const ex = sourceExamples(kind);
+    el.placeholder = ex.length ? 'Np. ' + (ex.length > 1 ? ex.slice(0, -1).join(', ') + ' albo ' + ex[ex.length - 1] : ex[0]) + (tail || '') : fallback;
+  };
+  set('#f-image-source', 'image', 'Np. Instagram artysty');
+  set('#im-source', 'image', 'Np. Instagram artysty');
+  set('#qm-source', 'quote', 'Np. wywiad, post na Instagramie');
+  set('#qk-source', 'quick', 'Np. Instagram artysty (puste = adres strony)', ' (puste = adres strony)');
+  set('#st-quick-source', 'quick', 'Np. Instagram artysty (puste = adres strony)', ' (puste = adres strony)');
+}
+
 async function openEditor(articleId, draftParam) {
   if (!Auth.isAdmin()) {
     location.hash = '#/';
@@ -7536,14 +7565,15 @@ function bindEvents() {
   }));
   $('#btn-focus').addEventListener('click', () => {
     const on = form.classList.toggle('focus-mode');
-    $('#btn-focus').textContent = on ? 'Pokaż panel' : 'Tryb pisania';
+    const fb = $('#btn-focus'), lbl = on ? 'Pokaż panel boczny' : 'Tryb pisania';
+    if (fb.querySelector('svg')) { fb.title = lbl; fb.setAttribute('aria-label', lbl); fb.classList.toggle('on', on); fb.querySelector('span').textContent = lbl; } else fb.textContent = lbl;
   });
   $('#banner-discard').addEventListener('click', discardRestored);
   $('#q-typo').addEventListener('click', fixTypographyAll);
   $('#cat-suggest').addEventListener('click', e => { const b = e.target.closest('[data-cat-add]'); if (!b) return; const i = $$('#f-categories input').find(x => x.value === b.dataset.catAdd); if (i) { i.checked = true; i.dispatchEvent(new Event('change', { bubbles: true })); } renderCatSuggest(); onFormChange(); });
   const edTabs = $$('.ed-tab');
-  const edMobile = window.matchMedia('(max-width: 860px)');
-  let edCur = 'pub';
+  const edMobile = window.matchMedia(Shell.on ? '(min-width: 0px)' : '(max-width: 860px)');   // w Śliska Studio zakładki zawsze (krótszy panel)
+  let edCur = 'set';
   const setEdTab = name => {
     edCur = name;
     edTabs.forEach(t => { const on = t.dataset.t === name; t.classList.toggle('on', on); t.setAttribute('aria-selected', on); });
@@ -7552,7 +7582,7 @@ function bindEvents() {
   };
   (edMobile.addEventListener ? edMobile.addEventListener('change', () => setEdTab(edCur)) : edMobile.addListener(() => setEdTab(edCur)));
   edTabs.forEach(t => t.addEventListener('click', () => setEdTab(t.dataset.t)));
-  setEdTab('pub');
+  setEdTab('set');
   editor.setTab = setEdTab;
 
   $('#f-schedule-on').addEventListener('change', updatePublishUi);

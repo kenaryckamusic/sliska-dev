@@ -63,3 +63,72 @@ html.is-embed .tip-item { align-items: flex-start !important; }
 html.is-embed .tip-item .panel-item-actions { align-self: flex-start; }
 html.is-embed .tip-item .panel-item-main { flex: 1 1 420px; }
 html.is-embed #panel-tips .panel-list > .tip-item, html.is-embed #panel-tips .tip-item { margin: 0 0 12px !important; border: 1px solid var(--sh-line) !important; border-radius: 16px !important; }
+
+/* ================= EDYTOR ARTYKUŁU – nowy układ (v20261106g) ================= */
+html.is-embed #view-editor { --ed-w: 760px; }
+html.is-embed #view-editor .editor-head { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; flex-wrap: nowrap; gap: 14px; margin: -22px -28px 22px; padding: 12px 28px; border-radius: 0; box-shadow: none; border-bottom: 1px solid var(--sh-line); background: color-mix(in srgb, var(--bg) 88%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+html.is-embed #view-editor .ed-back { flex: none; gap: 6px; height: 40px; padding: 0 14px 0 10px; border-radius: 12px; }
+html.is-embed #view-editor .ed-head-t { min-width: 0; flex: 1; }
+html.is-embed #view-editor .editor-head h1 { margin: 0; font-size: 1.12rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html.is-embed #view-editor .ed-meta { display: flex; align-items: center; gap: 10px; min-height: 18px; }
+html.is-embed #view-editor .ed-meta p { margin: 0; font-size: .8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html.is-embed #view-editor .ed-meta .save-status:not(:empty)::before { content: "•"; margin-right: 10px; color: var(--muted); }
+html.is-embed #view-editor .editor-actions { display: flex; flex: none; gap: 8px; align-items: center; }
+html.is-embed #view-editor .editor-actions .btn { height: 40px; border-radius: 12px; padding: 0 16px; font-weight: 700; }
+html.is-embed #view-editor .ed-icon { width: 40px; padding: 0 !important; justify-content: center; }
+html.is-embed #view-editor .ed-icon span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+@media (min-width: 1001px) { html.is-embed #view-editor .editor-grid { grid-template-columns: minmax(0, 1fr) 340px; gap: 28px; } }
+@media (max-width: 1000px) { html.is-embed #view-editor .editor-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; } html.is-embed #view-editor .editor-col-side { position: static; max-height: none; overflow: visible; } }
+html.is-embed .editor.focus-mode .editor-grid { grid-template-columns: minmax(0, 1fr); }
+html.is-embed .editor.focus-mode .editor-col-side { display: none; }
+html.is-embed #view-editor .ed-icon.on { background: var(--text); color: var(--card); border-color: var(--text); }
+
+/* kartka do pisania */
+html.is-embed #view-editor .ed-paper { max-width: var(--ed-w); margin: 0 auto; border: 1px solid var(--sh-line); border-radius: 20px; box-shadow: 0 1px 2px rgba(16, 24, 40, .04); overflow: visible; }
+html.is-embed #view-editor .ed-title { padding-top: 44px; }
+html.is-embed #view-editor .ed-title .field-label, html.is-embed #view-editor .ed-lead .field-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+html.is-embed #view-editor .ed-title .field-head, html.is-embed #view-editor .ed-lead .field-head { position: relative; height: 0; margin: 0; }
+html.is-embed #view-editor .ed-title .counter, html.is-embed #view-editor .ed-lead .counter { position: absolute; right: 0; top: -24px; opacity: 0; transition: opacity .15s; }
+html.is-embed #view-editor .ed-title:focus-within .counter, html.is-embed #view-editor .ed-lead:focus-within .counter { opacity: 1; }
+html.is-embed #view-editor #f-title { font-size: clamp(1.8rem, 3vw, 2.5rem); }
+html.is-embed #view-editor #f-lead { padding-bottom: 22px; }
+html.is-embed #view-editor .se-toolbar { position: sticky; top: 66px; z-index: 20; margin: 14px 20px 0; padding: 6px 8px; border: 1px solid var(--sh-line); border-radius: 14px; background: var(--card); box-shadow: 0 8px 24px rgba(16, 24, 40, .07); }
+html.is-embed #view-editor .se-root { min-height: 48vh; font-family: var(--font); font-size: 1.08rem; line-height: 1.75; }
+html.is-embed #view-editor .ed-foot { border-radius: 0 0 20px 20px; }
+html.is-embed #view-editor .shortcuts { border-radius: 0 0 20px 20px; }
+
+/* panel boczny: gotowość + zakładki + karty */
+html.is-embed #view-editor .editor-col-side { position: sticky; top: 82px; max-height: calc(100vh - 100px); overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 0 2px 20px; scrollbar-width: thin; }
+html.is-embed #view-editor .editor-col-side > .panel { margin: 0 !important; border: 1px solid var(--sh-line) !important; border-radius: 16px !important; box-shadow: none !important; background: var(--card); }
+html.is-embed #view-editor .editor-col-side > [data-etab] > summary { display: none; }
+html.is-embed #view-editor .editor-col-side > [data-etab] { padding-top: 14px !important; }
+html.is-embed #view-editor .editor-col-side > [data-etab] > summary::after { display: none; }
+html.is-embed #view-editor #fold-ready > summary { gap: 8px; }
+html.is-embed #view-editor .ready-n { margin-left: auto; padding: 2px 8px; border-radius: 99px; background: var(--soft, #eef0f3); color: var(--muted); font-size: .76rem; }
+html.is-embed #view-editor .ready-n.full { background: #dcfce7; color: #067647; }
+html.is-embed #view-editor .ready-bar { height: 6px; margin: 0 16px 12px; border-radius: 99px; background: var(--soft, #eef0f3); overflow: hidden; }
+html.is-embed #view-editor .ready-bar i { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--accent); transition: width .3s ease; }
+html.is-embed #view-editor .ready-bar.full i { background: #16a34a; }
+html.is-embed #view-editor .checklist { padding: 0 16px 14px !important; gap: 7px; }
+html.is-embed #view-editor .ed-tabs { display: grid !important; grid-template-columns: repeat(4, 1fr); gap: 2px; padding: 4px; border-radius: 14px; background: var(--soft, #eef0f3); position: static; margin: 0; }
+html.is-embed #view-editor .ed-tab { height: 36px; padding: 0 6px; border: 0; border-radius: 10px; background: transparent; color: var(--muted); font-weight: 700; font-size: .84rem; }
+html.is-embed #view-editor .ed-tab.on { background: var(--card); color: var(--text); box-shadow: 0 1px 3px rgba(16, 24, 40, .12); }
+html.is-embed #view-editor .dropzone { padding: 18px; border: 1.5px dashed var(--sh-line); border-radius: 14px; background: var(--soft, #f6f7f9); text-align: center; }
+html.is-embed #view-editor .dropzone:hover, html.is-embed #view-editor .dropzone.is-over { border-color: var(--accent); }
+
+@media (max-width: 1200px) {
+  html.is-embed #view-editor .editor-actions .btn:not(.btn-primary):not(.ed-icon) { padding: 0 12px; }
+}
+@media (max-width: 860px) {
+  html.is-embed #view-editor .editor-head { margin: -14px -14px 14px; padding: 10px 14px; flex-wrap: wrap; }
+  html.is-embed #view-editor .ed-back span { display: none; }
+  html.is-embed #view-editor .ed-back { width: 40px; padding: 0; justify-content: center; }
+  html.is-embed #view-editor .editor-actions { width: 100%; }
+  html.is-embed #view-editor .editor-actions .btn { flex: 1; padding: 0 8px; font-size: .84rem; }
+  html.is-embed #view-editor .editor-actions .ed-icon { flex: none; }
+  html.is-embed #view-editor .ed-paper { border-radius: 16px; }
+  html.is-embed #view-editor .ed-title { padding-top: 24px; }
+  html.is-embed #view-editor .se-toolbar { top: 112px; margin: 10px 8px 0; }
+  html.is-embed #view-editor .editor-col-side { position: static; max-height: none; }
+}
