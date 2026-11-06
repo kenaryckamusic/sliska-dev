@@ -1,0 +1,50 @@
+/* Animacje (tylko dev) – płynniejsze, bez „mrugania” przy odświeżaniu danych */
+:root { --ease-out: cubic-bezier(.22, 1, .36, 1); --ease-spring: cubic-bezier(.34, 1.36, .64, 1); interpolate-size: allow-keywords; }
+
+/* Wejście widoków i kafli tylko raz przy zmianie strony (klasa .anim-in z anim.js), a nie przy każdym odświeżeniu listy */
+#app > section:not([hidden]), .grid .card, .related-grid .card, .rank-row { animation: none; }
+@keyframes a-view { from { opacity: 0; transform: translate3d(0, 10px, 0); } to { opacity: 1; transform: none; } }
+@keyframes a-rise { from { opacity: 0; transform: translate3d(0, 18px, 0) scale(.985); } to { opacity: 1; transform: none; } }
+@keyframes a-pop  { from { opacity: 0; transform: translate3d(0, 18px, 0) scale(.94); } to { opacity: 1; transform: none; } }
+@keyframes a-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes a-toast { from { opacity: 0; transform: translate3d(0, 14px, 0) scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes a-sheet { from { opacity: 0; transform: translate3d(0, 12px, 0) scale(.97); } to { opacity: 1; transform: none; } }
+html.anim-in #app > section:not([hidden]) { animation: a-view .45s var(--ease-out) both; }
+html.anim-in .hero, html.anim-in .tile, html.anim-in .grid .card, html.anim-in .related-grid .card, html.anim-in .rank-row, html.anim-in .quick-row, html.anim-in .tl, html.anim-in .vc {
+  animation: a-rise .65s var(--ease-out) both; animation-delay: calc(min(var(--i, 0), 9) * 55ms);
+}
+
+/* Interakcje: tylko transform / opacity / kolory (bez animowania rozmiarów) */
+.btn, .chip, .chip-btn, .pa-row, .nav-link, .m-tab, .ptab, .hub-tab, .ed-tab, .tag-chip, .share-btn, .rx-btn {
+  transition: background-color .2s ease, color .2s ease, border-color .2s ease, box-shadow .25s ease, transform .2s var(--ease-out);
+}
+.btn:active, .chip-btn:active, .pa-row:active, .share-btn:active, .rx-btn:active { transform: scale(.96); }
+@media (hover: hover) {
+  .card, .tile, .hero, .quick-row { transition: transform .4s var(--ease-out), box-shadow .4s ease; }
+  .card:hover, .tile:hover { transform: translate3d(0, -4px, 0); box-shadow: 0 14px 30px -12px rgba(16, 24, 40, .28); }
+  .tile .tile-img, .hero .hero-img, .card img { transition: transform .8s var(--ease-out); }
+  .tile:hover .tile-img, .hero:hover .hero-img { transform: scale(1.045); }
+}
+
+/* Okna i powiadomienia */
+.modal:not([hidden]) { animation: a-fade .22s ease both; }
+.modal:not([hidden]) .modal-box { animation: a-pop .42s var(--ease-spring) both; }
+.toast { animation: a-toast .45s var(--ease-spring) both; }
+html.rail-on body.pp-open #side-left .profile-card { animation: a-sheet .32s var(--ease-out) both; transform-origin: bottom left; }
+.m-sheet { transition: transform .38s var(--ease-out), opacity .25s ease; }
+
+/* Rozwijane panele (details): płynne otwieranie */
+@supports (selector(::details-content)) {
+  details::details-content { block-size: 0; overflow: clip; transition: block-size .35s var(--ease-out), content-visibility .35s allow-discrete; }
+  details[open]::details-content { block-size: auto; }
+}
+
+/* Pasek postępu czytania i przycisk „w górę” */
+#read-progress { transition: width .12s linear; }
+#to-top { transition: opacity .25s ease, transform .3s var(--ease-out); }
+#to-top[hidden] { display: block !important; opacity: 0; pointer-events: none; transform: translate3d(0, 12px, 0); }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-delay: 0s !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+}

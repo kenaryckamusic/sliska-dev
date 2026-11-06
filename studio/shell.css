@@ -1,0 +1,51 @@
+/* Studio w oknie Śliska Studio (dev.sliska.pl): nawigację, tytuły i liczniki pokazuje powłoka – tu tylko treść. */
+html.is-embed { --sh-line: var(--border, #e4e7ec); --sh-hover: #f6f7f9; }
+html.is-embed[data-theme="dark"] { --sh-hover: #232327; }
+@media (prefers-color-scheme: dark) { html.is-embed:not([data-theme="light"]) { --sh-hover: #232327; } }
+
+html.is-embed body { background: var(--bg); }
+html.is-embed #layout { max-width: 1180px !important; margin: 0 auto !important; padding: 22px 28px 48px !important; }
+html.is-embed .read-progress, html.is-embed .skip-link { display: none !important; }
+
+/* panel: bez nagłówka, kafelków i zakładek (są w menu powłoki) */
+html.is-embed #view-panel > .article-top,
+html.is-embed #view-panel > .panel-title,
+html.is-embed #view-panel > .panel-sub,
+html.is-embed #view-panel > .panel-kpis,
+html.is-embed #view-panel > .ptabs,
+html.is-embed #view-settings > .article-top,
+html.is-embed #view-settings > .panel-title,
+html.is-embed #view-settings > .panel-sub,
+html.is-embed .hub-nav { display: none !important; }
+
+/* listy: jedna karta z wierszami zamiast osobnych kafli */
+html.is-embed .ptab-pane .panel-list { background: var(--card); border: 1px solid var(--sh-line); border-radius: 16px; overflow: hidden; }
+html.is-embed .ptab-pane .panel-list:empty, html.is-embed .ptab-pane .panel-list > p.muted:only-child { padding: 28px 20px; text-align: center; }
+html.is-embed .ptab-pane .panel-list > p.muted { margin: 0; }
+html.is-embed .ptab-pane .panel-list > .panel-item { margin: 0 !important; border: 0 !important; border-radius: 0 !important; border-top: 1px solid var(--sh-line) !important; padding: 14px 20px !important; align-items: center; transition: background .12s; }
+html.is-embed .ptab-pane .panel-list > .panel-item:first-child, html.is-embed .ptab-pane .panel-list > h4 + .panel-item { border-top: 0 !important; }
+html.is-embed .ptab-pane .panel-list > .panel-item:hover { background: var(--sh-hover) !important; }
+html.is-embed .ptab-pane .panel-list > .panel-item .panel-item-main strong { font-size: .98rem; }
+html.is-embed .ptab-pane .panel-list > .panel-item .panel-item-main .muted { font-size: .84rem; }
+html.is-embed .ptab-pane .panel-list > .panel-item .btn-sm { height: 32px; border-radius: 9px; }
+html.is-embed .ptab-pane .panel-list > h4.all-sec { margin: 0; padding: 12px 20px; border-top: 1px solid var(--sh-line); background: var(--sh-hover); font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+html.is-embed .ptab-pane .panel-list > h4.all-sec:first-child { border-top: 0; }
+html.is-embed .ptab-pane .panel-list > #all-more { display: flex; width: 100%; justify-content: center; border: 0; border-top: 1px solid var(--sh-line); border-radius: 0; height: 48px; background: transparent; }
+html.is-embed .ptab-pane .panel-list > #all-more:hover { background: var(--sh-hover); }
+html.is-embed #all-search { margin: 0 0 14px; height: 46px; border-radius: 12px; }
+
+/* nowinki: tytuł strony jest w powłoce */
+html.is-embed #view-quick > .article-top, html.is-embed #view-quick > .rank-head { display: none !important; }
+html.is-embed #view-quick .empty-state { border-radius: 16px; }
+
+/* ustawienia i konto: karty jak w powłoce */
+html.is-embed .st-card, html.is-embed #view-account .panel { border-radius: 16px !important; }
+
+@media (max-width: 760px) {
+  html.is-embed #layout { padding: 14px 14px 32px !important; }
+  html.is-embed .ptab-pane .panel-list > .panel-item { padding: 14px !important; }
+}
+html.is-embed .ptab-pane .panel-list > .panel-item .panel-item-main { gap: 3px !important; min-height: 0 !important; }
+html.is-embed .ptab-pane .panel-list > .panel-item .panel-item-main::before,
+html.is-embed .ptab-pane .panel-list > .panel-item .panel-item-main::after { display: none !important; }
+html.is-embed .ptab-pane .panel-list > .panel-item { row-gap: 10px !important; }

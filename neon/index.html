@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow">
+<title>DEV · Migracja bazy – Śliska News</title>
+<link rel="icon" href="/news/icons-dev/favicon.svg" type="image/svg+xml">
+<script>try{var t=localStorage.getItem('sliska_theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<script src="/news/dev-art.js"></script>
+<script src="/news/dev-gate.js"></script>
+<style>
+:root{--accent:#d6001c;--text:#1a1a1a;--muted:#667085;--bg:#f4f5f7;--card:#fff;--line:#e4e7ec;--soft:#eef0f3;--ok:#16a34a;--warn:#b45309}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--text:#ececec;--muted:#a3a3a3;--bg:#121212;--card:#1c1c1c;--line:#2e2e2e;--soft:#262626}}
+:root[data-theme=dark]{--text:#ececec;--muted:#a3a3a3;--bg:#121212;--card:#1c1c1c;--line:#2e2e2e;--soft:#262626}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 Figtree,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:640px;margin:0 auto;padding:32px 16px 60px}
+h1{font:800 1.6rem/1.2 "Bricolage Grotesque",Figtree,sans-serif;margin:0 0 6px}
+.sub{color:var(--muted);margin:0 0 22px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 20px;margin-bottom:14px}
+.card h2{font-size:1rem;margin:0 0 10px}
+.row{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-top:1px solid var(--line)}.row:first-of-type{border-top:0}
+.chip{font-weight:700;font-size:.82rem;padding:2px 10px;border-radius:99px;background:var(--soft);white-space:nowrap}.chip.ok{background:rgba(22,163,74,.14);color:var(--ok)}.chip.no{background:rgba(214,0,28,.1);color:var(--accent)}
+.btn{height:42px;padding:0 22px;border-radius:99px;border:0;background:var(--accent);color:#fff;font:800 .92rem Figtree,sans-serif;cursor:pointer}.btn:disabled{opacity:.5;cursor:default}
+.btn.g{background:var(--soft);color:var(--text)}
+ol{margin:0;padding-left:20px}ol li{margin:6px 0}
+code{background:var(--soft);padding:1px 6px;border-radius:6px;font-size:.88em}
+#log,.log{font:13px/1.5 ui-monospace,Menlo,monospace;white-space:pre-wrap;background:var(--soft);border-radius:12px;padding:12px;max-height:260px;overflow:auto;margin-top:12px}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:.92rem}td,th{text-align:left;padding:6px 4px;border-top:1px solid var(--line)}td.n{text-align:right;font-variant-numeric:tabular-nums}
+.deny{color:var(--muted)}
+</style></head>
+<body>
+<main>
+  <h1>Migracja bazy do Neon</h1>
+  <p class="sub">Przenosiny danych portalu do Neona (Postgres). Tylko dla Właściciela.</p>
+  <div id="app"><p class="deny">Sprawdzam uprawnienia…</p></div>
+</main>
+<script>
+(function () {
+  'use strict';
+  var app = document.getElementById('app');
+  var API = '/news/api/admin/';
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function call(path, body) {
+    return window.devToken().then(function (t) {
+      return fetch(API + path, { method: body ? 'POST' : 'GET', headers: { authorization: 'Bearer ' + t, 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined, cache: 'no-store' });
+    }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { if (!r.ok) throw new Error(d.error || ('HTTP ' + r.status)); return d; }); });
+  }
+  var NAMES = { users: 'Konta', authors: 'Autorzy', comments: 'Komentarze', creports: 'Zgłoszenia komentarzy', votes: 'Oceny recenzji', push_subs: 'Subskrypcje push', inbox: 'Skrzynka push', mail_box: 'Poczta', mail_tpl: 'Szablony maili' };
+  var FSN = { articles: 'Artykuły i nowinki', drafts: 'Wersje robocze', meta: 'Profile redakcji', profiles: 'Profile redakcji', tips: 'Zgłoszenia tematów', og: 'Grafiki podglądu linków' };
+  function chip(on, yes, no) { return '<span class="chip ' + (on ? 'ok">' + yes : '">' + no) + '</span>'; }
+  function render(st) {
+    var fsDone = st.artNeon;
+    app.innerHTML =
+      '<div class="card"><h2>Stan</h2>' +
+      '<div class="row"><span>Połączenie z Neonem</span>' + (st.test ? (st.test.ok ? chip(true, 'działa') : '<span class="chip no">błąd</span>') : chip(false, '', 'brak NEON_URL')) + '</div>' +
+      (st.test && !st.test.ok ? '<p class="deny" style="margin:4px 0 8px">' + esc(st.test.error) + '</p>' : '') +
+      '<div class="row"><span>Etap 1: konta, komentarze, poczta</span>' + chip(st.db === 'neon', 'w Neonie', 'w D1') + '</div>' +
+      '<div class="row"><span>Etap 2: artykuły, szkice, zgłoszenia</span>' + chip(fsDone, 'w Neonie', 'w Firestore') + '</div>' +
+      '<div class="row"><span>Konto serwisowe Firebase</span>' + chip(st.firebaseSa, 'jest', 'brak FIREBASE_SA') + '</div></div>' +
+      '<div class="card"><h2>Etap 2: artykuły z Firestore do Neona</h2>' +
+      (fsDone ? '<p>Artykuły są już w Neonie. Studio i czytnik dev korzystają z nowej bazy. Każdy zapis artykułu trafia też do Firestore, żeby publiczna strona sliska.pl/news działała bez zmian.</p>' +
+        '<p class="deny">„Skopiuj ponownie” dociąga z Firestore to, co zapisano tam później (np. starym studiem). Nowszych zmian z Neona nie nadpisuje.</p>' :
+        '<p>Kopiuje artykuły, nowinki, wersje robocze, profile redakcji, zgłoszenia i grafiki podglądu linków. Duże zdjęcia zapisane w treści starych artykułów trafiają do bazy zdjęć, a w artykule zostaje adres. Firestore niczego nie traci.</p>') +
+      '<p style="margin:14px 0 0"><button class="btn" id="go2"' + (st.test && st.test.ok && st.firebaseSa && st.db === 'neon' ? '' : ' disabled') + '>' + (fsDone ? 'Skopiuj ponownie' : 'Przenieś artykuły') + '</button></p>' +
+      '<div id="out2"></div><div id="log2" class="log" hidden></div></div>' +
+      '<div class="card"><h2>Etap 4: zdjęcia do R2</h2><div class="row"><span>Bucket R2 (binding <code>IMG</code>)</span>' + chip(st.r2, 'podłączony', 'brak') + '</div>' +
+      '<p>Kopiuje zdjęcia z artykułów z bazy D1 do R2 i zmienia ich adresy w artykułach na api.sliska.pl. Stare adresy dalej działają.</p>' +
+      '<p style="margin:14px 0 0"><button class="btn" id="go4"' + (st.r2 ? '' : ' disabled') + '>Przenieś zdjęcia</button></p><div id="out4"></div><div id="log4" class="log" hidden></div></div>' +
+      '<div class="card"><h2>Etap 1</h2><p>' + (st.db === 'neon' ? '✓ Konta, komentarze, oceny i poczta działają na Neonie.' : 'Najpierw przenieś dane etapu 1.') + '</p>' +
+      '<p style="margin:10px 0 0"><button class="btn g" id="go">' + (st.db === 'neon' ? 'Dociągnij z D1' : 'Przenieś dane') + '</button></p><div id="out"></div><div id="log" class="log" hidden></div></div>';
+    document.getElementById('go').onclick = function () { run(st.db === 'neon'); };
+    document.getElementById('go2').onclick = function () { run2(fsDone); };
+    document.getElementById('go4').onclick = run4;
+  }
+  function log(t, id) { var l = document.getElementById(id || 'log'); l.hidden = false; l.textContent += t + '\n'; l.scrollTop = l.scrollHeight; }
+  function run(reset) {
+    var go = document.getElementById('go'), out = document.getElementById('out');
+    go.disabled = true; out.innerHTML = ''; var round = 0;
+    (function step(first) {
+      round++;
+      call('neon-migrate', first && reset ? { reset: true } : {}).then(function (d) {
+        if (!d.done) { log('Runda ' + round + ': kopiuję „' + (NAMES[d.table] || d.table) + '”…'); return setTimeout(function () { step(false); }, 400); }
+        log('Runda ' + round + ': zakończone.');
+        var rows = Object.keys(d.counts).map(function (k) { var c = d.counts[k], ok = c.neon >= c.d1; return '<tr><td>' + esc(NAMES[k] || k) + '</td><td class="n">' + c.d1 + '</td><td class="n">' + c.neon + '</td><td>' + (ok ? '✓' : '✗') + '</td></tr>'; }).join('');
+        out.innerHTML = '<table><tr><th>Dane</th><th class="n">D1</th><th class="n">Neon</th><th></th></tr>' + rows + '</table>';
+        go.disabled = false;
+      }).catch(function (e) { log('Błąd: ' + e.message); go.disabled = false; });
+    })(true);
+  }
+  function run2(again) {
+    var go = document.getElementById('go2'), out = document.getElementById('out2');
+    go.disabled = true; out.innerHTML = ''; var round = 0;
+    (function step(first) {
+      round++;
+      call('fs-migrate', first && again ? { reset: true } : {}).then(function (d) {
+        if (!d.done) { log('Runda ' + round + ': ' + (FSN[d.col] || d.col) + ' – skopiowano ' + ((d.n && d.n[d.col]) || 0) + (d.imgs ? ' · zdjęć wyniesionych: ' + d.imgs : ''), 'log2'); return setTimeout(function () { step(false); }, 300); }
+        log('Runda ' + round + ': zakończone.', 'log2');
+        var keys = ['articles', 'drafts', 'profiles', 'tips', 'og'];
+        var rows = keys.map(function (k) { var f = d.firestore[k] || 0, n = d.neon[k] || 0; return '<tr><td>' + esc(FSN[k]) + '</td><td class="n">' + f + '</td><td class="n">' + n + '</td><td>' + (n >= f ? '✓' : '✗') + '</td></tr>'; }).join('');
+        var allOk = keys.every(function (k) { return (d.neon[k] || 0) >= (d.firestore[k] || 0); });
+        out.innerHTML = '<table><tr><th>Dane</th><th class="n">Firestore</th><th class="n">Neon</th><th></th></tr>' + rows + '</table>' +
+          '<p><b>' + (allOk ? 'Gotowe. Studio i czytnik dev korzystają teraz z Neona – odśwież ich karty.' : 'Liczby się nie zgadzają – wyślij zrzut tej strony.') + '</b>' + (d.imgs ? ' Wyniesione zdjęcia: ' + d.imgs + '.' : '') + '</p>';
+        go.disabled = false; go.textContent = 'Skopiuj ponownie';
+      }).catch(function (e) { log('Błąd: ' + e.message, 'log2'); go.disabled = false; });
+    })(true);
+  }
+  function run4() {
+    var go = document.getElementById('go4'), out = document.getElementById('out4'), done = 0, fail = 0, total = 0;
+    go.disabled = true; out.innerHTML = '';
+    function page(after) {
+      return call('img-list?after=' + encodeURIComponent(after || '')).then(function (d) {
+        total = d.total;
+        var chain = Promise.resolve();
+        d.todo.forEach(function (id) {
+          chain = chain.then(function () {
+            return fetch('/news/api/img/' + id, { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.blob(); })
+              .then(function (b) { return window.devToken().then(function (t) { return fetch('/news/api/admin/img-bin?id=' + id, { method: 'POST', headers: { authorization: 'Bearer ' + t, 'content-type': b.type || 'image/jpeg' }, body: b }); }); })
+              .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); done++; log('Przeniesiono ' + done + ' (z ok. ' + total + ')', 'log4'); })
+              .catch(function (e) { fail++; log('Błąd przy ' + id + ': ' + e.message, 'log4'); });
+          });
+        });
+        return chain.then(function () { return d.next ? page(d.next) : null; });
+      });
+    }
+    page('').then(function () { return call('img-urls', {}); }).then(function (u) {
+      out.innerHTML = '<p><b>' + (fail ? 'Gotowe z błędami (' + fail + ') – kliknij jeszcze raz.' : 'Gotowe.') + '</b> Przeniesione zdjęcia: ' + done + '. Zmienione adresy w artykułach: ' + ((u.changed && u.changed.articles) || 0) + ', w szkicach: ' + ((u.changed && u.changed.drafts) || 0) + '.</p>';
+      go.disabled = false;
+    }).catch(function (e) { log('Błąd: ' + e.message, 'log4'); go.disabled = false; });
+  }
+  function init() {
+    if (window.devRole !== 'owner') { app.innerHTML = '<p class="deny">Ta strona jest tylko dla Właściciela Portalu.</p>'; return; }
+    call('neon-status').then(render).catch(function (e) { app.innerHTML = '<p class="deny">Nie udało się sprawdzić Workera: ' + esc(e.message) + '. Czy nowy og-worker.js jest wgrany?</p>'; });
+  }
+  if (window.devRole) init(); else window.addEventListener('devgate', init, { once: true });
+})();
+</script>
+</body></html>

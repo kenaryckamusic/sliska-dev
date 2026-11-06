@@ -1,0 +1,26 @@
+{
+  "cleanUrls": false,
+  "rewrites": [
+    { "source": "/news/api/:path*", "destination": "https://api.sliska.pl/news/api/:path*" },
+    { "source": "/news/a/:id", "destination": "https://api.sliska.pl/a/:id" },
+    { "source": "/news/og/:file", "destination": "https://api.sliska.pl/og/:file" },
+    { "source": "/artykuly", "destination": "/index.html" },
+    { "source": "/artykuly/:path*", "destination": "/index.html" },
+    { "source": "/edytor", "destination": "/index.html" },
+    { "source": "/edytor/:path*", "destination": "/index.html" },
+    { "source": "/podglad/:path*", "destination": "/index.html" },
+    { "source": "/nowinki", "destination": "/index.html" },
+    { "source": "/komentarze", "destination": "/index.html" },
+    { "source": "/zgloszenia", "destination": "/index.html" },
+    { "source": "/uzytkownicy", "destination": "/index.html" },
+    { "source": "/narzedzia", "destination": "/index.html" },
+    { "source": "/ustawienia", "destination": "/index.html" },
+    { "source": "/konto", "destination": "/index.html" },
+    { "source": "/konto/:path*", "destination": "/index.html" }
+  ],
+  "headers": [
+    { "source": "/(.*)", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] },
+    { "source": "/", "headers": [{ "key": "Cache-Control", "value": "no-cache, must-revalidate" }] },
+    { "source": "/(.*)\\.(html|js|css|webmanifest)", "headers": [{ "key": "Cache-Control", "value": "no-cache, must-revalidate" }] }
+  ]
+}

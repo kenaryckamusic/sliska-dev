@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="pl"><head><script>try{if(self===top){location.replace('/?open='+encodeURIComponent(location.pathname+location.search+location.hash))}}catch(e){}</script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow">
+<title>DEV · Poczta – Śliska News</title>
+<link rel="icon" href="/news/icons-dev/favicon.svg" type="image/svg+xml">
+<script>try{var t=localStorage.getItem('sliska_theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<script src="/news/dev-art.js"></script>
+<script src="/news/dev-gate.js"></script>
+<style>
+:root{--accent:#d6001c;--text:#1a1a1a;--muted:#667085;--bg:#f4f5f7;--card:#fff;--line:#e4e7ec;--soft:#eef0f3;--ok:#16a34a}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--text:#ececec;--muted:#a3a3a3;--bg:#121212;--card:#1c1c1c;--line:#2e2e2e;--soft:#262626}}
+:root[data-theme=dark]{--text:#ececec;--muted:#a3a3a3;--bg:#121212;--card:#1c1c1c;--line:#2e2e2e;--soft:#262626}
+*{box-sizing:border-box}button,input{font-family:inherit}html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Figtree,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column}
+.deny{margin:60px auto;max-width:420px;text-align:center;color:var(--muted);padding:0 20px}
+.top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--card)}
+.fold{display:flex;gap:6px}.fold button{border:1px solid var(--line);background:var(--bg);color:var(--muted);font:700 .86rem Figtree,sans-serif;padding:7px 14px;border-radius:99px;cursor:pointer}
+.fold button.on{background:var(--accent);border-color:var(--accent);color:#fff}.fold b{margin-left:6px;background:var(--accent);color:#fff;border-radius:99px;padding:0 7px;font-size:.74rem}.fold button.on b{background:rgba(255,255,255,.3)}
+.grow{flex:1}
+.q{height:38px;min-width:160px;max-width:300px;flex:1;padding:0 14px;border-radius:99px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:inherit}.q:focus{outline:2px solid var(--accent);outline-offset:1px}
+.btn{height:38px;padding:0 18px;border-radius:99px;border:0;background:var(--accent);color:#fff;font:800 .88rem Figtree,sans-serif;cursor:pointer;white-space:nowrap}.btn.g{background:var(--soft);color:var(--text);font-weight:700}.btn.d{background:transparent;color:#d6001c;border:1px solid var(--line)}.btn.s{height:32px;padding:0 13px;font-size:.8rem}.btn:disabled{opacity:.5}
+.pm{flex:1;min-height:0;display:grid;grid-template-columns:minmax(300px,380px) 1fr}
+.lst{overflow:auto;border-right:1px solid var(--line);background:var(--card)}
+.row{display:grid;grid-template-columns:38px 1fr auto;gap:2px 10px;padding:11px 14px;border-bottom:1px solid var(--line);cursor:pointer;align-items:start}
+.row:hover{background:var(--soft)}.row.on{background:color-mix(in srgb,var(--accent) 9%,var(--card))}
+.av{grid-row:1/3;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;font-size:.95rem}
+.row .fr{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.row.un .fr,.row.un .sb{font-weight:800}
+.row time{color:var(--muted);font-size:.74rem;white-space:nowrap;padding-top:2px}
+.row .sb{grid-column:2/4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.88rem}
+.row .sn{grid-column:2/4;color:var(--muted);font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-right:6px}
+.star{border:0;background:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:0 2px;line-height:1}.star.on{color:#f59e0b}
+.rd{overflow:auto;padding:22px 26px;min-width:0}
+.rd h2{margin:0 0 10px;font:800 1.3rem/1.25 Figtree,sans-serif;word-break:break-word}
+.meta{display:flex;gap:12px;align-items:center;margin:0 0 14px;padding:0 0 14px;border-bottom:1px solid var(--line)}
+.meta .av{grid-row:auto}.meta b{display:block}.meta small{color:var(--muted)}.meta .when{margin-left:auto;color:var(--muted);font-size:.8rem;text-align:right}
+.bd{white-space:pre-wrap;word-break:break-word;line-height:1.65;font-size:.96rem}.bd a{color:var(--accent)}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
+.empty{padding:40px 20px;text-align:center;color:var(--muted)}
+.bk{display:none}
+@media(max-width:760px){.pm{grid-template-columns:1fr}.rd{display:none}.pm.open .lst{display:none}.pm.open .rd{display:block;padding:16px}.bk{display:inline-flex}.q{max-width:none}}
+@media(max-width:760px){.top{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px}.top .fold{grid-column:1/-1;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.top .fold::-webkit-scrollbar{display:none}.top .fold button{flex:none;white-space:nowrap}.top .q{grid-column:1/-1;max-width:none;min-width:0;width:100%;height:42px}.top .grow{display:none}.top .btn{width:100%;height:42px}}
+@media(max-width:760px){.top .q{grid-column:1/-1;width:100%;max-width:none;box-sizing:border-box;min-height:42px}.top .grow{display:none}.top .btn{width:100%;justify-content:center;text-align:center;min-height:42px;white-space:nowrap}}
+</style><style>.top{padding:14px 28px!important}@media(max-width:760px){.top{padding:12px 14px!important}}</style></head><body>
+<p class="deny" id="deny" hidden>Poczta jest dostępna tylko dla Właściciela serwisu.</p>
+<div class="top" id="top" hidden>
+  <div class="fold" id="fold"><button type="button" data-f="in" class="on">Odebrane</button><button type="button" data-f="out">Wysłane</button><button type="button" data-f="trash">Kosz</button></div>
+  <input class="q" id="q" type="search" placeholder="Szukaj w wiadomościach…" autocomplete="off">
+  <span class="grow"></span>
+  <button type="button" class="btn g s" id="tpl">Szablony</button>
+  <button type="button" class="btn" id="new">✎ Napisz</button>
+</div>
+<div class="pm" id="pm" hidden>
+  <div class="lst" id="lst"><p class="empty">Ładowanie…</p></div>
+  <div class="rd" id="rd"><p class="empty">Wybierz wiadomość z listy.</p></div>
+</div>
+<script src="/poczta/mail.js"></script>
+<script>
+(function () {
+  'use strict';
+  var M = window.SliskaMail, esc = M.esc, api = M.api;
+  var $ = function (s) { return document.querySelector(s); };
+  var st = { f: 'in', q: '', sel: 0, msgs: [], counts: {}, cur: null };
+  var COL = ['#d6001c', '#2563eb', '#16a34a', '#d97706', '#7c3aed', '#0891b2', '#db2777', '#4b5563'];
+  function color(s) { var h = 0; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return COL[h % COL.length]; }
+  function who(m) { return m.name || m.addr || '—'; }
+  function ini(m) { var t = who(m).replace(/[^\p{L}\p{N}]/gu, ''); return (t[0] || '?').toUpperCase(); }
+  function short(t) { var d = new Date(t), n = new Date(); if (d.toDateString() === n.toDateString()) return d.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' }); if (d.getFullYear() === n.getFullYear()) return d.toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' }); return d.toLocaleDateString('pl-PL'); }
+  function full(t) { return new Date(t).toLocaleString('pl-PL', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+  function linkify(t) { return esc(t).replace(/(https?:\/\/[^\s<]+[^\s<.,;:!?)"'])/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'); }
+
+  function counts() {
+    var c = st.counts, b = document.querySelectorAll('#fold button');
+    [].forEach.call(b, function (x) { var f = x.dataset.f, n = f === 'in' ? c.unread : 0; x.innerHTML = ({ in: 'Odebrane', out: 'Wysłane', trash: 'Kosz' })[f] + (n ? ' <b>' + n + '</b>' : ''); x.classList.toggle('on', f === st.f); });
+    try { parent.postMessage({ type: 'sliska-mail-unread', n: c.unread || 0 }, '*'); } catch (e) { /* ignoruj */ }
+  }
+  function drawList() {
+    var L = $('#lst');
+    if (!st.msgs.length) { L.innerHTML = '<p class="empty">' + (st.q ? 'Nic nie znaleziono.' : st.f === 'in' ? 'Skrzynka jest pusta. Nowe wiadomości z redakcja@sliska.pl pojawią się tutaj.' : st.f === 'out' ? 'Nie wysłano jeszcze żadnej wiadomości.' : 'Kosz jest pusty.') + '</p>'; return; }
+    L.innerHTML = st.msgs.map(function (m) {
+      var out = m.folder === 'out' || (st.f === 'trash' && false);
+      return '<div class="row' + (!m.rd && st.f === 'in' ? ' un' : '') + (m.id === st.sel ? ' on' : '') + '" data-id="' + m.id + '"><span class="av" style="background:' + color(m.addr || '?') + '">' + esc(ini(m)) + '</span>' +
+        '<span class="fr">' + (!m.rd && st.f === 'in' ? '<span class="dot"></span>' : '') + (st.f === 'out' ? 'Do: ' : '') + esc(who(m)) + '</span><time>' + short(m.at) + '</time>' +
+        '<span class="sb">' + '<button type="button" class="star' + (m.star ? ' on' : '') + '" data-star="' + m.id + '" title="Oznacz gwiazdką">' + (m.star ? '★' : '☆') + '</button> ' + esc(m.subject || '(bez tematu)') + (m.att ? ' 📎' : '') + '</span>' +
+        '<span class="sn">' + esc((m.snip || '').replace(/\s+/g, ' ')) + '</span></div>';
+    }).join('');
+  }
+  function load(quiet) {
+    if (!quiet) $('#lst').innerHTML = '<p class="empty">Ładowanie…</p>';
+    return api('/admin/mailbox?folder=' + st.f + (st.q ? '&q=' + encodeURIComponent(st.q) : '')).then(function (d) { st.msgs = d.msgs || []; st.counts = d.counts || {}; counts(); drawList(); })
+      .catch(function (e) { if (!quiet) $('#lst').innerHTML = '<p class="empty">' + esc(e.message) + '</p>'; });
+  }
+  function reDate(m) { return full(m.at); }
+  function quoteOf(m) { return 'Dnia ' + reDate(m) + ', ' + who(m) + ' <' + m.addr + '> napisał(a):\n' + String(m.body || '').split('\n').slice(0, 40).map(function (l) { return '> ' + l; }).join('\n'); }
+  function show(m) {
+    st.cur = m; var rd = $('#rd'), tr = m.folder === 'trash', out = m.folder === 'out';
+    rd.innerHTML = '<div class="acts"><button type="button" class="btn g s bk" data-a="back">‹ Wróć</button>' +
+      (tr ? '<button type="button" class="btn s" data-a="restore">Przywróć</button><button type="button" class="btn d s" data-a="delete">Usuń na stałe</button>' :
+        '<button type="button" class="btn s" data-a="reply">' + (out ? 'Napisz ponownie' : 'Odpowiedz') + '</button>' +
+        (out ? '' : '<button type="button" class="btn g s" data-a="unread">Oznacz jako nieprzeczytane</button>') +
+        '<button type="button" class="btn g s" data-a="' + (m.star ? 'unstar' : 'star') + '">' + (m.star ? '★ Usuń gwiazdkę' : '☆ Gwiazdka') + '</button><button type="button" class="btn d s" data-a="trash">Do kosza</button>') + '</div>' +
+      '<h2>' + esc(m.subject || '(bez tematu)') + '</h2>' +
+      '<div class="meta"><span class="av" style="background:' + color(m.addr || '?') + '">' + esc(ini(m)) + '</span><div><b>' + (out ? 'Do: ' : '') + esc(who(m)) + '</b><small>' + esc(m.addr) + (m.rto ? ' · odpowiedź na: ' + esc(m.rto) : '') + '</small></div><div class="when">' + esc(full(m.at)) + (m.att ? '<br>📎 załączniki: ' + m.att + ' (niepokazywane)' : '') + '</div></div>' +
+      '<div class="bd">' + linkify(m.body || '') + '</div>';
+    $('#pm').classList.add('open');
+  }
+  function open(id) {
+    st.sel = id; drawList();
+    api('/admin/mailbox?id=' + id).then(function (d) {
+      var m = d.msg; show(m);
+      var row = st.msgs.filter(function (x) { return x.id === id; })[0];
+      if (row && !row.rd) { row.rd = 1; st.counts.unread = Math.max(0, (st.counts.unread || 0) - 1); counts(); drawList(); }
+    }).catch(function (e) { $('#rd').innerHTML = '<p class="empty">' + esc(e.message) + '</p>'; });
+  }
+  function act(a, id) {
+    return api('/admin/mailbox', { action: a, id: id });
+  }
+  $('#lst').addEventListener('click', function (e) {
+    var s = e.target.closest('[data-star]');
+    if (s) { e.stopPropagation(); var id = Number(s.dataset.star), m = st.msgs.filter(function (x) { return x.id === id; })[0]; act(m.star ? 'unstar' : 'star', id).then(function () { m.star = m.star ? 0 : 1; drawList(); if (st.cur && st.cur.id === id) { st.cur.star = m.star; show(st.cur); } }).catch(function (er) { alert(er.message); }); return; }
+    var r = e.target.closest('.row'); if (r) open(Number(r.dataset.id));
+  });
+  $('#rd').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-a]'); if (!b || !st.cur) return; var a = b.dataset.a, m = st.cur;
+    if (a === 'back') { $('#pm').classList.remove('open'); return; }
+    if (a === 'reply') {
+      var to = m.folder === 'out' ? m.addr : (m.rto || m.addr);
+      M.compose({ title: m.folder === 'out' ? 'Nowa wiadomość' : 'Odpowiedź', to: to, name: m.name, subject: m.folder === 'out' ? m.subject : (/^re:/i.test(m.subject) ? m.subject : 'Re: ' + m.subject), text: '', quote: m.folder === 'out' ? '' : quoteOf(m), onSent: function () { load(true); } });
+      return;
+    }
+    if (a === 'delete' && !confirm('Usunąć tę wiadomość na stałe?')) return;
+    b.disabled = true;
+    act(a, m.id).then(function () {
+      if (a === 'unread') { st.counts.unread = (st.counts.unread || 0) + 1; }
+      if (a === 'star' || a === 'unstar') { m.star = a === 'star' ? 1 : 0; show(m); }
+      if (a === 'unread' || a === 'star' || a === 'unstar') return load(true);
+      st.cur = null; st.sel = 0; $('#rd').innerHTML = '<p class="empty">Wybierz wiadomość z listy.</p>'; $('#pm').classList.remove('open'); return load(true);
+    }).catch(function (er) { alert(er.message); b.disabled = false; });
+  });
+  $('#fold').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; st.f = b.dataset.f; st.sel = 0; st.cur = null; $('#rd').innerHTML = '<p class="empty">Wybierz wiadomość z listy.</p>'; $('#pm').classList.remove('open'); load(); });
+  var qt; $('#q').addEventListener('input', function () { clearTimeout(qt); var v = this.value.trim(); qt = setTimeout(function () { st.q = v; load(); }, 280); });
+  $('#new').onclick = function () { M.compose({ onSent: function () { if (st.f === 'out') load(true); } }); };
+  $('#tpl').onclick = function () { M.manageTemplates(); };
+
+  function start(role) {
+    if (role !== 'owner') { $('#deny').hidden = false; return; }
+    $('#top').hidden = false; $('#pm').hidden = false; load();
+    var qm = location.search.match(/[?&]to=([^&]+)/); if (qm) M.compose({ to: decodeURIComponent(qm[1]) });
+    setInterval(function () { if (!document.hidden) load(true); }, 45000);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) load(true); });
+  }
+  window.addEventListener('message', function (e) { if (e.data && e.data.type === 'sliska-shown' && !$('#top').hidden) load(true); });
+  if (window.devRole) start(window.devRole); else window.addEventListener('devgate', function (e) { start(e.detail.role); }, { once: true });
+})();
+</script></body></html>

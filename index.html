@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>DEV · Śliska Studio</title>
+<meta name="theme-color" content="#d6001c">
+<link rel="manifest" href="/manifest-dev.webmanifest">
+<link rel="apple-touch-icon" href="/news/icons-dev/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Śliska DEV">
+<link rel="icon" href="/news/icons-dev/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/news/icons-dev/favicon.ico" sizes="48x48">
+<script>try{var t=localStorage.getItem('sliska_theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="/hub/hub.css?v=20261106a">
+<script src="/news/dev-art.js"></script>
+<script src="/news/dev-gate.js"></script>
+</head>
+<body>
+<div class="shell">
+
+  <!-- BOCZNE MENU -->
+  <aside class="side" id="side" aria-label="Menu studia">
+    <a class="side-logo" href="/" data-nav><img class="lg-l" src="/news/logo-dev.svg" alt="Śliska News DEV"><img class="lg-d" src="/news/logo-dev-biale.svg" alt=""></a>
+    <div class="side-new">
+      <a class="btn btn-primary" href="/edytor" data-nav><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nowy artykuł</a>
+      <button class="btn btn-sq" type="button" data-act="quick-new" title="Dodaj nowinkę" aria-label="Dodaj nowinkę"><svg class="ic" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></button>
+    </div>
+    <nav class="nav" id="nav">
+      <div class="nav-grp">
+        <a href="/" data-nav data-r="pulpit"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Pulpit</a>
+      </div>
+      <div class="nav-grp">
+        <h3>Treści</h3>
+        <a href="/artykuly" data-nav data-r="opublikowane"><svg class="ic" viewBox="0 0 24 24"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M9 13h6M9 17h6"/></svg>Opublikowane<em data-c="published" hidden></em></a>
+        <a href="/artykuly/robocze" data-nav data-r="robocze"><svg class="ic" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg>Wersje robocze<em data-c="drafts" hidden></em></a>
+        <a href="/artykuly/zaplanowane" data-nav data-r="zaplanowane"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Zaplanowane<em data-c="scheduled" hidden></em></a>
+        <a href="/nowinki" data-nav data-r="nowinki"><svg class="ic" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>Nowinki</a>
+      </div>
+      <div class="nav-grp" data-need="mod">
+        <h3>Społeczność</h3>
+        <a href="/komentarze" data-nav data-r="komentarze" data-need="mod"><svg class="ic" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>Komentarze</a>
+        <a href="/zgloszenia" data-nav data-r="zgloszenia" data-need="owner"><svg class="ic" viewBox="0 0 24 24"><path d="M3 13h5l2 3h4l2-3h5"/><path d="M5 5h14l2 8v6H3v-6z"/></svg>Tematy i błędy<em data-c="tips" class="hot" hidden></em></a>
+        <a href="/uzytkownicy" data-nav data-r="uzytkownicy" data-need="owner"><svg class="ic" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20c0-2.8-1.6-4.9-4-5.7"/></svg>Użytkownicy</a>
+      </div>
+      <div class="nav-grp" data-need="owner">
+        <h3>Promocja i kontakt</h3>
+        <a href="/reklamy" data-nav data-r="reklamy"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="12" rx="2.5"/><path d="M8 21h8M12 17v4M7 11h6"/></svg>Reklamy</a>
+        <a href="/poczta" data-nav data-r="poczta"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/></svg>Poczta<em data-c="mail" class="hot" hidden></em></a>
+      </div>
+      <div class="nav-grp">
+        <h3>System</h3>
+        <a href="/narzedzia" data-nav data-r="narzedzia" data-need="owner"><svg class="ic" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg>Narzędzia</a>
+        <a href="/wersje" data-nav data-r="wersje" data-need="vers"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5z"/><path d="m3 13 9 5 9-5"/></svg>Wersje strony</a>
+        <a href="/ustawienia" data-nav data-r="ustawienia"><svg class="ic" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Ustawienia</a>
+      </div>
+      <div class="nav-grp">
+        <h3>Strony</h3>
+        <a href="/news/" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Strona dev<svg class="ic ext" viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+        <a href="https://news.sliska.pl/" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>news.sliska.pl<svg class="ic ext" viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+      </div>
+    </nav>
+    <div class="side-foot">
+      <button class="me" type="button" id="me" aria-haspopup="menu" aria-expanded="false">
+        <span class="av" id="me-av">R</span>
+        <span class="me-t"><b id="me-name">Redakcja</b><small id="me-role">Śliska News</small></span>
+        <svg class="ic" viewBox="0 0 24 24"><path d="m7 10 5-5 5 5M7 14l5 5 5-5"/></svg>
+      </button>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <!-- TREŚĆ -->
+  <div class="main" id="main">
+    <div class="mtop">
+      <button class="btn btn-sq" type="button" id="menu-btn" aria-label="Menu"><svg class="ic" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <a href="/" data-nav><img class="lg-l" src="/news/logo-dev.svg" alt="Śliska News DEV"><img class="lg-d" src="/news/logo-dev-biale.svg" alt=""></a>
+      <span class="sp"></span>
+      <button class="btn btn-sq" type="button" data-act="theme" aria-label="Jasny / ciemny motyw"><svg class="ic" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>
+    </div>
+    <header class="head" id="head">
+      <div class="head-t"><p class="crumb" id="crumb"></p><h1 id="title">Pulpit</h1><p id="sub"></p></div>
+      <div class="head-act" id="head-act"></div>
+    </header>
+    <div class="stage" id="stage">
+      <div class="page" id="page-dash">
+        <div class="dash">
+          <div class="hello"><div><h2 id="hello">Cześć!</h2><p id="today"></p></div><span class="role"><i></i><span id="hello-role">Redakcja</span></span></div>
+
+          <div class="quick">
+            <a class="qa main-qa" href="/edytor" data-nav><span class="qi"><svg class="ic" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></span><span><b>Napisz artykuł</b><small>Edytor, zdjęcia, planowanie</small></span></a>
+            <button class="qa" type="button" data-act="quick-new"><span class="qi"><svg class="ic" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></span><span><b>Dodaj nowinkę</b><small>Krótki news ze źródłem</small></span></button>
+            <a class="qa" href="/artykuly" data-nav><span class="qi"><svg class="ic" viewBox="0 0 24 24"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M9 13h6M9 17h6"/></svg></span><span><b>Opublikowane</b><small>Edycja, grafiki, social media</small></span></a>
+            <a class="qa" href="/komentarze" data-nav data-need="mod"><span class="qi"><svg class="ic" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg></span><span><b>Komentarze</b><small>Moderacja dyskusji</small></span></a>
+            <a class="qa" href="/ustawienia" data-nav data-need="nomod"><span class="qi"><svg class="ic" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></span><span><b>Ustawienia</b><small>Profil i powiadomienia</small></span></a>
+          </div>
+
+          <div class="kpis">
+            <a class="kpi" href="/artykuly/robocze" data-nav><span>Wersje robocze</span><b data-k="drafts">–</b><small>czekają na dokończenie</small></a>
+            <a class="kpi" href="/artykuly/zaplanowane" data-nav><span>Zaplanowane</span><b data-k="scheduled">–</b><small>wyjdą automatycznie</small></a>
+            <a class="kpi" href="/zgloszenia" data-nav data-need="owner" data-alert="tips"><span>Tematy i błędy</span><b data-k="tips">–</b><small>otwarte zgłoszenia</small></a>
+            <a class="kpi" href="/poczta" data-nav data-need="owner" data-alert="mail"><span>Poczta</span><b data-k="mail">–</b><small>nieprzeczytane</small></a>
+            <a class="kpi" href="/artykuly" data-nav data-need="noowner"><span>Opublikowane</span><b data-k="published">–</b><small>artykuły i nowinki</small></a>
+            <a class="kpi" href="/artykuly" data-nav data-need="noowner"><span>Moje teksty</span><b data-k="mine">–</b><small>podpisane Twoim nazwiskiem</small></a>
+          </div>
+
+          <div class="cols">
+            <section class="card">
+              <div class="card-h"><h3>Ostatnio opublikowane</h3><a href="/artykuly" data-nav>Wszystkie →</a></div>
+              <ul class="rows" id="latest"><li class="empty">Ładuję…</li></ul>
+            </section>
+            <div>
+              <section class="card">
+                <div class="card-h"><h3>Wersja strony</h3><a href="/wersje" data-nav data-need="vers">Historia →</a></div>
+                <div class="card-b">
+                  <div class="ver"><div><small>Dev</small><b id="v-dev">…</b></div><div><small>Publiczna</small><b id="v-pub">…</b></div></div>
+                  <p class="ver-note" id="v-note">Sprawdzam…</p>
+                </div>
+              </section>
+              <section class="card">
+                <div class="card-h"><h3>Na skróty</h3></div>
+                <div class="links">
+                  <a href="https://news.sliska.pl/" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>Śliska News (publiczna)<svg class="ic ext" viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+                  <a href="/news/" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>Strona dev (podgląd)<svg class="ic ext" viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+                  <a href="/konto" data-nav><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>Moje konto</a>
+                  <a href="https://sliska.pl/" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24"><path d="m12 3 2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg>sliska.pl<svg class="ic ext" viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="page" id="page-deny" hidden><div class="deny"><b>Brak dostępu</b>Ta sekcja jest dostępna tylko dla Właściciela Portalu albo Moderatora.</div></div>
+      <div class="loader" id="loader" hidden><span><i></i>Ładowanie…</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- DOLNY PASEK (telefon) -->
+<nav class="tabbar" id="tabbar" aria-label="Szybka nawigacja">
+  <a href="/" data-nav data-r="pulpit"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg><span>Pulpit</span></a>
+  <a href="/artykuly" data-nav data-r="opublikowane robocze zaplanowane"><svg class="ic" viewBox="0 0 24 24"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M9 13h6M9 17h6"/></svg><span>Artykuły</span></a>
+  <a class="plus" href="/edytor" data-nav data-r="edytor" aria-label="Nowy artykuł"><span><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span></a>
+  <a href="/nowinki" data-nav data-r="nowinki"><svg class="ic" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span>Nowinki</span></a>
+  <button type="button" id="tab-menu"><svg class="ic" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg><span>Więcej</span></button>
+</nav>
+
+<script src="/hub/hub.js?v=20261106a"></script>
+</body>
+</html>

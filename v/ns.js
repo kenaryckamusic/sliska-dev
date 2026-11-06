@@ -1,0 +1,2 @@
+(function(){try{var id=location.pathname.split('/')[2]||'x',P='v-'+id+':',keep=/^(sliska_theme|sliska-dev-pw|sliska-dev-logo)$/,S=Storage.prototype,g=S.getItem,s=S.setItem,r=S.removeItem;function ok(t){return t===window.localStorage||t===window.sessionStorage}
+S.getItem=function(k){return ok(this)&&!keep.test(k)?g.call(this,P+k):g.call(this,k)};S.setItem=function(k,v){return ok(this)&&!keep.test(k)?s.call(this,P+k,v):s.call(this,k,v)};S.removeItem=function(k){return ok(this)&&!keep.test(k)?r.call(this,P+k):r.call(this,k)}}catch(e){}})();

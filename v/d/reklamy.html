@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Podgląd reklam – Śliska News</title>
+<link rel="stylesheet" href="style.css"><link rel="stylesheet" href="ads.css">
+</head><body>
+<main id="ads-gallery"><h1>Podgląd reklam</h1><p class="muted">20 wariacji w trzech formatach. Reklamy edytujesz w <code>ads.js</code> (lista <code>CREATIVES</code>).</p>
+<h2>Popup (środek)</h2><div class="g-grid g-popup" id="g-popup"></div>
+<h2>Box (róg ekranu)</h2><div class="g-grid g-box" id="g-box"></div>
+<h2>Pasek pod nagłówkiem</h2><div class="g-grid g-strip" id="g-strip"></div></main>
+<script src="ads.js"></script>
+<script>['popup','box','strip'].forEach(function(f){document.getElementById('g-'+f).innerHTML=SliskaAds.creatives.map(function(c){return SliskaAds.html(f,c)}).join('')});
+document.querySelectorAll('.adv-x').forEach(function(b){b.hidden=true});document.querySelectorAll('.adv-cta').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault()})});</script>
+</body></html>

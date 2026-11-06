@@ -1,0 +1,79 @@
+/* Śliska News DEV – wygląd „prawdziwej aplikacji” na telefonie (≤ 860 px). Tylko dev. */
+html { overscroll-behavior-y: none; -webkit-text-size-adjust: 100%; }
+body { overscroll-behavior-y: none; }
+.m-tabbar, .m-sheet, .m-sheet-bg, .m-search-btn { display: none; }
+
+@media (max-width: 860px) {
+  html { scroll-padding-top: 64px; }
+  body { -webkit-tap-highlight-color: transparent; padding-bottom: calc(66px + env(safe-area-inset-bottom)); background: var(--bg); }
+  input, select, textarea { font-size: 16px !important; }   /* iOS nie powiększa strony po dotknięciu pola */
+  a, button { touch-action: manipulation; }
+
+  /* — górny pasek aplikacji — */
+  .breaking { padding-top: env(safe-area-inset-top); }
+  .site-header { padding-top: env(safe-area-inset-top); background: color-mix(in srgb, var(--surface) 88%, transparent); -webkit-backdrop-filter: saturate(180%) blur(14px); backdrop-filter: saturate(180%) blur(14px); box-shadow: 0 1px 0 var(--border); }
+  .breaking:not([hidden]) ~ .site-header { padding-top: 0; }
+  .header-top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding-top: 8px; padding-bottom: 8px; min-height: 56px; }
+  .header-top .logo { margin-right: auto; }
+  .header-top .logo svg { height: 30px; width: auto; }
+  .main-nav { display: none !important; }
+  .auth { display: flex; gap: 6px; margin-left: 0; }
+  .auth #btn-account { display: none; }
+  .auth .btn-icon, .m-search-btn { width: 40px; height: 40px; border-radius: 50%; padding: 0; display: inline-grid; place-items: center; background: var(--soft); border: 0; color: var(--text); }
+  .m-search-btn svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .search { order: 5; flex-basis: 100%; max-width: none; margin: 0; display: none; padding-bottom: 6px; }
+  .site-header.m-search-open .search { display: block; }
+  .search input { height: 42px; border-radius: 14px; }
+
+  /* — treść — */
+  .container.wide { padding-left: 14px; padding-right: 14px; }
+  #layout { gap: 14px; padding-top: 10px; }
+  .side-left { display: none !important; }
+  .side-right { display: none; }
+  .hero { min-height: 330px; border-radius: 22px; }
+  .card { border-radius: 20px; }
+  .home-top { gap: 12px; margin-bottom: 18px; }
+  .section-title { font-size: 1.12rem; }
+  .site-footer { padding-bottom: 24px; margin-top: 24px; }
+  .to-top { bottom: calc(78px + env(safe-area-inset-bottom)) !important; right: 14px; }
+  #dev-dock { display: none !important; }   /* na telefonie te przyciski są w arkuszu „Więcej” */
+
+  /* — dolna nawigacja — */
+  .m-tabbar { display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 900; padding: 6px 6px calc(6px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--surface) 92%, transparent); -webkit-backdrop-filter: saturate(180%) blur(18px); backdrop-filter: saturate(180%) blur(18px); border-top: 1px solid var(--border); }
+  .m-tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 6px 0 4px; border: 0; background: none; color: var(--muted); font: 700 .66rem/1 var(--font); letter-spacing: .01em; text-decoration: none; cursor: pointer; position: relative; border-radius: 14px; }
+  .m-tab svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; transition: transform .18s; }
+  .m-tab.is-on { color: var(--accent); }
+  .m-tab.is-on svg { transform: translateY(-1px) scale(1.06); fill: color-mix(in srgb, var(--accent) 14%, transparent); }
+  .m-tab:active { background: var(--soft); }
+  .m-tab .m-dot { position: absolute; top: 3px; left: calc(50% + 7px); min-width: 8px; height: 8px; border-radius: 99px; background: var(--accent); }
+
+  /* — arkusz „Więcej” — */
+  .m-sheet-bg { display: block; position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,.45); opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .m-sheet { display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 1001; max-height: 82vh; overflow-y: auto; background: var(--surface); border-radius: 24px 24px 0 0; padding: 8px 16px calc(20px + env(safe-area-inset-bottom)); transform: translateY(105%); transition: transform .26s cubic-bezier(.2,.8,.2,1); box-shadow: 0 -10px 40px rgba(0,0,0,.25); overscroll-behavior: contain; }
+  body.m-sheet-open .m-sheet-bg { opacity: 1; pointer-events: auto; }
+  body.m-sheet-open .m-sheet { transform: none; }
+  body.m-sheet-open { overflow: hidden; }
+  .m-grip { width: 40px; height: 4px; border-radius: 4px; background: var(--border); margin: 4px auto 12px; }
+  .m-sheet h3 { margin: 14px 4px 8px; font: 800 .72rem var(--font); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .m-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .m-item { display: flex; align-items: center; gap: 10px; padding: 13px 14px; border: 1px solid var(--border); border-radius: 16px; background: var(--bg); color: var(--text); font: 700 .92rem var(--font); text-decoration: none; text-align: left; cursor: pointer; }
+  .m-item:active { background: var(--soft); }
+  .m-item svg { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+  .m-item.is-main { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .m-item.is-danger { color: var(--accent); }
+  .m-item.is-wide { grid-column: 1 / -1; }
+
+  /* ekran logowania / modale jak arkusze */
+  .modal-box, .rm-box { max-height: 92vh; }
+}
+@media (max-width: 860px) and (display-mode: standalone) {
+  .site-footer { display: none; }
+  body { padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
+}
+
+/* Tryb osadzony: narzędzie redakcji otwarte w oknie na stronie głównej dev (bez nagłówka, menu i stopki) */
+html.is-embed .site-header, html.is-embed .breaking, html.is-embed .side-left, html.is-embed .side-right, html.is-embed .site-footer,
+html.is-embed .m-tabbar, html.is-embed .m-sheet, html.is-embed .m-sheet-bg, html.is-embed #dev-dock, html.is-embed .to-top, html.is-embed .sp-slot-top,
+html.is-embed .sp-box, html.is-embed .sp-popup, html.is-embed .sp-end { display: none !important; }
+html.is-embed body { padding-bottom: 0 !important; }
+html.is-embed #layout { grid-template-columns: minmax(0, 1fr) !important; padding-top: 10px; }

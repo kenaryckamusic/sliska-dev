@@ -1,0 +1,13 @@
+/artykuly /index.html 200
+/artykuly/* /index.html 200
+/edytor /index.html 200
+/edytor/* /index.html 200
+/podglad/* /index.html 200
+/nowinki /index.html 200
+/komentarze /index.html 200
+/zgloszenia /index.html 200
+/uzytkownicy /index.html 200
+/narzedzia /index.html 200
+/ustawienia /index.html 200
+/konto /index.html 200
+/konto/* /index.html 200
