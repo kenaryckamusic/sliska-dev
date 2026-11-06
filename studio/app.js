@@ -6420,7 +6420,7 @@ function renderAccount() {
       <div class="acc-hero-body">
         <div class="avatar avatar-lg acc-hero-av">${readerAvatar(me.name, me.avatarAt, me.pub)}</div>
         <div class="acc-hero-main"><h2 class="acc-hero-name">${Utils.esc(me.name || 'Twoje konto')}</h2>
-          <div class="acc-chips"><span class="acc-chip">${Utils.esc(ROLE_LABEL[me.role] || (staff ? 'Redaktor' : 'Czytelnik'))}</span>${me.crown ? `<span class="acc-chip is-crown">${crownHtml()} Moderator</span>` : ''}${vChip}</div></div>
+          <div class="acc-chips"><span class="acc-chip">${Utils.esc(ROLE_LABEL[me.role] || (staff ? 'Redaktor' : 'Czytelnik'))}</span>${me.crown ? `<span class="acc-chip is-mod">Moderator</span>` : ''}${vChip}</div></div>
         <div class="acc-hero-actions">${pubLink}</div>
       </div>
     </section>
@@ -6664,7 +6664,7 @@ document.addEventListener('click', async e => {
 const Mod = { all: false };
 const ROLE_LABEL = { owner: 'Właściciel Portalu', chief: 'Redaktor naczelny', editor: 'Redaktor', mod: 'Moderator' };
 const CROWN_SVG = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-1.6 10H4.6L3 8zm1.9 12h14.2v1.6H4.9V20z"/></svg>';
-const crownHtml = () => `<span class="crown" title="Moderator" role="img" aria-label="Moderator">${CROWN_SVG}</span>`;
+const crownHtml = () => '<span class="cmt-badge is-mod">Moderator</span>';      // bez ikony korony – sama plakietka (v20261106c)
 const MOD_ST = { pending: 'Czeka', reported: 'Zgłoszony', hidden: 'Ukryty', ok: 'Widoczny' };
 const myRole = () => (Readers.me && Readers.me.role) || '';
 const CMT_EDIT_MS = 5 * 60 * 1000;
