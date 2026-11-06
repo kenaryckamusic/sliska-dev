@@ -120,7 +120,7 @@
   }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function open(role, d) {
-    if (role === 'editor' && /^\/v\//.test(location.pathname)) { location.replace('/'); return; }      // Redaktor nie ogląda wersji archiwalnych
+    if (role !== 'owner' && /^\/(v|wersje)\//.test(location.pathname)) { location.replace('/'); return; }      // wersje archiwalne – tylko Właściciel Portalu
     window.devRole = role || ''; window.devInfo = { role: (d && d.role) || '', crown: !!(d && d.crown) }; try { window.dispatchEvent(new CustomEvent('devgate', { detail: { role: window.devRole, info: window.devInfo } })); } catch (e) {} root.classList.remove('dgate-lock'); if (box) { box.remove(); box = null; } }
 
   function loadScript(src) {

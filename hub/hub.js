@@ -81,7 +81,8 @@
     if (!need) return true;
     var own = role === 'owner', mod = own || role === 'mod' || crown;
     if (need === 'owner') return own;
-    if (need === 'mod' || need === 'vers') return mod;
+    if (need === 'mod') return mod;
+    if (need === 'vers') return own;            // archiwum wersji – tylko Właściciel Portalu
     if (need === 'nomod') return !mod;
     if (need === 'noowner') return !own;
     return true;
