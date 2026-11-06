@@ -42,7 +42,8 @@ button { cursor: pointer; }
 
 /* ---------- Boczne menu ---------- */
 .side { display: flex; flex-direction: column; min-height: 0; background: var(--side); border-right: 1px solid var(--side-line); padding: 18px 14px 14px; }
-.side-logo { display: flex; align-items: center; height: 40px; padding: 0 8px; margin-bottom: 14px; text-decoration: none; }
+.side-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 14px; }
+.side-logo { display: flex; align-items: center; height: 40px; padding: 0 8px; text-decoration: none; }
 .side-logo img { height: 28px; display: block; }
 .side-logo .lg-d { display: none; }
 :root[data-theme="dark"] .side-logo .lg-l { display: none; }
@@ -222,3 +223,31 @@ button { cursor: pointer; }
   :root:not([data-theme="light"]) .mtop .lg-d { display: block; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ---------- Powiadomienia (dzwonek, tylko Właściciel) ---------- */
+.bell { position: relative; display: grid; place-items: center; width: 40px; height: 40px; flex: none; border: 1px solid var(--line); border-radius: 12px; background: var(--card); color: var(--text); }
+.bell:hover { border-color: var(--faint); }
+.bell em { position: absolute; top: -6px; right: -6px; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 99px; background: var(--accent); color: #fff; font: 800 .7rem/20px var(--font); font-style: normal; text-align: center; box-shadow: 0 0 0 2px var(--side); }
+.mtop .bell { width: 42px; height: 42px; }
+.npop { position: fixed; z-index: 80; width: min(380px, calc(100vw - 24px)); max-height: min(560px, calc(100vh - 80px)); display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 16px; background: var(--card); box-shadow: var(--shadow-lg); overflow: hidden; }
+.npop-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px 10px; }
+.npop-h b { font-size: 1rem; }
+.npop-h button { border: 0; background: none; color: var(--accent); font-weight: 700; font-size: .84rem; }
+.npop-l { flex: 1; overflow-y: auto; padding: 0 8px 8px; }
+.ni { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 10px; align-items: start; padding: 10px; border-radius: 12px; color: var(--text); text-decoration: none; }
+.ni:hover { background: var(--hover); }
+.ni i { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: var(--soft); color: var(--muted); }
+.ni.new i { background: var(--accent-soft); color: var(--accent); }
+.ni b { display: block; font-size: .9rem; line-height: 1.3; }
+.ni span { display: block; color: var(--muted); font-size: .84rem; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ni small { display: block; margin-top: 2px; color: var(--faint); font-size: .76rem; }
+.ni.new b::after { content: ""; display: inline-block; width: 7px; height: 7px; margin-left: 6px; border-radius: 50%; background: var(--accent); vertical-align: 2px; }
+.npop-f { padding: 10px 16px 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: .82rem; }
+.npop-f button { margin-top: 8px; width: 100%; }
+.toasts { position: absolute; right: 20px; bottom: 20px; z-index: 30; display: grid; gap: 10px; width: min(360px, calc(100% - 32px)); pointer-events: none; }
+.toast { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 10px; align-items: start; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); box-shadow: var(--shadow-lg); color: var(--text); text-decoration: none; pointer-events: auto; animation: tin .25s ease; }
+.toast i { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); }
+.toast b { display: block; font-size: .9rem; }
+.toast span { display: block; color: var(--muted); font-size: .84rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@keyframes tin { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (max-width: 1023px) { .side-top .bell { display: none !important; } .toasts { bottom: calc(var(--tab-h) + 16px + env(safe-area-inset-bottom, 0px)); right: 16px; } }

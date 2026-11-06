@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap">
-<link rel="stylesheet" href="/hub/hub.css?v=20261106a">
+<link rel="stylesheet" href="/hub/hub.css?v=20261106d">
 <script src="/news/dev-art.js"></script>
 <script src="/news/dev-gate.js?v=20261106c"></script>
 </head>
@@ -25,7 +25,7 @@
 
   <!-- BOCZNE MENU -->
   <aside class="side" id="side" aria-label="Menu studia">
-    <a class="side-logo" href="/" data-nav><img class="lg-l" src="/news/logo-dev.svg" alt="Śliska News DEV"><img class="lg-d" src="/news/logo-dev-biale.svg" alt=""></a>
+    <div class="side-top"><a class="side-logo" href="/" data-nav><img class="lg-l" src="/news/logo-dev.svg" alt="Śliska News DEV"><img class="lg-d" src="/news/logo-dev-biale.svg" alt=""></a><button class="bell" type="button" data-act="bell" data-need="owner" aria-label="Powiadomienia" title="Powiadomienia"><svg class="ic" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/></svg><em data-bell hidden></em></button></div>
     <div class="side-new">
       <a class="btn btn-primary" href="/edytor" data-nav><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nowy artykuł</a>
       <button class="btn btn-sq" type="button" data-act="quick-new" title="Dodaj nowinkę" aria-label="Dodaj nowinkę"><svg class="ic" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></button>
@@ -49,7 +49,7 @@
       </div>
       <div class="nav-grp" data-need="owner">
         <h3>Promocja i kontakt</h3>
-        <a href="/reklamy" data-nav data-r="reklamy"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="12" rx="2.5"/><path d="M8 21h8M12 17v4M7 11h6"/></svg>Reklamy</a>
+        <a href="/reklamy" data-nav data-r="reklamy"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="12" rx="2.5"/><path d="M8 21h8M12 17v4M7 11h6"/></svg>Reklamy<em data-c="ads" class="hot" hidden></em></a>
         <a href="/poczta" data-nav data-r="poczta"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/></svg>Poczta<em data-c="mail" class="hot" hidden></em></a>
       </div>
       <div class="nav-grp">
@@ -80,6 +80,7 @@
       <button class="btn btn-sq" type="button" id="menu-btn" aria-label="Menu"><svg class="ic" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
       <a href="/" data-nav><img class="lg-l" src="/news/logo-dev.svg" alt="Śliska News DEV"><img class="lg-d" src="/news/logo-dev-biale.svg" alt=""></a>
       <span class="sp"></span>
+      <button class="bell" type="button" data-act="bell" data-need="owner" aria-label="Powiadomienia" title="Powiadomienia"><svg class="ic" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/></svg><em data-bell hidden></em></button>
       <button class="btn btn-sq" type="button" data-act="theme" aria-label="Jasny / ciemny motyw"><svg class="ic" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>
     </div>
     <header class="head" id="head">
@@ -135,6 +136,7 @@
         </div>
       </div>
       <div class="page" id="page-deny" hidden><div class="deny"><b>Brak dostępu</b>Ta sekcja jest dostępna tylko dla Właściciela Portalu albo Moderatora.</div></div>
+      <div class="toasts" id="toasts" aria-live="polite"></div>
       <div class="loader" id="loader" hidden><span><i></i>Ładowanie…</span></div>
     </div>
   </div>
@@ -149,6 +151,6 @@
   <button type="button" id="tab-menu"><svg class="ic" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg><span>Więcej</span></button>
 </nav>
 
-<script src="/hub/hub.js?v=20261106c"></script>
+<script src="/hub/hub.js?v=20261106d"></script>
 </body>
 </html>

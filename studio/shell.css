@@ -19,8 +19,12 @@ html.is-embed #view-settings > .panel-sub,
 html.is-embed .hub-nav { display: none !important; }
 
 /* listy: jedna karta z wierszami zamiast osobnych kafli */
-html.is-embed .ptab-pane .panel-list { background: var(--card); border: 1px solid var(--sh-line); border-radius: 16px; overflow: hidden; }
-html.is-embed .ptab-pane .panel-list:empty, html.is-embed .ptab-pane .panel-list > p.muted:only-child { padding: 28px 20px; text-align: center; }
+html.is-embed .ptab-pane .panel-list:has(> .panel-item:first-child, > h4.all-sec:first-child) { background: var(--card); border: 1px solid var(--sh-line); border-radius: 16px; overflow: hidden; }
+/* komentarze, użytkownicy, zgłoszenia: własny układ (pasek + karty) – bez wspólnej ramki */
+html.is-embed .ptab-pane .mod-bar { margin: 0 0 12px; }
+html.is-embed .ptab-pane .mod-list { gap: 10px; }
+html.is-embed .ptab-pane .mod-empty { margin: 0; padding: 28px 20px; border: 1px solid var(--sh-line); border-radius: 16px; background: var(--card); text-align: center; }
+html.is-embed .ptab-pane .panel-list > p.muted:only-child { margin: 0; padding: 28px 20px; text-align: center; border: 1px solid var(--sh-line); border-radius: 16px; background: var(--card); }
 html.is-embed .ptab-pane .panel-list > p.muted { margin: 0; }
 html.is-embed .ptab-pane .panel-list > .panel-item { margin: 0 !important; border: 0 !important; border-radius: 0 !important; border-top: 1px solid var(--sh-line) !important; padding: 14px 20px !important; align-items: center; transition: background .12s; }
 html.is-embed .ptab-pane .panel-list > .panel-item:first-child, html.is-embed .ptab-pane .panel-list > h4 + .panel-item { border-top: 0 !important; }

@@ -246,7 +246,7 @@
     $('#logo-tg', pop).onclick = function () { try { localStorage.setItem('sliska-dev-logo', off ? 'on' : 'off'); } catch (er) { /* ignoruj */ } logos(); closePop(); };
   });
   document.addEventListener('click', function (e) { if (pop && !pop.contains(e.target)) closePop(); else if (pop && e.target.closest('a,button')) setTimeout(closePop, 0); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closePop(); closeMenu(); } });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closePop(); closeMenu(); if (typeof closeNotes === 'function') closeNotes(); } });
 
   function logos() {
     var off = false; try { off = localStorage.getItem('sliska-dev-logo') === 'off'; } catch (e) { /* ignoruj */ }
@@ -279,6 +279,90 @@
   $('#tab-menu').addEventListener('click', function () { document.body.classList.add('menu-open'); });
   $('#scrim').addEventListener('click', closeMenu);
 
+  /* ---------- Powiadomienia: nowe tematy, błędy i reklamy (tylko Właściciel) ---------- */
+  var N = { items: [], known: null, pop: null, timer: 0 };
+  var NKEY = 'sliska-studio-seen';
+  var IC_TIP = '<svg class="ic" viewBox="0 0 24 24"><path d="M3 13h5l2 3h4l2-3h5"/><path d="M5 5h14l2 8v6H3v-6z"/></svg>';
+  var IC_ERR = '<svg class="ic" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>';
+  var IC_AD = '<svg class="ic" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="12" rx="2.5"/><path d="M8 21h8M12 17v4M7 11h6"/></svg>';
+  function seen() { try { return Number(localStorage.getItem(NKEY)) || 0; } catch (e) { return 0; } }
+  function setSeen(t) { try { localStorage.setItem(NKEY, String(t)); } catch (e) { /* ignoruj */ } }
+  function tms(v) { var n = Number(v); if (n > 1e11) return n; if (n > 1e9) return n * 1000; return Date.parse(v) || 0; }
+  function loadNotes() {
+    if (!can('owner')) return Promise.resolve();
+    var tips = api('/ed/tips').then(function (d) {
+      return ((d && d.tips) || []).map(function (t) {
+        var err = /^Błąd w artykule:/i.test(t.title || '');
+        return { id: 't:' + t.id, at: tms(t.createdAt), kind: err ? 'err' : 'tip', title: err ? 'Zgłoszony błąd w artykule' : 'Nowy temat od czytelnika', text: String(t.title || '').replace(/^Błąd w artykule:\s*/i, ''), href: '/zgloszenia', done: !!t.status && t.status !== 'new' };
+      });
+    }).catch(function () { return []; });
+    var ads = api('/admin/spot').then(function (d) {
+      return ((d && d.ads) || []).map(function (a) {
+        return { id: 'a:' + a.id, at: tms(a.at), kind: 'ad', title: 'Nowa reklama do sprawdzenia', text: (a.brand || a.name || 'Reklama') + (a.status && a.status !== 'new' ? ' · ' + ({ done: 'przyjęta', rejected: 'odrzucona' }[a.status] || a.status) : ''), href: '/reklamy', done: a.status && a.status !== 'new' };
+      });
+    }).catch(function () { return []; });
+    return Promise.all([tips, ads]).then(function (r) {
+      var list = r[0].concat(r[1]).filter(function (x) { return x.at; }).sort(function (a, b) { return b.at - a.at; }).slice(0, 30);
+      var first = N.known === null, fresh = [];
+      if (first) N.known = {};
+      list.forEach(function (x) { if (!first && !N.known[x.id] && !x.done) fresh.push(x); N.known[x.id] = 1; });
+      if (first && !seen()) setSeen(Date.now() - 3 * 864e5);      // pierwsze uruchomienie: „nowe” = ostatnie 3 dni
+      counts.ads = r[1].filter(function (x) { return !x.done; }).length; paintCounts();
+      N.items = list; paintBell();
+      fresh.slice(0, 3).forEach(alertNew);
+      if (N.pop) drawPop();
+    });
+  }
+  function unread() { var s = seen(); return N.items.filter(function (x) { return x.at > s && !x.done; }).length; }
+  function paintBell() { var n = unread(); $$('[data-bell]').forEach(function (e) { e.hidden = !n; e.textContent = n > 9 ? '9+' : n; }); }
+  function icon(x) { return x.kind === 'ad' ? IC_AD : x.kind === 'err' ? IC_ERR : IC_TIP; }
+  function alertNew(x) {
+    var t = document.createElement('a'); t.className = 'toast'; t.href = x.href; t.setAttribute('data-nav', '');
+    t.innerHTML = '<i>' + icon(x) + '</i><div><b>' + esc(x.title) + '</b><span>' + esc(x.text) + '</span></div>';
+    $('#toasts').appendChild(t); setTimeout(function () { t.remove(); }, 9000);
+    try {
+      if ('Notification' in window && Notification.permission === 'granted' && document.visibilityState !== 'visible') {
+        var n = new Notification(x.title, { body: x.text, icon: '/news/icons-dev/icon-192.png', tag: x.id });
+        n.onclick = function () { window.focus(); go(x.href); n.close(); };
+      }
+    } catch (e) { /* ignoruj */ }
+  }
+  function drawPop() {
+    var s = seen();
+    var perm = 'Notification' in window ? Notification.permission : 'unsupported';
+    N.pop.innerHTML = '<div class="npop-h"><b>Powiadomienia</b><button type="button" data-n-all>Oznacz jako przeczytane</button></div>' +
+      '<div class="npop-l">' + (N.items.length ? N.items.map(function (x) {
+        return '<a class="ni' + (x.at > s && !x.done ? ' new' : '') + '" href="' + x.href + '" data-nav><i>' + icon(x) + '</i><div><b>' + esc(x.title) + '</b><span>' + esc(x.text) + '</span><small>' + ago(new Date(x.at).toISOString()) + '</small></div></a>';
+      }).join('') : '<p class="empty">Na razie nic nowego.</p>') + '</div>' +
+      '<div class="npop-f">Nowe tematy, zgłoszone błędy i reklamy od czytelników.' + (perm === 'default' ? '<button class="btn btn-sm" type="button" data-n-perm>Pokazuj też, gdy ta karta jest w tle</button>' : perm === 'denied' ? '<br>Powiadomienia przeglądarki są zablokowane w ustawieniach strony.' : '') + '</div>';
+  }
+  function closeNotes() { if (N.pop) { N.pop.remove(); N.pop = null; } }
+  function openNotes(btn) {
+    if (N.pop) { closeNotes(); return; }
+    N.pop = document.createElement('div'); N.pop.className = 'npop'; N.pop.setAttribute('role', 'dialog'); N.pop.setAttribute('aria-label', 'Powiadomienia');
+    drawPop(); document.body.appendChild(N.pop);
+    var b = btn.getBoundingClientRect();
+    var left = Math.min(Math.max(12, b.left), innerWidth - N.pop.offsetWidth - 12);
+    N.pop.style.left = left + 'px'; N.pop.style.top = (b.bottom + 8) + 'px';
+    N.pop.addEventListener('click', function (e) {
+      if (e.target.closest('[data-n-all]')) { setSeen(Date.now()); paintBell(); drawPop(); return; }
+      if (e.target.closest('[data-n-perm]')) { Notification.requestPermission().then(function () { drawPop(); }); return; }
+      if (e.target.closest('a')) { setSeen(Date.now()); paintBell(); setTimeout(closeNotes, 0); }
+    });
+    loadNotes();
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-act="bell"]');
+    if (b) { e.stopPropagation(); openNotes(b); return; }
+    if (N.pop && !N.pop.contains(e.target)) closeNotes();
+  });
+  function startNotes() {
+    if (!can('owner')) return;
+    loadNotes();
+    clearInterval(N.timer); N.timer = setInterval(loadNotes, 90000);
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') loadNotes(); });
+  }
+
   /* ---------- Start po zalogowaniu ---------- */
   function token() { return window.devToken ? window.devToken() : Promise.reject(new Error('no-token')); }
   function api(path) { return token().then(function (t) { return fetch((/^(news|dev)\.sliska\.pl$/.test(location.hostname) ? 'https://api.sliska.pl' : '/news/api') + path, { headers: { authorization: 'Bearer ' + t }, cache: 'no-store' }); }).then(function (r) { return r.ok ? r.json() : null; }); }
@@ -300,6 +384,7 @@
     api('/ed/profile').then(function (d) { var p = d && d.profile; if (p && p.name) setMe(p.name, p.avatar); }).catch(function () { /* ignoruj */ });
     api('/me').then(function (d) { if (d && d.name && !me.full) setMe(d.name, ''); }).catch(function () { /* ignoruj */ });
     if (can('owner')) api('/admin/mailbox?count=1').then(function (d) { if (d) { counts.mail = d.unread || 0; paintCounts(); } }).catch(function () { /* ignoruj */ });
+    startNotes();
     // studio w tle: liczniki w menu i na pulpicie, a potem natychmiastowe przejścia
     setTimeout(function () { if (!frames.studio) frame('studio', '#/panel'); }, 400);
   }
