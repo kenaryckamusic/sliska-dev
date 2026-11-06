@@ -7050,6 +7050,7 @@ function renderProfile() {
   try { drawComments(); } catch { /* ignoruj */ }
   $('#profile-name').textContent = state.profile.name || 'Redaktor';
   $('#profile-avatar').innerHTML = avatarHtml(state.profile);
+  if (state.profile.name) Shell.post({ type: 'sliska-me', name: state.profile.name, avatar: state.profile.avatar || '' });
   renderProfileStats();
 }
 

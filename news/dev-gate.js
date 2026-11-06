@@ -108,8 +108,9 @@
   var H = location.hostname;
   var ON = /^dev\./.test(H) || /[?&]gate=1\b/.test(location.search);
   if (!ON) return;
+  var API = /^(news|dev)\.sliska\.pl$/.test(H) ? 'https://api.sliska.pl' : '/news/api';      // dev.sliska.pl (Vercel) mówi wprost z api.sliska.pl
   /** Poziom dostępu z odpowiedzi /me: owner > mod (korona) > editor; '' = brak dostępu. */
-  function level(d) { if (!d) return ''; if (d.role === 'owner') return 'owner'; if (d.crown) return 'mod'; if (d.role === 'editor' || d.role === 'chief') return 'editor'; return ''; }
+  function level(d) { if (!d) return ''; if (d.role === 'owner') return 'owner'; if (d.role === 'editor' || d.role === 'chief') return d.crown ? 'mod' : 'editor'; return ''; }   // tylko Redaktor (także naczelny) i Właściciel Portalu
   var FB = { apiKey: 'AIzaSyDi7M7X4cwsfIkxTebYlGsJPFN-NoAtwAU', authDomain: 'sliska.pl', projectId: 'sliska-users', appId: '1:236153117470:web:6b4bd4db90314fed52470f' };
   var SDK = '10.12.2';
   var root = document.documentElement;
@@ -150,35 +151,16 @@
         return ERR[c] || ('Nie udało się zalogować. [' + (c || 'błąd') + ']');
   }
 
-  var PW_HASH = 'e2a61487c6a2a14ec9930f9d8022f83bffc6e085d7cabdc6108256b1120de334';
-  var PW_KEY = 'sliska-dev-pw';
   window.devLogout = function () {
-    try { localStorage.removeItem(PW_KEY); } catch (e) {}
+    try { localStorage.removeItem('sliska-dev-pw'); } catch (e) {}
     var go = function () { location.href = '/'; };
     try { if (auth) auth.signOut().then(go, go); else go(); } catch (e) { go(); }
   };
-  function sha(t) {
-    var b = new TextEncoder().encode(t);
-    return crypto.subtle.digest('SHA-256', b).then(function (h) { return Array.prototype.map.call(new Uint8Array(h), function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); });
-  }
-  function pwOk() { try { return localStorage.getItem(PW_KEY) === PW_HASH; } catch (e) { return false; } }
-  function showPw(msg) {
-    ui('<h1>Środowisko deweloperskie</h1><p>Wpisz hasło dostępu.</p><form id="dg-pf" novalidate><label>Hasło<input id="dg-pw" type="password" autocomplete="off" required></label><div class="dg-err" id="dg-pe" role="alert">' + esc(msg || '') + '</div><button class="dg-btn" type="submit">Dalej</button></form>');
-    var f = box.querySelector('#dg-pf'); box.querySelector('#dg-pw').focus();
-    f.addEventListener('submit', function (ev) {
-      ev.preventDefault();
-      sha(box.querySelector('#dg-pw').value).then(function (h) {
-        if (h === PW_HASH) { try { localStorage.setItem(PW_KEY, h); } catch (e) {} start2(); }
-        else box.querySelector('#dg-pe').textContent = 'Nieprawidłowe hasło.';
-      });
-    });
-  }
-
   var auth = null;
   /** Token zalogowanego konta – dla narzędzi huba dev (np. baza reklam), które mówią z Workerem. */
   window.devToken = function () { return auth && auth.currentUser ? auth.currentUser.getIdToken() : Promise.reject(new Error('no-user')); };
   function showLogin(msg) {
-    ui('<h1>Tylko dla redakcji</h1><p>To środowisko testowe. Zaloguj się kontem Redaktora, Moderatora lub Właściciela.</p>' +
+    ui('<h1>Tylko dla redakcji</h1><p>Zaloguj się swoim kontem sliska.pl. Wejść mogą tylko Redaktorzy i Właściciel Portalu.</p>' +
       '<form id="dg-f" novalidate><label>Nazwa użytkownika lub e-mail<input id="dg-u" autocomplete="username" autocapitalize="off" spellcheck="false" required></label>' +
       '<label>Hasło<input id="dg-p" type="password" autocomplete="current-password" required></label><div class="dg-err" id="dg-e" role="alert">' + esc(msg || '') + '</div>' +
       '<button class="dg-btn" id="dg-go" type="submit">Zaloguj</button></form>');
@@ -198,7 +180,7 @@
     });
   }
   function showDenied(role) {
-    ui(CROWN + '<h1>Brak uprawnień</h1><p>To środowisko jest dostępne tylko dla redakcji' + (role === '' ? '' : '') + '. Poproś Właściciela Portalu o nadanie rangi Redaktor albo korony Moderatora.</p>' +
+    ui(CROWN + '<h1>Brak uprawnień</h1><p>To środowisko jest dostępne tylko dla redakcji' + (role === '' ? '' : '') + '. Wejść mogą tylko konta z rangą Redaktor albo Właściciel Portalu.</p>' +
       '<button class="dg-btn is-ghost" id="dg-out" type="button">Wyloguj</button>');
     box.querySelector('#dg-out').onclick = function () { auth.signOut(); };
   }
@@ -221,7 +203,7 @@
     });
   }
 
-  function start() { if (pwOk()) start2(); else showPw(); }
+  function start() { start2(); }          // bez hasła dostępu – samo logowanie kontem sliska.pl
   function start2() {
     ui('<h1>Ładowanie…</h1><p>&nbsp;</p>');
     Promise.resolve().then(function () { auth = window.SliskaAuth.auth(); })

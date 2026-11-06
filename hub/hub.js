@@ -177,6 +177,7 @@
       history.pushState(null, '', p); show();
     }
     if (d.type === 'sliska-counts') { Object.keys(d).forEach(function (k) { if (k !== 'type') counts[k] = d[k]; }); paintCounts(); }
+    if (d.type === 'sliska-me' && d.name) setMe(d.name, d.avatar);
     if (d.type === 'sliska-mail-unread') { counts.mail = d.n || 0; paintCounts(); }
     if (d === 'sliska-open-ads' && can('owner')) go('/reklamy');
     if (d === 'sliska-embed-close') go('/');
@@ -192,7 +193,7 @@
   function dash() {
     var h = new Date().getHours();
     $('#today').textContent = new Date().toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-    $('#hello').textContent = (h < 5 ? 'Dobranoc' : h < 12 ? 'Dzień dobry' : h < 18 ? 'Cześć' : 'Dobry wieczór') + (me.first ? ', ' + me.first : '') + '!';
+    $('#hello').textContent = 'Cześć' + (me.full ? ', ' + me.full : '') + '!';
     if (dashDone) return;
     dashDone = true;
     fetch('https://api.sliska.pl/news/api/articles?limit=8', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (d) {
@@ -224,7 +225,7 @@
   }
 
   /* ---------- Menu użytkownika ---------- */
-  var me = { first: '' }, pop = null;
+  var me = { full: '' }, pop = null;
   function closePop() { if (pop) { pop.remove(); pop = null; $('#me').setAttribute('aria-expanded', 'false'); } }
   $('#me').addEventListener('click', function (e) {
     e.stopPropagation();
@@ -280,6 +281,13 @@
   /* ---------- Start po zalogowaniu ---------- */
   function token() { return window.devToken ? window.devToken() : Promise.reject(new Error('no-token')); }
   function api(path) { return token().then(function (t) { return fetch((/^(news|dev)\.sliska\.pl$/.test(location.hostname) ? 'https://api.sliska.pl' : '/news/api') + path, { headers: { authorization: 'Bearer ' + t }, cache: 'no-store' }); }).then(function (r) { return r.ok ? r.json() : null; }); }
+  function setMe(name, avatar) {
+    name = String(name || '').trim(); if (!name) return;
+    me.full = name;
+    $('#me-name').textContent = name;
+    $('#me-av').innerHTML = avatar && /^(https?:|data:image\/)/.test(avatar) ? '<img src="' + esc(avatar) + '" alt="">' : esc(name.split(/\s+/).slice(0, 2).map(function (w) { return w.charAt(0); }).join('').toUpperCase());
+    if (cur && cur.k === 'pulpit') $('#hello').textContent = 'Cześć, ' + name + '!';
+  }
   function start(info) {
     role = window.devRole || (GATE ? '' : 'owner');
     crown = !!(info && info.crown) || role === 'mod';
@@ -287,14 +295,9 @@
     var leg = legacy();
     if (leg) history.replaceState(null, '', leg);
     show();
-    api('/me').then(function (d) {
-      if (!d) return;
-      var name = d.name || d.displayName || '';
-      me.first = String(name).split(/\s+/)[0] || '';
-      $('#me-name').textContent = name || 'Redakcja';
-      $('#me-av').innerHTML = d.avatar ? '<img src="' + esc(d.avatar) + '" alt="">' : esc((name || 'R').trim().split(/\s+/).slice(0, 2).map(function (w) { return w.charAt(0); }).join('').toUpperCase());
-      if (cur && cur.k === 'pulpit') dash();
-    }).catch(function () { /* ignoruj */ });
+    // imię i nazwisko z profilu redaktora (podpis pod artykułami); bez profilu – nazwa konta
+    api('/ed/profile').then(function (d) { var p = d && d.profile; if (p && p.name) setMe(p.name, p.avatar); }).catch(function () { /* ignoruj */ });
+    api('/me').then(function (d) { if (d && d.name && !me.full) setMe(d.name, ''); }).catch(function () { /* ignoruj */ });
     if (can('owner')) api('/admin/mailbox?count=1').then(function (d) { if (d) { counts.mail = d.unread || 0; paintCounts(); } }).catch(function () { /* ignoruj */ });
     // studio w tle: liczniki w menu i na pulpicie, a potem natychmiastowe przejścia
     setTimeout(function () { if (!frames.studio) frame('studio', '#/panel'); }, 400);
