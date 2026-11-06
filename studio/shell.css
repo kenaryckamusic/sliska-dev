@@ -53,3 +53,13 @@ html.is-embed .ptab-pane .panel-list > .panel-item .panel-item-main { gap: 3px !
 html.is-embed .ptab-pane .panel-list > .panel-item .panel-item-main::before,
 html.is-embed .ptab-pane .panel-list > .panel-item .panel-item-main::after { display: none !important; }
 html.is-embed .ptab-pane .panel-list > .panel-item { row-gap: 10px !important; }
+/* v20261106f: plakietki ról z odstępem, zgłoszenia – przyciski u góry, równe karty */
+html.is-embed .mu-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+html.is-embed .mu-chips .rb { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+html.is-embed .rb .cmt-badge { margin: 0 !important; }
+html.is-embed .rb { gap: 6px; }
+html.is-embed .tip-bar { margin: 0 0 14px; }
+html.is-embed .tip-item { align-items: flex-start !important; }
+html.is-embed .tip-item .panel-item-actions { align-self: flex-start; }
+html.is-embed .tip-item .panel-item-main { flex: 1 1 420px; }
+html.is-embed #panel-tips .panel-list > .tip-item, html.is-embed #panel-tips .tip-item { margin: 0 0 12px !important; border: 1px solid var(--sh-line) !important; border-radius: 16px !important; }
