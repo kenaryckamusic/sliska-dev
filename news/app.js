@@ -2245,7 +2245,7 @@ function renderTip() {
         <small class="hint"><span id="tip-count">0</span>/2000</small></label>
       <div class="field"><span class="field-label">Zdjęcie główne * <em class="tip-ratio">16:9</em></span>
         <div class="tip-photo" id="tip-photo">
-          <label class="tip-photo-empty" id="tip-photo-pick">${ICON('plus', 22)}<b>Dodaj zdjęcie główne</b><small>Poziome, w formacie 16:9 – np. 1600×900 px. Inne kadrujemy do 16:9.</small><input type="file" id="tip-photo-file" accept="image/jpeg,image/png,image/webp" hidden></label>
+          <label class="tip-photo-empty" id="tip-photo-pick">${ICON('plus', 22)}<b>Dodaj zdjęcie główne</b><small class="tip-drop-txt">albo przeciągnij je tutaj</small><small>Poziome, w formacie 16:9 – np. 1600×900 px. Inne kadrujemy do 16:9.</small><input type="file" id="tip-photo-file" accept="image/jpeg,image/png,image/webp" hidden></label>
           <div class="tip-photo-crop" id="tip-photo-crop" hidden><img id="tip-photo-img" alt="Zdjęcie główne – podgląd kadru 16:9" draggable="false"><span class="tip-photo-hint">Przeciągnij, aby ustawić kadr</span></div>
         </div>
         <div class="tip-photo-actions" id="tip-photo-actions" hidden><label class="btn btn-sm">Zmień zdjęcie<input type="file" id="tip-photo-file2" accept="image/jpeg,image/png,image/webp" hidden></label><button type="button" class="btn btn-sm" id="tip-photo-del">Usuń</button></div>
@@ -2358,6 +2358,18 @@ const TipPhoto = {
 };
 document.addEventListener('change', e => { if (e.target.id === 'tip-photo-file' || e.target.id === 'tip-photo-file2') { TipPhoto.set(e.target.files[0]); e.target.value = ''; } });
 document.addEventListener('click', e => { if (e.target.closest('#tip-photo-del')) TipPhoto.reset(); });
+/* przeciągnięcie pliku ze zdjęciem na pole (komputer) */
+['dragenter', 'dragover'].forEach(t => document.addEventListener(t, e => {
+  const box = e.target.closest && e.target.closest('#tip-photo'); if (!box || ![...(e.dataTransfer && e.dataTransfer.types || [])].includes('Files')) return;
+  e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; box.classList.add('is-over');
+}));
+document.addEventListener('dragleave', e => { const box = e.target.closest && e.target.closest('#tip-photo'); if (box && !box.contains(e.relatedTarget)) box.classList.remove('is-over'); });
+document.addEventListener('drop', e => {
+  const box = e.target.closest && e.target.closest('#tip-photo'); if (!box) return;
+  e.preventDefault(); box.classList.remove('is-over');
+  const f = [...(e.dataTransfer.files || [])].find(x => /^image\//.test(x.type));
+  if (f) TipPhoto.set(f); else toast('Przeciągnij plik ze zdjęciem (JPG, PNG lub WebP).', 'error');
+});
 document.addEventListener('pointerdown', e => {
   const crop = e.target.closest('#tip-photo-crop'); if (!crop || !TipPhoto.img) return;
   e.preventDefault(); crop.setPointerCapture(e.pointerId); crop.classList.add('is-drag');

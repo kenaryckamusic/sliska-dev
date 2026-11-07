@@ -4192,3 +4192,11 @@ a.saga-t:hover span { color: var(--accent); }
 .tip-photo-crop.is-drag .tip-photo-hint { opacity: 0; }
 .tip-photo-actions { display: flex; gap: 8px; margin-top: 10px; }
 .tip-photo-actions .btn { cursor: pointer; }
+.tip-photo-empty .tip-drop-txt { margin-top: -4px; font-size: .82rem; font-weight: 600; }
+.tip-photo.is-over .tip-photo-empty, .tip-photo.is-over .tip-photo-crop { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--soft)); color: var(--accent); }
+.tip-photo.is-over::after { content: "Upuść zdjęcie"; position: absolute; inset: 0; display: grid; place-items: center; border-radius: 16px; background: color-mix(in srgb, var(--accent) 78%, transparent); color: #fff; font-weight: 800; pointer-events: none; }
+@supports not (aspect-ratio: 16 / 9) { .tip-photo { height: 0; padding-top: 56.25%; } }
+/* zrzuty ekranu też w kafelkach 16:9 */
+.tip-shot { width: 144px; height: auto; aspect-ratio: 16 / 9; }
+@supports not (aspect-ratio: 16 / 9) { .tip-shot { height: 81px; } }
+@media (hover: none) { .tip-photo-empty .tip-drop-txt { display: none; } }
