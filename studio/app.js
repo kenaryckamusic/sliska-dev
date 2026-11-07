@@ -2105,11 +2105,7 @@ async function igBackdrop(a, W, H, overlay) {
   const src = getImage(a);
   try { img = await loadImage(src, !src.startsWith('data:')); }
   catch { photoOk = !a.image; try { img = await loadImage(Utils.placeholder(Utils.catsOf(a)[0])); } catch {} }
-  if (img) {
-    const iw = img.naturalWidth || W, ih = img.naturalHeight || H;
-    const k = Math.max(W / iw, H / ih);
-    ctx.drawImage(img, (W - iw * k) / 2, (H - ih * k) / 2, iw * k, ih * k);
-  }
+  if (img) drawCoverAt(ctx, img, W, H, a.image ? a.igPos : null);   // kadr ustawiony w edytorze („Kadr na Instagram”)
   if (overlay) { ctx.fillStyle = overlay; ctx.fillRect(0, 0, W, H); }
   return { canvas, ctx, family, photoOk };
 }
@@ -2394,11 +2390,7 @@ async function renderInstagramImage(a, opts = {}) {
   let img = null;
   try { img = await loadImage(src, !src.startsWith('data:')); }
   catch { photoOk = !a.image; try { img = await loadImage(Utils.placeholder(Utils.catsOf(a)[0])); } catch {} }
-  if (img) {
-    const iw = img.naturalWidth || W, ih = img.naturalHeight || H;
-    const k = Math.max(W / iw, H / ih);
-    ctx.drawImage(img, (W - iw * k) / 2, (H - ih * k) / 2, iw * k, ih * k);
-  }
+  if (img) drawCoverAt(ctx, img, W, H, a.image ? a.igPos : null);   // kadr ustawiony w edytorze („Kadr na Instagram”)
   // przyciemnienie: lekko u góry, mocno na dole (pod tytułem)
   const g = ctx.createLinearGradient(0, 0, 0, H);
   g.addColorStop(0, 'rgba(0,0,0,.45)');
@@ -3490,7 +3482,7 @@ function defaultAuthor() {
 function emptyData() {
   return {
     title: '', lead: '', categories: state.profile.defaultCategory ? [state.profile.defaultCategory] : [], author: defaultAuthor(),
-    image: '', imagePos: null, imageCaption: '', imageSource: '', urgent: false, featured: false, commentsOff: false, status: '', related: [], saga: '', fromQuick: '', content: '',
+    image: '', imagePos: null, igPos: null, imageCaption: '', imageSource: '', urgent: false, featured: false, commentsOff: false, status: '', related: [], saga: '', fromQuick: '', content: '',
     tags: '',
     reviewOn: false, reviewScore: '', reviewKind: 'Albumy', reviewCoverSame: false, reviewCover: '', reviewWork: '', reviewArtist: '', reviewYear: '',
     scheduleOn: false, scheduleAt: ''
@@ -3508,6 +3500,7 @@ function normalizeData(obj) {
     author: o.author ?? base.author,
     image: o.image || '',
     imagePos: o.imagePos && typeof o.imagePos === 'object' ? { x: Number(o.imagePos.x) || 50, y: Number(o.imagePos.y) || 50, z: Number(o.imagePos.z) || 1 } : null,
+    igPos: normIgPos(o.igPos),
     imageCaption: o.imageCaption || '',
     imageSource: o.imageSource || '',
     reviewOn: !!o.reviewOn,
@@ -3564,6 +3557,7 @@ function collectData() {
     author: editor.author || state.profile.name || 'Redaktor',
     image: editor.image,
     imagePos: editor.image ? { ...editor.pos } : null,
+    igPos: editor.image ? normIgPos(editor.ig) : null,
     imageCaption: $('#f-image-caption').value,
     imageSource: $('#f-image-source').value,
     reviewOn: $('#f-review-on').checked,
@@ -3627,16 +3621,64 @@ function applyCrop() {
   $('#f-crop-zoom').value = z;
 }
 function setMainImage(src, pos) {
+  if ((src || '') !== (editor.image || '')) editor.ig = { x: 50, y: 50 };   // nowe zdjęcie = kadr na Instagram od środka
   editor.image = src || '';
   editor.pos = pos && src ? { x: Number(pos.x) || 50, y: Number(pos.y) || 50, z: Math.min(3, Math.max(1, Number(pos.z) || 1)) } : defaultPos();
   const box = $('#f-image-preview');
   box.hidden = !editor.image;
   updateChecklist();
-  if (editor.image) $('#f-crop img').src = editor.image;
-  applyCrop();
+  if (editor.image) { $('#f-crop img').src = editor.image; const ig = $('#f-igcrop img'); if (ig) ig.src = editor.image; }
+  applyCrop(); applyIgCrop();
   // pole URL pokazuje tylko zwykły link (nie Base64)
   $('#f-image-url').value = editor.image && !editor.image.startsWith('data:') ? editor.image : '';
   if (!editor.image) $('#f-image-file').value = '';
+}
+
+/* ---------- Kadr zdjęcia na grafiki Instagram (4:5 i Story 9:16) ----------
+   igPos = punkt, który ma być w kadrze ({x, y} w %, 50/50 = środek). Zapisywany w artykule; null = środek. */
+function normIgPos(p) {
+  if (!p || typeof p !== 'object') return null;
+  const c = v => Math.min(100, Math.max(0, Math.round((Number(v) || 0) * 10) / 10));
+  const x = p.x == null ? 50 : c(p.x), y = p.y == null ? 50 : c(p.y);
+  return (x === 50 && y === 50) ? null : { x, y };
+}
+function setIgPos(p) { const n = normIgPos(p); editor.ig = n ? { ...n } : { x: 50, y: 50 }; applyIgCrop(); }
+function applyIgCrop() {
+  const img = $('#f-igcrop img'); if (!img || !editor.ig) return;
+  img.style.objectPosition = `${editor.ig.x}% ${editor.ig.y}%`;
+  const b = $('#f-igcrop-reset'); if (b) b.disabled = editor.ig.x === 50 && editor.ig.y === 50;
+}
+/** Rysuje zdjęcie „cover” z punktem kadru (jak object-position w CSS). */
+function drawCoverAt(ctx, img, W, H, pos) {
+  const iw = img.naturalWidth || W, ih = img.naturalHeight || H, k = Math.max(W / iw, H / ih);
+  const px = pos && pos.x != null ? pos.x / 100 : .5, py = pos && pos.y != null ? pos.y / 100 : .5;
+  ctx.drawImage(img, (W - iw * k) * px, (H - ih * k) * py, iw * k, ih * k);
+}
+function initIgCropper() {
+  const frame = $('#f-igcrop'); if (!frame) return;
+  const img = $('img', frame);
+  let drag = null;
+  frame.addEventListener('pointerdown', e => {
+    if (!editor.image) return;
+    drag = { sx: e.clientX, sy: e.clientY, x: editor.ig.x, y: editor.ig.y };
+    frame.setPointerCapture(e.pointerId); frame.classList.add('is-drag'); e.preventDefault();
+  });
+  frame.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const r = frame.getBoundingClientRect(), nw = img.naturalWidth, nh = img.naturalHeight;
+    if (!nw || !nh) return;
+    const k = Math.max(r.width / nw, r.height / nh), ox = nw * k - r.width, oy = nh * k - r.height;
+    if (ox > 0.5) editor.ig.x = Math.min(100, Math.max(0, drag.x - (e.clientX - drag.sx) * 100 / ox));
+    if (oy > 0.5) editor.ig.y = Math.min(100, Math.max(0, drag.y - (e.clientY - drag.sy) * 100 / oy));
+    applyIgCrop();
+  });
+  const end = () => { if (!drag) return; drag = null; frame.classList.remove('is-drag'); onFormChange(); };
+  frame.addEventListener('pointerup', end); frame.addEventListener('pointercancel', end);
+  frame.addEventListener('keydown', e => {
+    const d = { ArrowLeft: [-2, 0], ArrowRight: [2, 0], ArrowUp: [0, -2], ArrowDown: [0, 2] }[e.key]; if (!d || !editor.image) return;
+    e.preventDefault(); editor.ig.x = Math.min(100, Math.max(0, editor.ig.x + d[0])); editor.ig.y = Math.min(100, Math.max(0, editor.ig.y + d[1])); applyIgCrop(); onFormChange();
+  });
+  $('#f-igcrop-reset').addEventListener('click', () => { editor.ig = { x: 50, y: 50 }; applyIgCrop(); onFormChange(); });
 }
 
 /** Kadrowanie zdjęcia głównego: przeciąganie ustawia punkt ostrości, suwak – przybliżenie (podgląd 16:9 = to, co zobaczą czytelnicy). */
@@ -3807,6 +3849,7 @@ function applyData(d) {
   $('#f-schedule-at').value = d.scheduleAt;
 
   setMainImage(d.image, d.imagePos);
+  setIgPos(d.igPos);
 
   if (d.content) {
     editor.quill.setHTML(Sanitizer.upgradeQuotes(d.content));
@@ -5502,6 +5545,7 @@ async function saveArticle(e) {
     authorPhoto,
     image: d.image,
     imagePos: d.image && d.imagePos ? d.imagePos : null,
+    igPos: d.image ? normIgPos(d.igPos) : null,
     imageCaption: d.imageCaption.trim(),
     imageSource: d.imageSource.trim(),
     review,
@@ -5588,6 +5632,7 @@ function openPreview() {
     authorPhoto: (d.author.trim() === state.profile.name && state.profile.avatar) || '',
     image: d.image,
     imagePos: d.image && d.imagePos ? d.imagePos : null,
+    igPos: d.image ? normIgPos(d.igPos) : null,
     imageCaption: d.imageCaption.trim(),
     imageSource: d.imageSource.trim(),
     review: d.reviewOn && Utils.parseScore(d.reviewScore) !== null
@@ -7676,6 +7721,7 @@ function bindEvents() {
     applyCrop();
   });
   initCropper();
+  initIgCropper();
   $('#f-image-file').addEventListener('change', async e => {
     const file = e.target.files[0];
     if (!file) return;
