@@ -2974,6 +2974,7 @@ function renderTipList() {
     return `<div class="panel-item tip-item${err ? ' is-error' : ''}">
           <div class="panel-item-main">
             <div class="tip-tags"><span class="tip-kind-tag ${err ? 'is-err' : 'is-topic'}">${err ? 'Błąd w artykule' : 'Temat'}</span><span class="tip-status ${TIP_STATUS[st].cls}">${label}</span></div>
+            ${!err && t.photo ? `<div class="tip-photo-st"><button type="button" class="tsh tsh-main" data-tip-shot="${Utils.esc(t.photo)}" title="Powiększ zdjęcie główne"><img data-shot="${Utils.esc(t.photo)}" alt="Zdjęcie główne"><span>16:9</span></button></div>` : ''}
             <strong>${err && art ? `<a href="#/artykul/${encodeURIComponent(art.id)}">${Utils.esc(title)}</a>` : Utils.esc(title)}</strong>
             <span class="tip-msg">${Utils.esc(msg)}</span>
             ${Array.isArray(t.shots) && t.shots.length ? `<div class="tip-shots-st">${t.shots.map((k, i) => `<button type="button" class="tsh" data-tip-shot="${Utils.esc(k)}" title="Powiększ zrzut ${i + 1}"><img data-shot="${Utils.esc(k)}" alt="Zrzut ekranu ${i + 1}"></button>`).join('')}</div>` : ''}
@@ -2982,6 +2983,7 @@ function renderTipList() {
           </div>
           <div class="panel-item-actions">${quick}
             ${err && open ? '' : `<button type="button" class="btn btn-sm btn-primary" data-action="tip-status" data-id="${Utils.esc(t.id)}">Status</button>`}
+            ${!err && t.photo ? `<button type="button" class="btn btn-sm" data-tip-dl="${Utils.esc(t.photo)}" data-name="${Utils.esc('zgloszenie-' + t.id + '.jpg')}">Pobierz zdjęcie</button>` : ''}
             ${!err && t.link ? `<a class="btn btn-sm" href="${Utils.esc(t.link)}" target="_blank" rel="noopener noreferrer">Źródło</a>` : ''}
             ${t.email ? (isOwnerRole() ? `<button type="button" class="btn btn-sm" data-action="tip-mail" data-to="${Utils.esc(t.email)}" data-subj="${Utils.esc('Re: ' + title)}">✉ Napisz e-mail</button>` : `<a class="btn btn-sm" href="mailto:${Utils.esc(t.email)}?subject=${encodeURIComponent('Re: ' + title)}">Odpisz</a>`) : ''}
             ${err && open ? `<button type="button" class="btn btn-sm" data-action="tip-status" data-id="${Utils.esc(t.id)}">Status…</button>` : ''}
@@ -3053,6 +3055,10 @@ async function tipShotUrl(k) {
 function loadTipShots(root) {
   $$('img[data-shot]', root).forEach(async img => { try { img.src = await tipShotUrl(img.dataset.shot); } catch { img.alt = 'Nie udało się wczytać'; img.closest('.tsh').classList.add('is-err'); } });
 }
+document.addEventListener('click', async e => {
+  const d = e.target.closest('[data-tip-dl]'); if (!d) return;
+  try { const a = document.createElement('a'); a.href = await tipShotUrl(d.dataset.tipDl); a.download = d.dataset.name || 'zdjecie.jpg'; document.body.appendChild(a); a.click(); a.remove(); } catch { toast('Nie udało się pobrać zdjęcia.', 'error'); }
+});
 document.addEventListener('click', async e => {
   const b = e.target.closest('[data-tip-shot]'); if (!b) return;
   try { window.open(await tipShotUrl(b.dataset.tipShot), '_blank', 'noopener'); } catch { toast('Nie udało się otworzyć zrzutu.', 'error'); }

@@ -4175,3 +4175,20 @@ a.saga-t:hover span { color: var(--accent); }
 .acc-chip.is-mod { background: rgba(245, 158, 11, .16); color: #b45309; }
 :root[data-theme="dark"] .acc-chip.is-mod { color: #fbbf24; }
 .rb .cmt-badge + .cmt-badge { margin-left: 0; }
+
+/* ===== Zgłoś temat – zdjęcie główne 16:9 (obowiązkowe) ===== */
+.tip-ratio { margin-left: 6px; padding: 1px 7px; border-radius: 6px; background: var(--soft); color: var(--muted); font-style: normal; font-size: .72rem; font-weight: 800; letter-spacing: .04em; vertical-align: 1px; }
+.tip-photo { position: relative; width: 100%; max-width: 560px; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; }
+.tip-photo-empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 16px; border: 2px dashed var(--border); border-radius: 16px; background: var(--soft); color: var(--muted); text-align: center; cursor: pointer; transition: border-color .15s, color .15s; }
+.tip-photo-empty:hover { border-color: var(--accent); color: var(--accent); }
+.tip-photo-empty b { color: var(--text); font-size: .98rem; }
+.tip-photo-empty small { max-width: 300px; font-size: .8rem; line-height: 1.35; }
+.tip-photo-empty[hidden], .tip-photo-crop[hidden], .tip-photo-actions[hidden] { display: none; }
+.tip-photo-crop { position: absolute; inset: 0; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: #000; touch-action: none; user-select: none; }
+.tip-photo-crop.can-x { cursor: ew-resize; } .tip-photo-crop.can-y { cursor: ns-resize; } .tip-photo-crop.is-drag { cursor: grabbing; }
+.tip-photo-crop img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+.tip-photo-hint { position: absolute; left: 10px; bottom: 10px; padding: 4px 10px; border-radius: 99px; background: rgba(0, 0, 0, .62); color: #fff; font-size: .76rem; font-weight: 700; pointer-events: none; transition: opacity .2s; }
+.tip-photo-crop:not(.can-x):not(.can-y) .tip-photo-hint { display: none; }
+.tip-photo-crop.is-drag .tip-photo-hint { opacity: 0; }
+.tip-photo-actions { display: flex; gap: 8px; margin-top: 10px; }
+.tip-photo-actions .btn { cursor: pointer; }

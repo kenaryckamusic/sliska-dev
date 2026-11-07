@@ -161,3 +161,8 @@ html.is-embed #view-editor .dropzone:hover, html.is-embed #view-editor .dropzone
 html.is-embed #view-editor #fold-publish { display: none !important; }
 /* okienka: na środku całego ekranu (menu powłoki ma 256 px po lewej) */
 @media (min-width: 1100px) { html.is-embed .modal > .modal-box { position: relative; left: -128px; } }
+
+/* zgłoszenie tematu – zdjęcie główne 16:9 */
+.tip-photo-st { margin: 2px 0 8px; }
+.tsh.tsh-main { position: relative; width: min(320px, 100%); height: auto; aspect-ratio: 16 / 9; border-radius: 12px; }
+.tsh.tsh-main span { position: absolute; left: 8px; top: 8px; padding: 1px 7px; border-radius: 6px; background: rgba(0,0,0,.62); color: #fff; font-size: .7rem; font-weight: 800; letter-spacing: .04em; }
