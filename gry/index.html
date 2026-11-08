@@ -106,7 +106,7 @@ td input[type=number]{width:96px;height:32px}
   var $ = function (s, r) { return (r || document).querySelector(s); }, $$ = function (s, r) { return [].slice.call((r || document).querySelectorAll(s)); };
   var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var GN = { slizgle: 'Ślizgle', krzyzowka: 'Krzyżówka', krople: 'Łap Krople', flappy: 'Knaga Flappy', waz: 'Śliski Wąż', slizgawka: 'Ślizgawka', ukladanka: 'Układanka', drama: 'Drama Simulator' };
-  var LV = ['Sucharz', 'Wilgotny', 'Mokry', 'Ociekający', 'Śliski', 'Ślizgacz', 'Mokra Elita', 'Legenda Śliskiej'];
+  var LV = ['Suchar', 'Lekko Wilgotny', 'Spocony', 'Mokry od Plotek', 'Ociekający', 'Napalony na Dramy', 'Śliski Typ', 'Król Przypału', 'Chodząca Afera', 'Mokra Elita', 'Mokry Sen Redakcji', 'Legenda Śliskiej'];
   var ERR = { forbidden: 'Ta strona jest tylko dla Właściciela Portalu.', krzyz: 'Krzyżówka niepoprawna: każdy wyraz musi zawierać swoją literę hasła i mieć pytanie.', bad: 'Nieprawidłowe dane.' };
   var D = null, arts = [];
   function token() { return window.devToken ? window.devToken() : Promise.reject(new Error('Brak logowania.')); }

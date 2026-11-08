@@ -3,7 +3,7 @@
    Wymaga z app.js: CONFIG, actorApi, Readers, state, Utils, readerAvatar, toast. */
 (function () {
   'use strict';
-  var LEVELS = [[0, 'Sucharz'], [50, 'Wilgotny'], [150, 'Mokry'], [350, 'Ociekający'], [700, 'Śliski'], [1200, 'Ślizgacz'], [2000, 'Mokra Elita'], [3500, 'Legenda Śliskiej']];
+  var LEVELS = [[0, 'Suchar'], [50, 'Lekko Wilgotny'], [120, 'Spocony'], [250, 'Mokry od Plotek'], [450, 'Ociekający'], [700, 'Napalony na Dramy'], [1000, 'Śliski Typ'], [1400, 'Król Przypału'], [1900, 'Chodząca Afera'], [2600, 'Mokra Elita'], [3500, 'Mokry Sen Redakcji'], [5000, 'Legenda Śliskiej']];
   var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var K = function (s, c) { return window.Knaga ? Knaga.svg(s, { cls: c || 'gk' }) : ''; };
   var logged = function () { try { return Readers.loggedIn() && Readers.hasName && Readers.hasName(); } catch (e) { return false; } };

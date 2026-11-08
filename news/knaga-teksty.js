@@ -86,7 +86,7 @@ window.KNAGA_LINES = {
   ],
   level: [
     ['kibic', 'Ranking sezonu! Kto dziś przewodzi stawce?'],
-    ['gwiazdor', 'Legenda Śliskiej to 3500 XP. Ja mam więcej, ale nie liczę.'],
+    ['gwiazdor', 'Legenda Śliskiej to 5000 XP. Ja mam więcej, ale nie liczę.'],
     ['super', 'Czytaj, komentuj, graj – i wspinaj się po poziomach.']
   ],
   morning: [

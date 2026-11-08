@@ -322,12 +322,13 @@ kbd { padding: 2px 7px; border: 1px solid var(--border); border-bottom-width: 3p
    Poziomy i sezony (XP), ranking, podsumowanie, wzmianki
    ========================================================= */
 .lv-1 { --lv: #9aa0a6; } .lv-2 { --lv: #4fb3d9; } .lv-3 { --lv: #2b8be8; } .lv-4 { --lv: #7a5cf0; }
-.lv-5 { --lv: #d6001c; } .lv-6 { --lv: #ff6a00; } .lv-7 { --lv: #e0a100; } .lv-8 { --lv: #c2185b; }
+.lv-5 { --lv: #c026d3; } .lv-6 { --lv: #ff2d77; } .lv-7 { --lv: #d6001c; } .lv-8 { --lv: #ff6a00; }
+.lv-9 { --lv: #e0a100; } .lv-10 { --lv: #0f9d8a; } .lv-11 { --lv: #8b1d5c; } .lv-12 { --lv: #c2185b; }
 .lv-b { display: inline-flex; align-items: center; margin-left: 6px; padding: 1px 7px; border-radius: 99px; background: color-mix(in srgb, var(--lv, #999) 16%, transparent); color: var(--lv, #999); font-size: .68rem; font-weight: 900; letter-spacing: .02em; white-space: nowrap; vertical-align: middle; }
 .lv-b.is-big { padding: 4px 12px; font-size: .8rem; }
 .lv-ring { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--lv, transparent); }
-.lv-7.lv-ring, .lv-8.lv-ring { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--lv), 0 0 14px color-mix(in srgb, var(--lv) 60%, transparent); }
-.lv-8.lv-ring { background-image: conic-gradient(#ffcf4a, #d6001c, #7a5cf0, #ffcf4a); }
+.lv-10.lv-ring, .lv-11.lv-ring, .lv-12.lv-ring { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--lv), 0 0 14px color-mix(in srgb, var(--lv) 60%, transparent); }
+.lv-12.lv-ring { background-image: conic-gradient(#ffcf4a, #d6001c, #7a5cf0, #ffcf4a); }
 
 .xp-pop { position: fixed; right: 18px; bottom: 120px; z-index: 4100; padding: 8px 14px; border-radius: 99px; background: linear-gradient(135deg, #ffcf4a, #ff8a00); color: #2a1620; font-weight: 900; box-shadow: 0 10px 26px rgba(0, 0, 0, .25); animation: xp-in .35s ease; transition: opacity .4s, transform .4s; }
 .xp-pop.out { opacity: 0; transform: translateY(-14px); }
