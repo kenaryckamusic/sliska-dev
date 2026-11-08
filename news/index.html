@@ -54,6 +54,7 @@
   <link rel="stylesheet" href="app-m.css?v=20261104g">
   <link rel="stylesheet" href="spoty.css?v=20261104g">
   <link rel="stylesheet" href="spot-form.css?v=20261107c">
+  <link rel="stylesheet" href="gry.css?v=20261108a">
   <script>
     /* Motyw ustawiany przed wyświetleniem strony (bez migania) */
     try { var t = localStorage.getItem('sliska_theme'); if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
@@ -88,6 +89,7 @@
         <a class="nav-link" id="nav-quick" href="#/szybkie"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span>Nowinki</span></a>
         <a class="nav-link" id="nav-authors" href="#/redakcja"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20c0-2.8-1.6-4.9-4-5.7"/></svg><span>Redakcja</span></a>
         <a class="nav-link" id="nav-saved" href="#/zapisane"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg><span>Zapisane</span><b class="nav-badge" id="saved-count" hidden></b></a>
+        <a class="nav-link" id="nav-games" href="#/gry"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="7" width="19" height="11" rx="5"/><path d="M7.5 10.5v4M5.5 12.5h4"/><circle cx="15.5" cy="11.5" r="1" fill="currentColor"/><circle cx="17.5" cy="13.5" r="1" fill="currentColor"/></svg><span>Gry</span></a>
         <a class="nav-link" id="nav-spot" href="#/spot"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10v4h3l6 4V6L6 10z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg><span>Spot</span></a>
       </nav>
 
@@ -173,6 +175,7 @@
     <!-- WIDOK: ZGŁOŚ TEMAT -->
     <section id="view-tip" hidden></section>
     <section id="view-spot" hidden></section>
+    <section id="view-games" hidden></section>
 
     <!-- WIDOK: POLITYKA / REGULAMIN -->
     <section id="view-legal" hidden></section>
@@ -203,6 +206,7 @@
         <a href="#" id="install-link" hidden>Zainstaluj aplikację</a>
         <a href="#/o-nas">O nas i kontakt</a>
         <a href="#/zglos">Zgłoś temat</a>
+        <a href="#" id="knaga-toggle">Knaga: wyłącz</a>
         <a href="#/prywatnosc">Polityka prywatności</a>
         <a href="#/regulamin">Regulamin</a>
       </nav>
@@ -315,10 +319,13 @@
 
   <script src="taxonomy.js?v=20261104g"></script>
 
-  <script src="app.js?v=20261107c"></script>
-  <script src="spoty.js?v=20261107c" defer></script>
+  <script src="app.js?v=20261108a"></script>
+  <script src="spoty.js?v=20261108a" defer></script>
   <script src="spot-form.js?v=20261107c"></script>
-  <script src="app-m.js?v=20261107c" defer></script>
+  <script src="knaga.js?v=20261108a"></script>
+  <script src="gry.js?v=20261108a"></script>
+  <script src="knaga-mowi.js?v=20261108a" defer></script>
+  <script src="app-m.js?v=20261108a" defer></script>
 <script src="anim.js?v=20261104g" defer></script>
 </body>
 </html>

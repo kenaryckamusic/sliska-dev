@@ -984,6 +984,7 @@ function currentRoute() {
   if (parts[0] === 'ranking') return { name: 'ranking' };
   if (parts[0] === 'zglos') return { name: 'tip' };
   if (parts[0] === 'spot' || parts[0] === 'reklama') return { name: 'spot' };
+  if (parts[0] === 'gry') return { name: 'games', sub: parts[1] || '' };
   if (parts[0] === 'prywatnosc' || parts[0] === 'regulamin') return { name: 'legal', doc: parts[0] };
   if (parts[0] === 'o-nas' || parts[0] === 'kontakt') return { name: 'legal', doc: 'o-nas' };
   if (parts[0] === 'zapisane') return { name: 'saved' };
@@ -3880,7 +3881,8 @@ function modItemHtml(c) {
 
 /* ---------- Routing ---------- */
 function showView(name) {
-  ['home', 'article', 'ranking', 'notfound', 'tip', 'spot', 'legal', 'saved', 'quick', 'account', 'user', 'authors'].forEach(v => { $('#view-' + v).hidden = v !== name; });
+  ['home', 'article', 'ranking', 'notfound', 'tip', 'spot', 'games', 'legal', 'saved', 'quick', 'account', 'user', 'authors'].forEach(v => { $('#view-' + v).hidden = v !== name; });
+  if (name !== 'games' && window.SliskieGry) SliskieGry.stop();
   $('#layout').dataset.view = name;
 }
 
@@ -3939,7 +3941,7 @@ function routeCore() {
   }
 
   $$('.main-nav .nav-link').forEach(l => l.classList.toggle('is-active',
-    (l.id === 'nav-ranking' && r.name === 'ranking') || (l.id === 'nav-spot' && r.name === 'spot') || (l.id === 'nav-quick' && r.name === 'quick') || (l.id === 'nav-authors' && (r.name === 'authors' || (r.name === 'home' && r.author))) || (l.id === 'nav-home' && r.name === 'home' && !r.tag && !r.artist && !r.author && !r.category)));
+    (l.id === 'nav-ranking' && r.name === 'ranking') || (l.id === 'nav-spot' && r.name === 'spot') || (l.id === 'nav-games' && r.name === 'games') || (l.id === 'nav-quick' && r.name === 'quick') || (l.id === 'nav-authors' && (r.name === 'authors' || (r.name === 'home' && r.author))) || (l.id === 'nav-home' && r.name === 'home' && !r.tag && !r.artist && !r.author && !r.category)));
 
   if (r.name === 'article') {
     showView('article');
@@ -3966,6 +3968,12 @@ function routeCore() {
     document.title = `Zgłoś temat – ${CONFIG.SITE_NAME}`;
     setMeta('Zgłoś temat', 'Masz news, temat albo wskazówkę? Podeślij ją redakcji Śliska News.');
     renderTip();
+  } else if (r.name === 'games') {
+    showView('games');
+    document.title = `Śliskie Gry – ${CONFIG.SITE_NAME}`;
+    setMeta('Śliskie Gry', 'Ślizgle, Łap Krople, Knaga Flappy, Śliski Wąż, Układanka i Drama Simulator – gry Śliskiej News.');
+    if (window.SliskieGry) SliskieGry.mount($('#view-games'), r.sub, { articles: state.articles });
+    else $('#view-games').innerHTML = notFoundHtml('Nie udało się wczytać gier. Odśwież stronę.');
   } else if (r.name === 'spot') {
     showView('spot');
     document.title = `Wyślij reklamę – ${CONFIG.SITE_NAME}`;
