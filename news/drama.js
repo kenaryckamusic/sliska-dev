@@ -609,13 +609,13 @@
     var run = null, R = Math.random;
     /* ikonka: Knaga w stroju + odznaka na gradiencie (id afery albo zakończenia) */
     function tile(id, kind) { var c = COL[id] || ['#ffc4a8', '#e0407a']; return '<span class="dr-ico is-' + (kind || 'sc') + '" style="--a:' + c[0] + ';--b:' + c[1] + '"><svg class="dr-art" viewBox="0 0 48 48" aria-hidden="true">' + (ART[id] || '') + '</svg></span>'; }
-    H.shell(el, g, '<div class="dr" id="dr"></div>', { side: '<section class="gp-box"><h3>Twoje dramy <small id="dr-ec"></small></h3><div id="dr-ends"></div></section><section class="gp-box"><h3>Jak grać</h3><p class=\"dr-lead\">Jesteś reporterem Śliskiej. Zagraj pojedynczą sprawę albo cały sezon. Każdy dzień to dylemat, wątek z redakcją i losowe wydarzenia. Paski i relacje z ekipą decydują o jednym z 9 zakończeń każdej dramy.</p></section>' });
+    H.shell(el, g, '<div class="dr" id="dr"></div>', { side: '<section class="gp-box"><h3>Twoje dramy <small id="dr-ec"></small></h3><div id="dr-ends"></div></section>' });
     var d0 = H.load();
     (function () { var f = $('#dr-fold'); if (!f) return; try { f.open = localStorage.getItem('sn-dr-fold') === '1'; } catch (e) { /* - */ } f.addEventListener('toggle', function () { try { localStorage.setItem('sn-dr-fold', f.open ? '1' : '0'); } catch (e) { /* - */ } }); })();
     function data() { var d = H.load(); d.endings = d.endings || []; d.dramaAch = d.dramaAch || []; d.dramaDone = d.dramaDone || []; d.dramaNick = d.dramaNick || ''; return d; }
     function endsBox() {
       var d = data(), fe = d.dramaEnd || {}, L = window.DramaFacts ? window.DramaFacts.LIST : [], tot = 0;
-      $('#dr-ends').innerHTML = L.map(function (x) { var n = (fe[x.id] || []).length; tot += n; return '<div class="dr-end' + (n ? ' is-on' : '') + '" style="display:flex;justify-content:space-between;gap:8px;padding:7px 0;font-size:.85rem"><span>' + esc(x.t) + '</span><b>' + n + '/9</b></div>'; }).join('');
+      $('#dr-ends').innerHTML = L.map(function (x) { var n = (fe[x.id] || []).length; tot += n; return '<div class="dv-row' + (n ? ' is-on' : '') + '"><span>' + esc(x.t) + '</span><b>' + n + '/9</b></div>'; }).join('');
       $('#dr-ec').textContent = tot + '/' + (L.length * 9);
     }
     function saveRun() { try { if (run && !run.done) localStorage.setItem(RUN_KEY, JSON.stringify(run)); else localStorage.removeItem(RUN_KEY); } catch (e) { /* - */ } }
