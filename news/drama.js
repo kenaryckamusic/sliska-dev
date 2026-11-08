@@ -1,6 +1,6 @@
 /* Śliska News – Drama Simulator (#/gry/drama). Rozbudowana gra fabularna:
    postać (ksywka + typ artysty), 10 afer po 7 dni z rozgałęzieniami, losowe wydarzenia, zatrudnianie ekipy (prawnik, PR, terapeuta),
-   4 paski (Hype, Szacunek, Kasa, Nerwy), obserwujący, komentarze internautów, 30 zakończeń, 12 osiągnięć, zapis gry w trakcie.
+   4 paski (Hype, Szacunek, Kasa, Nerwy), obserwujący, komentarze internautów, 30 zakończeń, 13 osiągnięć, zapis gry w trakcie.
    Wywołanie z gry.js: DramaSim.mount(el, H) – H to pomocnicze funkcje gier (K, shell, submit, xp, played, share, load, save, esc, toast). */
 (function () {
   'use strict';
@@ -111,6 +111,10 @@
     ziomek: { bg: '#5a8f4a', skin: '#e0a880', hair: '#1a1220', style: 'short', hatk: 'cap', hat: '#2b3a55', top: '#3a4a30', mouth: 'grin' }
   };
   var AV = function (id) { return person(P[id] || NPC[id] || NPC.ziomek); };
+
+  /* ---------- poziomy trudności: mnożnik strat (ujemne zmiany Hype/Szacunku/Kasy i dodatnie Nerwów) ---------- */
+  var DIFFS = [['easy', 'Spokojny', 'Straty o 30% mniejsze'], ['norm', 'Normalny', 'Tak jak zawsze'], ['hard', 'Hardkor', 'Straty o 40% większe, +10 Nerwów na start']];
+  var DMUL = { easy: .7, norm: 1, hard: 1.4 };
 
   /* ---------- typy artystów ---------- */
   var ROLES = [
@@ -587,7 +591,8 @@
     ['ice', 'Stalowe nerwy', 'Skończ z Nerwami 10 lub mniej'],
     ['lawyer', 'Prawnik w zanadrzu', 'Użyj opcji prawnika'],
     ['spin', 'Spin doktor', 'Użyj opcji PR-owca'],
-    ['mln', 'Milion obserwujących', 'Przekrocz 1 milion obserwujących']
+    ['mln', 'Milion obserwujących', 'Przekrocz 1 milion obserwujących'],
+    ['hard', 'Hardkorowiec', 'Ukończ aferę na poziomie Hardkor bez przegranego zakończenia']
   ];
 
   /* ---------- komentarze internautów ---------- */
@@ -624,13 +629,14 @@
 
     /* ----- ekran wyboru: postać + afera ----- */
     function pick() {
-      var d = data(), saved = loadRun(), role = d.dramaRole || 'raper';
+      var d = data(), saved = loadRun(), role = d.dramaRole || 'raper', diff = d.dramaDiff || 'norm';
       $('#dr').innerHTML = '<div class="dr-pick">' +
         (saved ? '<button type="button" class="dr-cont" data-act="cont"><span class="dr-cont-k">' + tile(saved.sc, 'sc') + '</span><span><small>Masz niedokończoną aferę</small><b>' + esc(SC(saved.sc).name) + ' · dzień ' + Math.min(7, saved.beat + 1) + '/7</b><em>' + esc(saved.nick) + ' – ' + esc(ROLE(saved.role).name) + '</em></span><i>' + ic('play', 18) + ' Kontynuuj</i></button>' : '') +
         '<h2>Twoja postać</h2><div class="dr-who"><label class="dr-nick"><span>Ksywka</span><input type="text" id="dr-nick" maxlength="16" placeholder="np. Mokry Mati" value="' + esc(d.dramaNick) + '" autocomplete="off"></label></div>' +
         '<div class="dr-roles" role="radiogroup" aria-label="Typ artysty">' + ROLES.map(function (r) {
           return '<button type="button" class="dr-role' + (r.id === role ? ' is-on' : '') + '" data-role="' + r.id + '" role="radio" aria-checked="' + (r.id === role) + '"><span class="dr-role-k">' + AV(r.id) + '</span><b>' + r.name + '</b><small>' + r.d + '</small><span class="dr-role-st">' + STATS.map(function (s) { return '<i title="' + s[1] + '">' + ic(s[2], 12) + r.st[s[0]] + '</i>'; }).join('') + '</span></button>';
         }).join('') + '</div>' +
+        '<h2>Poziom trudności</h2><div class="dr-diff" id="dr-diff" role="radiogroup" aria-label="Poziom trudności">' + DIFFS.map(function (x) { return '<button type="button" class="dr-df' + (x[0] === diff ? ' is-on' : '') + '" data-diff="' + x[0] + '" role="radio" aria-checked="' + (x[0] === diff) + '"><b>' + x[1] + '</b><small>' + x[2] + '</small></button>'; }).join('') + '</div>' +
         '<h2>Wybierz aferę</h2><p class="dr-lead">7 dni, decyzje, losowe wydarzenia i 4 paski. Jeśli Szacunek albo Kasa spadną do zera, a Nerwy dojdą do 100 – koniec gry.</p><div class="dr-sc">' +
         SCEN.map(function (s, i) { var done = d.dramaDone.indexOf(s.id) >= 0; return '<button type="button" class="dr-scb" data-sc="' + s.id + '"><span class="dr-scb-k">' + tile(s.id, 'sc') + '</span><span><b>' + (i + 1) + '. ' + s.name + (done ? ' <em>' + ic('check', 12) + ' ukończona</em>' : '') + '</b><small>' + s.sub + '</small></span></button>'; }).join('') + '</div></div>';
     }
@@ -640,7 +646,8 @@
       var d = data(), roleId = (el.querySelector('.dr-role.is-on') || {}).dataset ? el.querySelector('.dr-role.is-on').dataset.role : 'raper', r = ROLE(roleId);
       var nick = ($('#dr-nick').value || '').trim().slice(0, 16) || 'Mokry Mati';
       d.dramaNick = nick; d.dramaRole = roleId; H.save(d);
-      run = { sc: scId, role: roleId, nick: nick, st: JSON.parse(JSON.stringify(r.st)), fol: r.fol, beat: 0, items: [], flags: [], ev: 0, shop: false, used: [], log: [], inter: null };
+      var diff = (el.querySelector('.dr-df.is-on') || {}).dataset ? el.querySelector('.dr-df.is-on').dataset.diff : 'norm'; d.dramaDiff = diff; H.save(d);
+      run = { sc: scId, role: roleId, diff: diff, fol0: r.fol, lastDay: -1, st: (function (st) { if (diff === 'hard') st.n = Math.min(95, st.n + 10); return st; })(JSON.parse(JSON.stringify(r.st))), nick: nick, fol: r.fol, beat: 0, items: [], flags: [], ev: 0, shop: false, used: [], log: [], inter: null };
       phone(); day(); saveRun();
     }
     function phone() {
@@ -651,19 +658,32 @@
       var f = $('#dr-feed'); f.scrollTop = f.scrollHeight;
     }
     function meters(delta) {
-      $('#dr-meters').innerHTML = '<div class="dr-m">' + STATS.map(function (s) { var v = run.st[s[0]], dl = delta && delta[s[0]]; return '<div class="dr-mt is-' + s[0] + (s[0] === 'n' ? (v >= 75 ? ' is-warn' : '') : (v <= 20 ? ' is-warn' : '')) + '"><span>' + ic(s[2], 12) + s[1] + '<em>' + v + (dl ? '<sup class="' + ((dl > 0) === (s[0] !== 'n') ? 'up' : 'dn') + '">' + (dl > 0 ? '+' : '') + dl + '</sup>' : '') + '</em></span><i><b style="width:' + v + '%"></b></i></div>'; }).join('') + '</div>';
+      $('#dr-meters').innerHTML = '<div class="dr-m">' + STATS.map(function (s) { var v = run.st[s[0]], dl = delta && delta[s[0]]; return '<div class="dr-mt is-' + s[0] + (dl ? ' is-flash ' + (((dl > 0) === (s[0] !== 'n')) ? 'f-up' : 'f-dn') : '') + (s[0] === 'n' ? (v >= 75 ? ' is-warn' : '') : (v <= 20 ? ' is-warn' : '')) + '"><span>' + ic(s[2], 12) + s[1] + '<em>' + v + (dl ? '<sup class="' + ((dl > 0) === (s[0] !== 'n') ? 'up' : 'dn') + '">' + (dl > 0 ? '+' : '') + dl + '</sup>' : '') + '</em></span><i><b style="width:' + v + '%"></b></i></div>'; }).join('') + '</div>';
       $('#dr-fol').textContent = fmtFol(run.fol);
       $('#dr-crew').innerHTML = run.items.length ? 'Ekipa: ' + run.items.map(function (it) { var c = CREW.filter(function (x) { return x[0] === it; })[0]; return '<span>' + c[1] + '</span>'; }).join('') : '';
     }
     function bubble(cls, html, keep) { var f = $('#dr-feed'), b = '<div class="dr-b ' + cls + '">' + html + '</div>'; f.insertAdjacentHTML('beforeend', b); if (keep !== false) run.log.push(b); if (run.log.length > 60) run.log = run.log.slice(-60); f.scrollTop = f.scrollHeight; }
     function beatNode() { var b = SC(run.sc).b[run.beat]; if (!Array.isArray(b)) return b; return b.filter(function (v) { return !v.when || run.flags.indexOf(v.when) >= 0; })[0]; }
     function opts(node) { return node.c.map(function (c, i) { return { c: c, i: i }; }).filter(function (o) { var x = o.c[3] || {}; return !x.need || run.items.indexOf(x.need) >= 0; }); }
+    function pips() { var h = '<i class="dr-pips" aria-hidden="true">'; for (var i = 0; i < 7; i++) h += '<u class="' + (i < run.beat ? 'is-done' : i === run.beat ? 'is-now' : '') + '"></u>'; return h + '</i>'; }
+    var STI = { h: 'fire', s: 'star', k: 'cash', n: 'bolt' };
+    function hintOf(c) { var h = ''; Object.keys(STI).forEach(function (k) { if (c[1] && c[1][k]) h += '<span title="Zmienia: ' + STATS.filter(function (x) { return x[0] === k; })[0][1] + '">' + ic(STI[k], 12) + '</span>'; }); return h ? '<span class="dr-hint">' + h + '</span>' : ''; }
+    var calm = function () { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
     function show(node, kind) {
-      $('#dr-step').textContent = kind === 'shop' ? 'Przerwa' : kind === 'event' ? 'Dzień ' + (run.beat + 1) + ' · niespodzianka' : 'Dzień ' + (run.beat + 1) + '/7';
-      meters();
-      bubble('is-in' + (kind === 'event' ? ' is-ev' : ''), '<span class="dr-av">' + AV(node.k) + '</span><div><small>' + esc(node.app) + (kind === 'event' ? ' · losowe wydarzenie' : '') + '</small><p>' + esc(T(node.t)) + '</p></div>');
-      $('#dr-ch').innerHTML = opts(node).map(function (o) { var x = o.c[3] || {}; return '<button type="button" class="dr-opt' + (x.need ? ' is-need' : '') + '" data-c="' + o.i + '">' + (x.need ? '<em>' + (x.need === 'prawnik' ? 'Prawnik' : 'PR') + '</em>' : '') + esc(T(o.c[0])) + '</button>'; }).join('');
-      saveRun();
+      $('#dr-step').innerHTML = kind === 'shop' ? 'Przerwa' : kind === 'event' ? '<span class="dr-dtx">Dzień ' + (run.beat + 1) + ' · niespodzianka</span>' : pips() + '<span class="dr-dtx">Dzień ' + (run.beat + 1) + '/7</span>';
+      meters(); saveRun();
+      if (kind === 'beat' && run.lastDay !== run.beat) { run.lastDay = run.beat; bubble('is-day', '<span>Dzień ' + (run.beat + 1) + '</span>'); }
+      $('#dr-ch').innerHTML = '';
+      var mine = run, render = function () {
+        if (run !== mine || !$('#dr-feed')) return;
+        var tp = $('#dr-typing'); if (tp) tp.remove();
+        bubble('is-in' + (kind === 'event' ? ' is-ev' : ''), '<span class="dr-av">' + AV(node.k) + '</span><div><small>' + esc(node.app) + (kind === 'event' ? ' · losowe wydarzenie' : '') + '</small><p>' + esc(T(node.t)) + '</p></div>');
+        $('#dr-ch').innerHTML = opts(node).map(function (o) { var x = o.c[3] || {}; return '<button type="button" class="dr-opt' + (x.need ? ' is-need' : '') + '" data-c="' + o.i + '">' + (x.need ? '<em>' + (x.need === 'prawnik' ? 'Prawnik' : 'PR') + '</em>' : '') + '<span>' + esc(T(o.c[0])) + '</span>' + hintOf(o.c) + '</button>'; }).join('');
+        saveRun();
+      };
+      if (calm()) return render();
+      var f = $('#dr-feed'); f.insertAdjacentHTML('beforeend', '<div class="dr-b is-in" id="dr-typing"><span class="dr-av">' + AV(node.k) + '</span><div class="dr-tp"><i></i><i></i><i></i></div></div>'); f.scrollTop = f.scrollHeight;
+      setTimeout(render, 650);
     }
     function day() {
       if (run.inter && run.inter.type === 'event') return show(EVENTS[run.inter.i], 'event');
@@ -692,6 +712,7 @@
           if (k === 'n' && v > 0 && run.items.indexOf('terapeuta') >= 0) v = Math.round(v * .6);
           if (k === 'k' && v < 0 && run.items.indexOf('prawnik') >= 0 && e.legal) v = Math.round(v * .5);
         }
+        if (!raw && ((k === 'n' && v > 0) || (k !== 'n' && v < 0))) v = Math.round(v * (DMUL[run.diff || 'norm'] || 1));
         var nv = Math.max(0, Math.min(100, run.st[k] + v)); out[k] = nv - run.st[k]; run.st[k] = nv;
       });
       var hd = e.h || 0; run.fol = Math.max(1000, Math.round(run.fol * (1 + hd / 90 + (R() - .4) * .04)));
@@ -741,14 +762,17 @@
       var got = function (k) { if (d.dramaAch.indexOf(k) < 0) { d.dramaAch.push(k); ach.push(k); } };
       got('first'); if (d.dramaDone.length >= SCEN.length) got('all6'); if (d.endings.length >= 10) got('col10'); if (d.endings.length >= ENDS.length) got('col20');
       if (SPECIAL.indexOf(e[0]) >= 0) got('special'); if (st.k >= 95) got('rich'); if (st.h >= 95) got('viral'); if (st.s <= 10 && e[0] !== 'cancel') got('zero'); if (st.n <= 10) got('ice');
-      if (run.used.indexOf('lawyer') >= 0) got('lawyer'); if (run.used.indexOf('spin') >= 0) got('spin'); if (run.fol >= 1e6) got('mln');
+      if (run.used.indexOf('lawyer') >= 0) got('lawyer'); if (run.used.indexOf('spin') >= 0) got('spin'); if (run.fol >= 1e6) got('mln'); if (run.diff === 'hard' && ['cancel', 'bankrut', 'zalamanie'].indexOf(e[0]) < 0) got('hard');
       H.save(d);
       H.submit('drama', d.endings.length, true); H.xp('drama'); H.played('drama'); endsBox();
       $('#dr-ch').innerHTML = ''; $('#dr-step').textContent = 'Koniec';
       var qb = el.querySelector('[data-act="quit"]'); if (qb) qb.style.display = 'none';
       var ac = ach.map(function (k) { var a = ACH.filter(function (x) { return x[0] === k; })[0]; return '<span>' + ic('check', 12) + a[1] + '</span>'; }).join('');
-      bubble('is-end', '<div class="dr-ek">' + tile(e[0], 'end') + '</div><span class="gm-eye">Zakończenie' + (fresh ? ' · nowe!' : '') + (SPECIAL.indexOf(e[0]) >= 0 ? ' · specjalne' : '') + '</span><h2>' + e[1] + '</h2><p>' + esc(T(e[4])) + '</p>' +
-        '<div class="dr-fin">' + STATS.map(function (s) { return '<span>' + ic(s[2], 13) + s[1] + ' <b>' + st[s[0]] + '</b></span>'; }).join('') + '<span>' + ic('user', 13) + 'Obserwujący <b>' + fmtFol(run.fol) + '</b></span></div>' +
+      var rl = ROLE(run.role), dfn = DIFFS.filter(function (x) { return x[0] === (run.diff || 'norm'); })[0][1];
+      bubble('is-end', '<div class="dr-card"><div class="dr-card-top"><span class="dr-card-av">' + AV(rl.id) + '</span><span><b>' + esc(run.nick) + '</b><small>' + rl.name + ' · ' + esc(SC(run.sc).name) + '</small></span><em class="dr-lvl is-' + (run.diff || 'norm') + '">' + dfn + '</em></div>' +
+        '<div class="dr-ek">' + tile(e[0], 'end') + '</div><span class="gm-eye">Zakończenie' + (fresh ? ' · nowe!' : '') + (SPECIAL.indexOf(e[0]) >= 0 ? ' · specjalne' : '') + '</span><h2>' + e[1] + '</h2><p>' + esc(T(e[4])) + '</p>' +
+        '<div class="dr-bars">' + STATS.map(function (s) { return '<div class="dr-bar-r is-' + s[0] + '"><span>' + ic(s[2], 13) + s[1] + '</span><i><b style="width:' + st[s[0]] + '%"></b></i><em>' + st[s[0]] + '</em></div>'; }).join('') + '</div>' +
+        '<div class="dr-fol"><span>Obserwujący</span><b>' + fmtFol(run.fol0 || run.fol) + ' → ' + fmtFol(run.fol) + '</b></div></div>' +
         (ac ? '<div class="dr-newach"><small>Nowe osiągnięcia</small>' + ac + '</div>' : '') +
         '<p class="dr-sum">Odkryte zakończenia: <b>' + d.endings.length + '/' + ENDS.length + '</b></p><div class="gm-acts"><button type="button" class="btn btn-primary" data-act="again">Nowa afera</button><button type="button" class="btn" data-act="share">Udostępnij</button></div>', false);
       var endName = e[1], scName = SC(run.sc).name, nick = run.nick;
@@ -758,6 +782,7 @@
 
     el.addEventListener('click', function (ev) {
       var b = ev.target.closest('[data-role]'); if (b) { [].forEach.call(el.querySelectorAll('.dr-role'), function (x) { x.classList.toggle('is-on', x === b); x.setAttribute('aria-checked', x === b); }); return; }
+      b = ev.target.closest('[data-diff]'); if (b) { [].forEach.call(el.querySelectorAll('.dr-df'), function (x) { x.classList.toggle('is-on', x === b); x.setAttribute('aria-checked', x === b); }); return; }
       b = ev.target.closest('[data-sc]'); if (b) return begin(b.dataset.sc);
       b = ev.target.closest('[data-crew]'); if (b && !b.disabled) return hire(b.dataset.crew);
       b = ev.target.closest('[data-c]'); if (b) return choose(+b.dataset.c);

@@ -59,7 +59,7 @@
     { id: 'ukladanka', name: 'Śliska Układanka', knaga: 'detektyw', sub: 'Ułóż zdjęcie z artykułu.', tag: 'Logiczna', unit: 'ruchów', low: true, c: ['#7a3d00', '#ffae2b'],
       how: 'Przesuwaj kafelki na puste pole, aż ułożysz zdjęcie z artykułu. Rekordem jest najmniejsza liczba ruchów. „Podgląd” pokazuje całe zdjęcie.' },
     { id: 'drama', name: 'Drama Simulator', knaga: 'wsciekla', sub: '10 afer, 7 dni, 30 zakończeń. Przetrwasz?', tag: 'Fabularna', kind: 'story', c: ['#5c0716', '#ff3b3b'],
-      how: 'Stwórz postać (ksywka i typ artysty), wybierz jedną z 10 afer i przetrwaj 7 dni. Każda decyzja zmienia Hype, Szacunek, Kasę i Nerwy oraz liczbę obserwujących. Po drugim dniu zatrudnisz prawnika, PR-owca albo terapeutę – odblokują nowe opcje. Uważaj: zero Szacunku albo Kasy, czy 100 Nerwów to natychmiastowy koniec. 30 zakończeń i 12 osiągnięć do zdobycia, gra zapisuje się w trakcie.' },
+      how: 'Stwórz postać (ksywka i typ artysty), wybierz jedną z 10 afer i przetrwaj 7 dni. Każda decyzja zmienia Hype, Szacunek, Kasę i Nerwy oraz liczbę obserwujących. Po drugim dniu zatrudnisz prawnika, PR-owca albo terapeutę – odblokują nowe opcje. Uważaj: zero Szacunku albo Kasy, czy 100 Nerwów to natychmiastowy koniec. 30 zakończeń i 13 osiągnięć do zdobycia, gra zapisuje się w trakcie.' },
     { id: 'slizgawka', name: 'Ślizgawka', knaga: 'surfer', sub: 'Tajna gra. Surfuj i skacz.', tag: 'Sekret', unit: 'm', secret: true, c: ['#b33a1a', '#ffb36b'],
       how: 'Spacja albo stuknięcie – skok (drugi raz w powietrzu = podwójny skok). Przeskakuj pozwy, dissy i fejki, zbieraj krople (+25 m).' }
   ];
@@ -166,7 +166,7 @@
 
   /* ============== ŚLIZGLE (codzienne słowo) ============== */
   var WORDS = ['AFERA', 'ZDRADA', 'WTOPA', 'SKANDAL', 'POZEW', 'HEJTER', 'ROMANS', 'PLOTKA', 'OBCIACH', 'FLIRT', 'PRZYPAŁ', 'ŚCIEMA', 'DRAMA', 'WYCIEK', 'NAGONKA', 'KŁAMCA', 'PLAGIAT', 'BLOKADA', 'ZAWIŚĆ', 'TOKSYK', 'KŁÓTNIA', 'BURDA', 'OSZUST', 'IMPREZA', 'RANDKA', 'GOLAS', 'WSTYD', 'PODRÓBA', 'ARESZT', 'MANDAT', 'HEJT', 'FEJK', 'DISS', 'BEEF', 'LANS', 'SPINA', 'BYŁA', 'BÓJKA', 'ŚLISKO', 'MOKRO'];
-  var KB = ['ĄĆĘŁŃÓŚŹŻ', 'QWERTYUIOP', 'ASDFGHJKL', '⏎ZXCVBNM⌫'];
+  var KB = ['QWERTYUIOP', 'ASDFGHJKL', '⏎ZXCVBNM⌫', 'ĄĆĘŁŃÓŚŹŻ'];
   function slizgleKey() { return 'sn-slizgle-' + dayIndex(); }
   function slizgleState() { return lsGet(slizgleKey()); }
   function slizgleAnswer(c) { return c && c.slizgle && c.slizgle.day === dayIndex() && c.slizgle.word ? c.slizgle.word : WORDS[((dayIndex() % WORDS.length) + WORDS.length) % WORDS.length]; }
@@ -611,7 +611,7 @@
       '<span class="uk-chip"><small>Ruchy</small><b id="uk-m">0</b></span><span class="uk-chip"><small>Czas</small><b id="uk-t">0:00</b></span><span class="uk-chip"><small>Rekord</small><b id="uk-b">–</b></span></div>' +
       '<div class="uk-frame"><div class="uk-board" id="uk-board"></div><div class="uk-ghost" id="uk-ghost" hidden></div><div class="uk-done" id="uk-done" hidden></div></div>' +
       '<div class="uk-acts"><button type="button" class="btn btn-sm" id="uk-hint">Podpowiedź</button><button type="button" class="btn btn-sm" id="uk-peek">Podgląd</button><button type="button" class="btn btn-sm" id="uk-new">Inne zdjęcie</button><button type="button" class="btn btn-sm" id="uk-mix">Wymieszaj</button></div><p class="uk-art" id="uk-art"></p></div>');
-    function src() { return art ? art.image : 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(K('ziomek').replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" style="background:#ffe3d6" ')); }
+    function src() { return art ? art.image : 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(K('ziomek').replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" style="background:#ffe3d6" ')).replace(/'/g, '%27'); }
     function pick() { art = arts.length ? arts[Math.floor(Math.random() * Math.min(arts.length, 24))] : null; }
     function solvable(a) { var inv = 0, f = a.filter(function (x) { return x !== N * N - 1; }); for (var i = 0; i < f.length; i++) for (var j = i + 1; j < f.length; j++) if (f[i] > f[j]) inv++; if (N % 2) return inv % 2 === 0; var row = N - Math.floor(a.indexOf(N * N - 1) / N); return (inv + row) % 2 === 1; }
     function start() {
