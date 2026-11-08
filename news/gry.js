@@ -47,8 +47,8 @@
       how: 'Strzałki, WASD albo przesunięcie palcem zmienia kierunek. Mikrofon +1, złoty mikrofon +3 (znika po kilku sekundach). Nie uderzaj w ściany ani w siebie.' },
     { id: 'ukladanka', name: 'Śliska Układanka', knaga: 'detektyw', sub: 'Ułóż zdjęcie z artykułu.', tag: 'Logiczna', unit: 'ruchów', low: true, c: ['#7a3d00', '#ffae2b'],
       how: 'Przesuwaj kafelki na puste pole, aż ułożysz zdjęcie z artykułu. Rekordem jest najmniejsza liczba ruchów. „Podgląd” pokazuje całe zdjęcie.' },
-    { id: 'drama', name: 'Drama Simulator', knaga: 'wsciekla', sub: '6 afer, 7 dni, 20 zakończeń. Przetrwasz?', tag: 'Fabularna', kind: 'story', c: ['#5c0716', '#ff3b3b'],
-      how: 'Stwórz postać (ksywka i typ artysty), wybierz jedną z 6 afer i przetrwaj 7 dni. Każda decyzja zmienia Hype, Szacunek, Kasę i Nerwy oraz liczbę obserwujących. Po drugim dniu zatrudnisz prawnika, PR-owca albo terapeutę – odblokują nowe opcje. Uważaj: zero Szacunku albo Kasy, czy 100 Nerwów to natychmiastowy koniec. 20 zakończeń i 12 osiągnięć do zdobycia, gra zapisuje się w trakcie.' },
+    { id: 'drama', name: 'Drama Simulator', knaga: 'wsciekla', sub: '10 afer, 7 dni, 30 zakończeń. Przetrwasz?', tag: 'Fabularna', kind: 'story', c: ['#5c0716', '#ff3b3b'],
+      how: 'Stwórz postać (ksywka i typ artysty), wybierz jedną z 10 afer i przetrwaj 7 dni. Każda decyzja zmienia Hype, Szacunek, Kasę i Nerwy oraz liczbę obserwujących. Po drugim dniu zatrudnisz prawnika, PR-owca albo terapeutę – odblokują nowe opcje. Uważaj: zero Szacunku albo Kasy, czy 100 Nerwów to natychmiastowy koniec. 30 zakończeń i 12 osiągnięć do zdobycia, gra zapisuje się w trakcie.' },
     { id: 'slizgawka', name: 'Ślizgawka', knaga: 'surfer', sub: 'Tajna gra. Surfuj i skacz.', tag: 'Sekret', unit: 'm', secret: true, c: ['#b33a1a', '#ffb36b'],
       how: 'Spacja albo stuknięcie – skok (drugi raz w powietrzu = podwójny skok). Przeskakuj pozwy, dissy i fejki, zbieraj krople (+25 m).' }
   ];
@@ -63,7 +63,7 @@
   function fmt(g, v) {
     if (!v) return '–';
     if (g === 'slizgle') return (7 - v) + '/6';
-    if (g === 'drama') return v + '/20';
+    if (g === 'drama') return v + '/30';
     if (g === 'krzyzowka') return v + '×';
     return v + ' ' + (G(g).unit || '');
   }
@@ -114,7 +114,7 @@
       var b = best(g.id);
       return '<a class="gh-tile' + (g.secret ? ' is-secret' : '') + '" href="#/gry/' + g.id + '" style="--g1:' + g.c[0] + ';--g2:' + g.c[1] + '">' +
         '<span class="gh-tile-k">' + K(g.knaga) + '</span><span class="gh-tag">' + g.tag + '</span><b>' + g.name + '</b><small>' + g.sub + '</small>' +
-        '<em>' + (g.kind === 'story' ? ((d.endings || []).length + '/20 zakończeń') : b ? ICO.cup + ' ' + fmt(g.id, b) : 'Zagraj pierwszy raz') + '</em></a>';
+        '<em>' + (g.kind === 'story' ? ((d.endings || []).length + '/30 zakończeń') : b ? ICO.cup + ' ' + fmt(g.id, b) : 'Zagraj pierwszy raz') + '</em></a>';
     };
     var feat = function (g, title, meta, cta) {
       return '<a class="gh-feat" href="#/gry/' + g.id + '" style="--g1:' + g.c[0] + ';--g2:' + g.c[1] + '"><span class="gh-feat-t"><span class="gh-tag">' + title + '</span><b>' + g.name + '</b><small>' + meta + '</small><span class="gh-cta">' + cta + ' →</span></span><span class="gh-feat-k">' + K(g.knaga) + '</span></a>';
