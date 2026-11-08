@@ -632,12 +632,13 @@
       var d = data(), saved = loadRun(), role = d.dramaRole || 'raper', diff = d.dramaDiff || 'norm';
       $('#dr').innerHTML = '<div class="dr-pick">' +
         (saved ? '<button type="button" class="dr-cont" data-act="cont"><span class="dr-cont-k">' + tile(saved.sc, 'sc') + '</span><span><small>Masz niedokończoną aferę</small><b>' + esc(SC(saved.sc).name) + ' · dzień ' + Math.min(7, saved.beat + 1) + '/7</b><em>' + esc(saved.nick) + ' – ' + esc(ROLE(saved.role).name) + '</em></span><i>' + ic('play', 18) + ' Kontynuuj</i></button>' : '') +
-        '<h2>Twoja postać</h2><div class="dr-who"><label class="dr-nick"><span>Ksywka</span><input type="text" id="dr-nick" maxlength="16" placeholder="np. Mokry Mati" value="' + esc(d.dramaNick) + '" autocomplete="off"></label></div>' +
+        (window.DramaFacts ? '<h2>Prawdziwe dramy</h2><p class="dr-lead">Najgłośniejsze polskie afery, wyłącznie fakty z prasy i sądów. Zgadnij, co wydarzyło się dalej.</p><div class="dr-fcs">' + window.DramaFacts.cards(d.factDone) + '</div>' : '') +
+        '<h2>Afery fikcyjne: twoja postać</h2><div class="dr-who"><label class="dr-nick"><span>Ksywka</span><input type="text" id="dr-nick" maxlength="16" placeholder="np. Mokry Mati" value="' + esc(d.dramaNick) + '" autocomplete="off"></label></div>' +
         '<div class="dr-roles" role="radiogroup" aria-label="Typ artysty">' + ROLES.map(function (r) {
           return '<button type="button" class="dr-role' + (r.id === role ? ' is-on' : '') + '" data-role="' + r.id + '" role="radio" aria-checked="' + (r.id === role) + '"><span class="dr-role-k">' + AV(r.id) + '</span><b>' + r.name + '</b><small>' + r.d + '</small><span class="dr-role-st">' + STATS.map(function (s) { return '<i title="' + s[1] + '">' + ic(s[2], 12) + r.st[s[0]] + '</i>'; }).join('') + '</span></button>';
         }).join('') + '</div>' +
         '<h2>Poziom trudności</h2><div class="dr-diff" id="dr-diff" role="radiogroup" aria-label="Poziom trudności">' + DIFFS.map(function (x) { return '<button type="button" class="dr-df' + (x[0] === diff ? ' is-on' : '') + '" data-diff="' + x[0] + '" role="radio" aria-checked="' + (x[0] === diff) + '"><b>' + x[1] + '</b><small>' + x[2] + '</small></button>'; }).join('') + '</div>' +
-        '<h2>Wybierz aferę</h2><p class="dr-lead">7 dni, decyzje, losowe wydarzenia i 4 paski. Jeśli Szacunek albo Kasa spadną do zera, a Nerwy dojdą do 100 – koniec gry.</p><div class="dr-sc">' +
+        '<h2>Afery fikcyjne (parodie)</h2><p class="dr-lead">7 dni, decyzje, losowe wydarzenia i 4 paski. Jeśli Szacunek albo Kasa spadną do zera, a Nerwy dojdą do 100 – koniec gry.</p><div class="dr-sc">' +
         SCEN.map(function (s, i) { var done = d.dramaDone.indexOf(s.id) >= 0; return '<button type="button" class="dr-scb" data-sc="' + s.id + '"><span class="dr-scb-k">' + tile(s.id, 'sc') + '</span><span><b>' + (i + 1) + '. ' + s.name + (done ? ' <em>' + ic('check', 12) + ' ukończona</em>' : '') + '</b><small>' + s.sub + '</small></span></button>'; }).join('') + '</div></div>';
     }
 
@@ -783,6 +784,7 @@
     el.addEventListener('click', function (ev) {
       var b = ev.target.closest('[data-role]'); if (b) { [].forEach.call(el.querySelectorAll('.dr-role'), function (x) { x.classList.toggle('is-on', x === b); x.setAttribute('aria-checked', x === b); }); return; }
       b = ev.target.closest('[data-diff]'); if (b) { [].forEach.call(el.querySelectorAll('.dr-df'), function (x) { x.classList.toggle('is-on', x === b); x.setAttribute('aria-checked', x === b); }); return; }
+      b = ev.target.closest('[data-fact]'); if (b && window.DramaFacts) { window.scrollTo(0, 0); return window.DramaFacts.play($('#dr'), H, b.dataset.fact, pick); }
       b = ev.target.closest('[data-sc]'); if (b) return begin(b.dataset.sc);
       b = ev.target.closest('[data-crew]'); if (b && !b.disabled) return hire(b.dataset.crew);
       b = ev.target.closest('[data-c]'); if (b) return choose(+b.dataset.c);

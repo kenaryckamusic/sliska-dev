@@ -90,7 +90,40 @@
     ['Właściciel', 'Szef prosi o „lekki tekst o prezentach” z okazji świąt.', [
       ['Piszę lekki tekst', { k: 6, w: 1, n: -3 }, 'Przyjemny, krótki i dobrze się czyta.'],
       ['Wciskam w niego reklamę', { k: 2, w: -6, p: 2 }, 'Czytelnicy mają nos do kryptoreklamy.'],
-      ['Odmawiam', { n: 6, w: 3 }, 'Szef się obraził. Redakcja się cieszy.']]]
+      ['Odmawiam', { n: 6, w: 3 }, 'Szef się obraził. Redakcja się cieszy.']]],
+    /* pikantne (postacie wyłącznie fikcyjne) */
+    ['Paparazzo', 'Zdjęcie: fikcyjna gwiazda pop Lola Wilgotna wychodzi o 6 rano z hotelu w cudzej koszuli. Pod spodem jej mąż, prezes klubu żeglarskiego, „nic nie wie”.', [
+      ['Tytuł: „Koszula Loli. Czyja?”', { k: 20, w: -10, p: 14, n: 4 }, 'Rekord wejść. Prawnik Loli napisał pozew szybciej niż Ty tytuł.'],
+      ['Piszę elegancko o „porannym spacerze”', { k: 8, w: 3, p: 2 }, 'Wszyscy wiedzą, o co chodzi, nikt nie może Cię pozwać. Mistrzostwo aluzji.'],
+      ['Odsprzedaję zdjęcie konkurencji', { k: 6, w: -8, p: 6, n: -2 }, 'Kasa wpadła, szacunek wypadł. Redakcja udaje, że nic nie widziała.']]],
+    ['Influencerka', 'Fikcyjna Kasia Kuszyńska wrzuca „kulisy sesji bielizny” i prosi, żebyś napisał, że to „sztuka”. W tle widać Twojego szefa.', [
+      ['Piszę: „Sztuka. Niesamowita sztuka”', { k: 14, w: -6, p: 2, n: -3 }, 'Szef nagle ma pochwałę dla całego zespołu. Rzadko się to zdarza.'],
+      ['Wycinam szefa z kadru', { k: 10, w: 2, n: 4 }, 'Kadr czysty, a szef i tak wie, że wiesz. Awansu nie będzie.'],
+      ['Odrzucam. To reklama', { k: -2, w: 8, n: 3 }, 'Pozostajesz nieskazitelny. Kasia poszła do konkurencji.']]],
+    ['Tajemniczy mail', 'Anonim: „Wiem, z kim spał fikcyjny jury-gwiazdor Tomasz Pikantny. Wyślę ci skan, jeśli napiszesz, że jestem Twoim źródłem w kilku tekstach”.', [
+      ['Płacę i publikuję', { k: 18, w: -14, p: 18, n: 6 }, 'Okazało się, że skan to zdjęcie psa. Pozew za zniesławienie jest za darmo.'],
+      ['Odpisuję: „Najpierw dowody”', { k: 2, w: 10, n: 3 }, 'Anonim zniknął. Zostałeś redaktorem, którego nie da się oszukać.'],
+      ['Zgłaszam to prawnikom', { k: -2, w: 7, p: -4, n: 5 }, 'Wyszło, że ktoś chciał Cię wkręcić. Dobra decyzja, zero dymu.']]],
+    ['Wydawca', 'Sponsor oferuje fortunę za okładkę numeru „Seks, kłamstwa i playback” z fikcyjnym duetem Mokra i Mokry. Duet jeszcze nie wie.', [
+      ['Okładka idzie do druku', { k: 22, w: -12, p: 16, n: 5 }, 'Nakład wyprzedany, menedżer duetu dzwoni od rana. Z groźbami.'],
+      ['Zmieniam na „Miłość, kłamstwa i playback”', { k: 9, w: 3, p: 3 }, 'Mniej pikantnie, ale też sprzedaje. Wszyscy żyją.'],
+      ['Odmawiam sponsorowi', { k: -6, w: 10, n: 4 }, 'Sponsor wycofał budżet. Honor zostaje, premia znika.']]],
+    ['Czytelnik', 'Czytelnik pisze, że zna „gorący sekret” fikcyjnego rapera Wuja Dropsa z afterparty. Prosi o 500 zł i dyskrecję.', [
+      ['Płacę i drążę', { k: 12, w: -4, p: 8, n: 4 }, 'Sekret okazał się plotką z podstawówki. Straciłeś 500 zł.'],
+      ['Proszę o dowody na piśmie', { k: 3, w: 9, n: 2 }, 'Czytelnik się obraził. Ty nie, bo to było rozsądne.'],
+      ['Wrzucam bez płacenia, jako „głosy z sieci”', { k: 15, w: -10, p: 12 }, 'Wuj Drops zapowiedział proces. Ludzie pytają o „głosy z sieci”.']]],
+    ['Wywiad', 'Fikcyjna aktorka Zuzanna Gorąca na wywiadzie odpowiada na wszystko: „A to nie Twoja sprawa, kochanie”. Zostało 8 minut nagrania.', [
+      ['Wycinam i publikuję najostrzejsze fragmenty', { k: 17, w: -7, p: 7, n: 3 }, 'Wywiad viralowy. Aktorka wściekła, ale wpisu nie usunęła.'],
+      ['Publikuję całość bez cięć', { k: 8, w: 8, p: 1 }, 'Uczciwie i długo. Czytelnicy zostają do końca.'],
+      ['Pytam o zgodę na cytaty', { k: 3, w: 7, n: 4 }, 'Zgodę dała z pocałunkiem w policzek. Zero skandalu, pełne autoryzacje.']]],
+    ['Szef', 'Szef chce tytułu: „SZOK! Gwiazda w negliżu!”. Chodzi o fikcyjnego Maćka Sauna, który wyszedł z sauny w ręczniku na konferencji.', [
+      ['Dajemy: „SZOK! Maciek w negliżu!”', { k: 19, w: -9, p: 6, n: -2 }, 'Klikalność jak z reaktora. Maciek śmieje się w poście, a Ty dostajesz opinię clickbaitera.'],
+      ['Dajemy: „Maciek Saun w ręczniku”', { k: 7, w: 4 }, 'Prawdziwe, krótkie, zabawne. Szef kręci nosem.'],
+      ['Proponuję szefowi, żeby sam napisał tytuł', { k: 2, w: 2, n: 5 }, 'Szef napisał, nie spodobało mu się. Dyskusji nie będzie.']]],
+    ['Prawnik', 'Fikcyjny celebryta Dawid Dymiący żąda usunięcia tekstu o jego „dwóch randkach naraz”. Masz zdjęcia z obu.', [
+      ['Nie usuwam. Publikuję drugą część', { k: 16, w: -4, p: 14, n: 5 }, 'Pozew rośnie, a Ty masz rozmowę w sądzie i materiał na trzecią część.'],
+      ['Ugoda: usuwam jedno zdjęcie', { k: 4, w: 5, p: -2, n: 2 }, 'Kompromis. Dawid jest zadowolony, a Ty masz święty spokój.'],
+      ['Usuwam wszystko i przepraszam', { k: -8, w: 6, p: -6, n: -4 }, 'Cisza. Ale kasa za prawnika zostaje w kieszeni.']]]
   ];
 
   /* zakończenia: [id, nazwa, opis, ikona, kolory] */
