@@ -47,8 +47,8 @@
       how: 'Strzałki, WASD albo przesunięcie palcem zmienia kierunek. Mikrofon +1, złoty mikrofon +3 (znika po kilku sekundach). Nie uderzaj w ściany ani w siebie.' },
     { id: 'ukladanka', name: 'Śliska Układanka', knaga: 'detektyw', sub: 'Ułóż zdjęcie z artykułu.', tag: 'Logiczna', unit: 'ruchów', low: true, c: ['#7a3d00', '#ffae2b'],
       how: 'Przesuwaj kafelki na puste pole, aż ułożysz zdjęcie z artykułu. Rekordem jest najmniejsza liczba ruchów. „Podgląd” pokazuje całe zdjęcie.' },
-    { id: 'drama', name: 'Drama Simulator', knaga: 'wsciekla', sub: 'Jesteś w środku afery. Co robisz?', tag: 'Fabularna', kind: 'story', c: ['#5c0716', '#ff3b3b'],
-      how: 'Wybierz aferę i podejmuj decyzje. Każdy wybór zmienia Hype, Szacunek i Kasę – od nich zależy, które z 8 zakończeń zobaczysz. Zbierz wszystkie.' },
+    { id: 'drama', name: 'Drama Simulator', knaga: 'wsciekla', sub: '6 afer, 7 dni, 20 zakończeń. Przetrwasz?', tag: 'Fabularna', kind: 'story', c: ['#5c0716', '#ff3b3b'],
+      how: 'Stwórz postać (ksywka i typ artysty), wybierz jedną z 6 afer i przetrwaj 7 dni. Każda decyzja zmienia Hype, Szacunek, Kasę i Nerwy oraz liczbę obserwujących. Po drugim dniu zatrudnisz prawnika, PR-owca albo terapeutę – odblokują nowe opcje. Uważaj: zero Szacunku albo Kasy, czy 100 Nerwów to natychmiastowy koniec. 20 zakończeń i 12 osiągnięć do zdobycia, gra zapisuje się w trakcie.' },
     { id: 'slizgawka', name: 'Ślizgawka', knaga: 'surfer', sub: 'Tajna gra. Surfuj i skacz.', tag: 'Sekret', unit: 'm', secret: true, c: ['#b33a1a', '#ffb36b'],
       how: 'Spacja albo stuknięcie – skok (drugi raz w powietrzu = podwójny skok). Przeskakuj pozwy, dissy i fejki, zbieraj krople (+25 m).' }
   ];
@@ -63,7 +63,7 @@
   function fmt(g, v) {
     if (!v) return '–';
     if (g === 'slizgle') return (7 - v) + '/6';
-    if (g === 'drama') return v + '/8';
+    if (g === 'drama') return v + '/20';
     if (g === 'krzyzowka') return v + '×';
     return v + ' ' + (G(g).unit || '');
   }
@@ -114,7 +114,7 @@
       var b = best(g.id);
       return '<a class="gh-tile' + (g.secret ? ' is-secret' : '') + '" href="#/gry/' + g.id + '" style="--g1:' + g.c[0] + ';--g2:' + g.c[1] + '">' +
         '<span class="gh-tile-k">' + K(g.knaga) + '</span><span class="gh-tag">' + g.tag + '</span><b>' + g.name + '</b><small>' + g.sub + '</small>' +
-        '<em>' + (g.kind === 'story' ? ((d.endings || []).length + '/8 zakończeń') : b ? ICO.cup + ' ' + fmt(g.id, b) : 'Zagraj pierwszy raz') + '</em></a>';
+        '<em>' + (g.kind === 'story' ? ((d.endings || []).length + '/20 zakończeń') : b ? ICO.cup + ' ' + fmt(g.id, b) : 'Zagraj pierwszy raz') + '</em></a>';
     };
     var feat = function (g, title, meta, cta) {
       return '<a class="gh-feat" href="#/gry/' + g.id + '" style="--g1:' + g.c[0] + ';--g2:' + g.c[1] + '"><span class="gh-feat-t"><span class="gh-tag">' + title + '</span><b>' + g.name + '</b><small>' + meta + '</small><span class="gh-cta">' + cta + ' →</span></span><span class="gh-feat-k">' + K(g.knaga) + '</span></a>';
@@ -585,127 +585,10 @@
     pick(); start();
   }
 
-  /* ============== DRAMA SIMULATOR ============== */
-  var STATS = [['h', 'Hype', '🔥'], ['s', 'Szacunek', '⭐'], ['k', 'Kasa', '💰']];
-  var SCEN = [
-    { id: 'wyciek', name: 'Wyciek z koncertu', k: 'wsciekla', sub: 'Nagranie, na którym mówisz o feacie „za kasę”, krąży po sieci.', sc: [
-      { k: 'wsciekla', app: 'Instagram', t: 'Budzisz się, a na telefonie 147 powiadomień. Ktoś wrzucił nagranie z koncertu: mówisz, że ostatni feat „był za kasę i nawet go nie słuchałeś”. Internet płonie.', c: [
-        ['Odpisuję od razu na story. Ostro.', { h: 20, s: -10 }, 'Story ma 40 tys. wyświetleń w 10 minut. Raper z featu już nagrywa odpowiedź.'],
-        ['Milczę i czekam, aż przejdzie.', { h: -10, s: 5 }, 'Cisza. Internet nie znosi ciszy – zaczyna zgadywać, co ukrywasz.'],
-        ['Dzwonię do menedżera.', { k: 5 }, 'Menedżer: „Spokojnie, mam plan”. To nigdy nie wróży dobrze.']] },
-      { k: 'diabelek', app: 'YouTube', t: 'Raper z featu wrzuca diss „Za kasę to ty oddychasz”. Milion wyświetleń w dobę, komentarze pod Twoimi postami: „odpowiesz?”.', c: [
-        ['Nagrywam odpowiedź jeszcze w nocy.', { h: 25, s: 5, k: -5 }, 'Bit kradziony z TikToka, ale wersy palą. Ludzie dzielą się na dwa obozy.'],
-        ['Zapraszam go na live – pogadajmy jak ludzie.', { h: 15, s: 10 }, 'Live ogląda 30 tysięcy osób. Po godzinie śmiejecie się razem. Nikt się tego nie spodziewał.'],
-        ['Blokuję go wszędzie.', { h: -5, s: -15 }, '„Zablokował, bo nie ma argumentów” – piszą wszyscy. Screeny blokady mają więcej lajków niż Twój singiel.']] },
-      { k: 'gwiazdor', app: 'Mail', t: 'Śliska News pisze o aferze, pod artykułem 2 tysiące komentarzy. Marka napojów energetycznych proponuje współpracę „na fali dramy”.', c: [
-        ['Biorę kasę i reklamuję na story.', { k: 30, s: -15 }, 'Puszka w dłoni, uśmiech, kod rabatowy „ZAKASE”. Komentarze piszą się same.'],
-        ['Odmawiam publicznie.', { s: 15, k: -5, h: 5 }, '„Nie sprzedam dramy” – cytat dnia. Szacun rośnie, konto w banku nie.'],
-        ['Negocjuję podwójną stawkę.', { k: 20, h: 5, s: -5 }, 'Menedżer płacze ze szczęścia. Ty trochę mniej, czytając komentarze.']] },
-      { k: 'kapiel', app: 'TikTok', t: 'Fani robią z Twojej miny z nagrania mema. Jest wszędzie: na TikToku, w grupach, nawet na tablicy w szkole Twojej kuzynki.', c: [
-        ['Ustawiam mema jako zdjęcie profilowe.', { h: 15, s: 10 }, 'Dystans do siebie? Internet to kocha. „Szacun, że się nie obraził”.'],
-        ['Proszę o usuwanie mema.', { h: -5, s: -10 }, 'Efekt Streisand w pełnej krasie. Mem ma teraz trzy nowe wersje.'],
-        ['Drukuję merch z memem.', { k: 20, h: 10, s: -5 }, 'Koszulki wyprzedane w dwie godziny. Hejterzy też kupili.']] },
-      { k: 'redaktor', app: 'Śliska News', t: 'Wieczór. Wszyscy czekają na Twój ruch. Redakcja Śliskiej pyta o komentarz do artykułu. Co ogłaszasz?', c: [
-        ['Trasę „Za Kasę Tour”.', { h: 20, k: 15 }, 'Bilety schodzą jak ciepłe bułki. Ironia zrobiła robotę.'],
-        ['Szczere oświadczenie i przeprosiny.', { s: 20, h: -5 }, 'Długi post, bez prawników. Nawet raper z featu daje lajka.'],
-        ['Nic. Znikam na miesiąc.', { h: -20, s: 5 }, 'Konto milczy. Po tygodniu ludzie zaczynają tęsknić. Albo zapominać.']] }
-    ] },
-    { id: 'romans', name: 'Romans na backstage’u', k: 'uwodziciel', sub: 'Paparazzi przyłapał Cię z byłą Twojego producenta.', sc: [
-      { k: 'uwodziciel', app: 'Pudelek-styl', t: 'Paparazzi przyłapał Cię, jak o 4:00 wychodzisz z backstage’u z byłą Twojego producenta. Zdjęcie jest nieostre, ale wszyscy wiedzą, że to Ty.', c: [
-        ['„To tylko koleżanka.”', { s: -10, h: 5 }, 'Koleżanka wrzuca story z Twoją bluzą. Ups.'],
-        ['Potwierdzam. Zakochałem się.', { h: 20, s: 5 }, 'Internet szaleje. Połowa wysyła serduszka, połowa popcorn.'],
-        ['Bez komentarza.', { h: 5 }, '„Bez komentarza” to też komentarz. Plotki się mnożą.']] },
-      { k: 'wsciekla', app: 'Instagram', t: 'Producent wrzuca story: „Bitów już ode mnie nie dostaniesz. Ani niczego innego”. Masz za tydzień premierę singla.', c: [
-        ['Kupuję bity z internetu.', { k: -10, s: -5 }, 'Bit brzmi jak dzwonek z 2009. Ktoś to rozpoznał w 3 minuty.'],
-        ['Przepraszam producenta prywatnie.', { s: 10, h: -5 }, 'Odpisał „ok”. Tylko „ok”. Ale bity wysłał.'],
-        ['Wrzucam nasze wspólne zdjęcie.', { h: 25, s: -10 }, 'Wojna na story. Śliska News robi z tego serię artykułów.']] },
-      { k: 'sauna', app: 'Podcast', t: 'Dostajesz zaproszenie do podcastu „Szczerze i mokro”. Prowadzący obiecuje, że „pytania będą lekkie”. Nigdy nie są.', c: [
-        ['Idę i mówię wszystko.', { h: 20, s: 5 }, 'Trzy godziny szczerości. Klipy z rozmowy są wszędzie.'],
-        ['Idę i ściemniam.', { h: 10, s: -15 }, 'Widzowie łapią każdą sprzeczność. Ktoś zrobił z tego kompilację.'],
-        ['Odmawiam.', { h: -10 }, 'Podcast i tak o Tobie mówi. Bez Ciebie.']] },
-      { k: 'detektyw', app: 'Twitter', t: 'Wyciekają screeny Waszych wiadomości. Najczęściej cytowane zdanie: „mój producent nie umie nawet w bity”.', c: [
-        ['Mówię, że to fejk.', { s: -15, h: 10 }, 'Ktoś pokazuje metadane. To nie fejk.'],
-        ['Śmieję się z siebie na TikToku.', { h: 15, s: 10 }, 'Autoironia ratuje sytuację. Dźwięk z filmiku wiralowy.'],
-        ['Zatrudniam prawnika.', { k: -15, s: 5 }, 'Pismo idzie do trzech portali. Dwa usuwają. Trzeci pisze o piśmie.']] },
-      { k: 'zakochana', app: 'Śliska News', t: 'Minął miesiąc. Wszyscy pytają, czy to coś poważnego. Co robicie?', c: [
-        ['Nagrywamy razem duet.', { h: 25, k: 15, s: -5 }, 'Numer wpada na listy. Producent… robi remix. Podobno za kasę.'],
-        ['Zrywamy dla świętego spokoju.', { s: 10, h: -10 }, 'Spokój jest. Tylko serce trochę mokre.'],
-        ['Ogłaszam przerwę od social mediów.', { h: -15, s: 10 }, 'Przerwa trwa 4 dni. Rekord.']] }
-    ] },
-    { id: 'plagiat', name: 'Gala i plagiat', k: 'gwiazdor', sub: 'Wygrywasz nagrodę, ale ktoś zarzuca Ci kradzież refrenu.', sc: [
-      { k: 'gwiazdor', app: 'Gala', t: 'Wygrywasz nagrodę za Numer Roku. Godzinę później ktoś wrzuca porównanie: Twój refren brzmi jak piosenka mało znanego artysty z 2019.', c: [
-        ['„To była inspiracja.”', { s: -5, h: 5 }, 'Słowo „inspiracja” staje się memem tygodnia.'],
-        ['Oddaję statuetkę na scenie.', { s: 20, h: 15, k: -10 }, 'Wideo ma 2 miliony wyświetleń. Klasa – piszą nawet hejterzy.'],
-        ['Ignoruję i świętuję.', { h: 5, s: -10 }, 'Zdjęcia z afterparty kontra porównanie refrenów. Nie wygląda to dobrze.']] },
-      { k: 'redaktor', app: 'Mail', t: 'Autor oryginału żąda tantiem i przeprosin. Jego jedyny numer ma teraz więcej odsłuchów niż przez 7 lat.', c: [
-        ['Płacę od razu.', { k: -20, s: 15 }, 'Sprawa zamknięta po cichu. Prawie po cichu – on o tym nagrał film.'],
-        ['Idę do sądu.', { k: -10, h: 10 }, 'Rozprawa za rok. Do tego czasu – darmowa promocja dla Was obu.'],
-        ['Proponuję mu feat.', { h: 15, s: 10, k: 5 }, 'Zgodził się. Internet: „najlepsze zakończenie dramy ever”.']] },
-      { k: 'imprezowa', app: 'Instagram', t: 'Na afterparty ktoś nagrywa, jak tańczysz na stole ze statuetką na głowie. Nagranie już krąży.', c: [
-        ['Tańczę dalej. To moja noc.', { h: 20, s: -5 }, 'Filmik jest wszędzie. Z dźwiękiem Twojego „inspirowanego” refrenu.'],
-        ['Zabieram komuś telefon.', { h: 10, s: -20 }, 'Teraz jest też drugie nagranie. Z innego telefonu.'],
-        ['Zamawiam pizzę dla wszystkich.', { s: 10, k: -5, h: 5 }, 'Pizza dla 80 osób. Najlepszy PR za 1200 zł.']] },
-      { k: 'diabelek', app: 'Zrzutka', t: 'Hejterzy zakładają zrzutkę „na lekcje oryginalności dla Ciebie”. Zebrali już 3 tysiące.', c: [
-        ['Wpłacam pierwszy i dziękuję.', { h: 20, s: 15, k: -5 }, 'Dystans level master. Zrzutkę przekazujesz na schronisko.'],
-        ['Zgłaszam zrzutkę.', { s: -10, h: 5 }, 'Zrzutka zdjęta. Powstają trzy nowe.'],
-        ['Nagrywam diss na hejterów.', { h: 15, s: -5 }, 'Diss jest dobry. Ale refren… brzmi znajomo.']] },
-      { k: 'redaktor', app: 'Śliska News', t: 'Rok później. Śliska News robi podsumowanie afery. Jaki jest Twój ostatni ruch?', c: [
-        ['Remix z autorem oryginału.', { s: 20, k: 15 }, 'Remix lepszy od obu wersji. Nikt nie pamięta, o co była afera.'],
-        ['Mówię, że to była prowokacja marketingowa.', { h: 25, s: -15, k: 10 }, 'Pół internetu klaszcze, pół czuje się oszukane. Zasięgi rekordowe.'],
-        ['Usuwam numer z serwisów.', { s: 5, h: -15, k: -15 }, 'Numer znika. Tylko ludzie wciąż nucą ten refren.']] }
-    ] }
-  ];
-  var ENDS = [
-    ['legenda', 'Legenda', 'super', function (s) { return s.s >= 70 && s.h >= 65; }, 'Wychodzisz z afery silniejszy niż kiedykolwiek. Hype, szacunek i nagłówek „Comeback dekady”. Legenda.'],
-    ['krol', 'Król dramy', 'diabelek', function (s) { return s.h >= 75 && s.s < 45; }, 'Wszyscy Cię znają, nikt Ci nie ufa. Każdy Twój post to nowy artykuł na Śliskiej. Korona jest, tylko trochę ubrudzona.'],
-    ['biznes', 'Biznesmen roku', 'gwiazdor', function (s) { return s.k >= 75; }, 'Z afery zrobiłeś biznes: merch, reklamy, trasa. Konto pełne. O muzyce mało kto pamięta.'],
-    ['wtopa', 'Wtopa roku', 'ratownik', function (s) { return s.s < 25; }, 'Każdy ruch dolewał oliwy do ognia. Śliska News przyznaje Ci tytuł „Wtopa roku”. Licznik dni bez wtopy: 0.'],
-    ['comeback', 'Szanowany weteran', 'zakochana', function (s) { return s.s >= 65; }, 'Nie było fajerwerków, ale wyszedłeś z tego z klasą. Branża Cię szanuje, fani też.'],
-    ['mem', 'Żywy mem', 'kapiel', function (s) { return s.h >= 65; }, 'Nie wiadomo jak, ale wszyscy Cię kochają – jako mema. Twoja mina jest na naklejkach, kubkach i w każdej grupie.'],
-    ['cisza', 'Cichy przeczekiwacz', 'szlafrok', function (s) { return s.h < 35; }, 'Drama wygasła sama. Nikt już nie pamięta, o co chodziło – Ty też nie. Bezpiecznie, ale nudno.'],
-    ['przecietniak', 'Przeciętniak sceny', 'ziomek', function () { return true; }, 'Ani legenda, ani wtopa. Afera przeszła, Ty zostałeś – gdzieś pośrodku. Spróbuj odważniej!']
-  ];
+  /* ============== DRAMA SIMULATOR (news/drama.js) ============== */
   function drama(el) {
-    var g = G('drama');
-    shell(el, g, '<div class="dr" id="dr"></div>', { side: '<section class="gp-box"><h3>Zakończenia</h3><div class="dr-ends" id="dr-ends"></div></section>' });
-    var stt, sc, step;
-    function endsBox() { var got = load().endings || []; $('#dr-ends').innerHTML = ENDS.map(function (e) { var on = got.indexOf(e[1]) >= 0; return '<span class="dr-end' + (on ? ' is-on' : '') + '" title="' + (on ? e[1] : 'Jeszcze nie odkryte') + '">' + (on ? K(e[2], 'gk') : '<i>?</i>') + '<b>' + (on ? e[1] : '???') + '</b></span>'; }).join(''); }
-    function meters() { return '<div class="dr-m">' + STATS.map(function (s) { return '<div class="dr-mt"><span>' + s[2] + ' ' + s[1] + '</span><i><b style="width:' + stt[s[0]] + '%"></b></i></div>'; }).join('') + '</div>'; }
-    function pickScenario() {
-      $('#dr').innerHTML = '<div class="dr-pick"><h2>Wybierz aferę</h2><p>Każda ma 5 decyzji. Wybory zmieniają Hype 🔥, Szacunek ⭐ i Kasę 💰 – a od nich zależy zakończenie.</p><div class="dr-sc">' +
-        SCEN.map(function (s, i) { return '<button type="button" class="dr-scb" data-sc="' + i + '"><span class="dr-scb-k">' + K(s.k, 'gk') + '</span><span><b>' + s.name + '</b><small>' + s.sub + '</small></span></button>'; }).join('') + '</div></div>';
-    }
-    function begin(i) { sc = SCEN[i]; stt = { h: 50, s: 50, k: 50 }; step = 0; $('#dr').innerHTML = '<div class="dr-phone"><div class="dr-top"><b>' + sc.name + '</b><span id="dr-step"></span></div><div id="dr-meters"></div><div class="dr-feed" id="dr-feed"></div><div class="dr-ch" id="dr-ch"></div></div>'; scene(); }
-    function bubble(cls, html) { var f = $('#dr-feed'), d = document.createElement('div'); d.className = 'dr-b ' + cls; d.innerHTML = html; f.appendChild(d); f.scrollTop = f.scrollHeight; return d; }
-    function scene() {
-      var s = sc.sc[step]; $('#dr-step').textContent = (step + 1) + '/' + sc.sc.length; $('#dr-meters').innerHTML = meters();
-      bubble('is-in', '<span class="dr-av">' + K(s.k, 'gk') + '</span><div><small>' + s.app + '</small><p>' + s.t + '</p></div>');
-      $('#dr-ch').innerHTML = s.c.map(function (c, i) { return '<button type="button" class="dr-opt" data-c="' + i + '">' + c[0] + '</button>'; }).join('');
-    }
-    function choose(i) {
-      var c = sc.sc[step].c[i];
-      bubble('is-me', '<p>' + c[0] + '</p>');
-      Object.keys(c[1]).forEach(function (k) { stt[k] = Math.max(0, Math.min(100, stt[k] + c[1][k])); });
-      var dl = STATS.filter(function (s) { return c[1][s[0]]; }).map(function (s) { var v = c[1][s[0]]; return '<span class="' + (v > 0 ? 'up' : 'dn') + '">' + s[2] + ' ' + (v > 0 ? '+' : '') + v + '</span>'; }).join('');
-      bubble('is-re', '<p>' + c[2] + '</p>' + (dl ? '<div class="dr-dl">' + dl + '</div>' : ''));
-      step++;
-      if (step >= sc.sc.length) return finish();
-      scene();
-    }
-    function finish() {
-      var e = ENDS.filter(function (x) { return x[3](stt); })[0], d = load(); d.endings = d.endings || [];
-      var fresh = d.endings.indexOf(e[1]) < 0; if (fresh) d.endings.push(e[1]); save(d);
-      submit('drama', d.endings.length); xp('drama'); played('drama'); endsBox();
-      $('#dr-meters').innerHTML = meters(); $('#dr-ch').innerHTML = '';
-      var card = bubble('is-end', '<div class="dr-ek">' + K(e[2], 'gk') + '</div><span class="gm-eye">Zakończenie' + (fresh ? ' · nowe!' : '') + '</span><h2>' + e[1] + '</h2><p>' + e[4] + '</p><p class="dr-sum">Odkryte zakończenia: <b>' + d.endings.length + '/8</b></p><div class="gm-acts"><button type="button" class="btn btn-primary" data-act="again">Inna afera</button><button type="button" class="btn" data-act="share">' + ICO.share + ' Udostępnij</button></div>');
-      card.querySelector('[data-act="share"]').onclick = function () { share('Drama Simulator na Śliskiej: wyszedłem z afery „' + sc.name + '” jako „' + e[1] + '” 💦\n' + LINK); };
-    }
-    $('#dr').addEventListener('click', function (e) {
-      var b = e.target.closest('[data-sc]'); if (b) return begin(+b.dataset.sc);
-      b = e.target.closest('[data-c]'); if (b) return choose(+b.dataset.c);
-      b = e.target.closest('[data-act="again"]'); if (b) pickScenario();
-    });
-    endsBox(); pickScenario();
+    if (!window.DramaSim) { shell(el, G('drama'), '<p class="gp-empty">Nie udało się wczytać gry. Odśwież stronę.</p>'); return; }
+    DramaSim.mount(el, { G: G, K: K, esc: esc, shell: shell, submit: submit, xp: xp, played: played, share: share, load: load, save: save, toast: toast, LINK: LINK });
   }
 
   /* ============== KRZYŻÓWKA TYGODNIA (krzyżówka z hasłem) ============== */
