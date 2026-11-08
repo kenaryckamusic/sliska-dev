@@ -117,7 +117,7 @@ td input[type=number]{width:96px;height:32px}
       return fetch(API + path, o);
     }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { if (!r.ok) throw new Error(ERR[d.error] || ('Błąd ' + r.status + (d.error ? ' (' + d.error + ')' : ''))); return d; }); });
   }
-  function fmtBest(g, v) { return g === 'slizgle' ? (7 - v) + '/6' : g === 'drama' ? v + '/30' : g === 'krzyzowka' ? v + '×' : g === 'ukladanka' ? v + ' ruchów' : v + (g === 'slizgawka' ? ' m' : ' pkt'); }
+  function fmtBest(g, v) { return g === 'slizgle' ? (7 - v) + '/6' : g === 'drama' ? v + '/9' : g === 'krzyzowka' ? v + '×' : g === 'ukladanka' ? v + ' ruchów' : v + (g === 'slizgawka' ? ' m' : ' pkt'); }
   function dayDate(d) { var x = new Date(Date.UTC(2026, 10, 1) + d * 864e5); return x.toLocaleDateString('pl-PL', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' }); }
   function weekRange(w) { var s = w * 7 - 6; return dayDate(Math.max(0, s)) + ' – ' + dayDate(s + 6); }
   function say(el, t, ok) { el.textContent = t; el.className = 'msg ' + (ok ? 'o' : 'e'); }
