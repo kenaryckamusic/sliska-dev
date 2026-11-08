@@ -86,27 +86,11 @@
   var TITLES = function (ok, n) { return ok === n ? ['Archiwum Śliskiej', 'Znasz to na pamięć. Pudelek by się nie powstydził.'] : ok >= Math.ceil(n * .6) ? ['Czytasz newsy', 'Wiesz sporo. Jeszcze trochę i będziesz redaktorem.'] : ['Nowy w mieście', 'Dopiero zaczynasz. Przeczytaj artykuły i wróć.']; };
   function shuffle(a, r) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(r() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
 
-  /* karty na ekranie wyboru (HTML): postęp = odkryte zakończenia danej dramy */
-  var KEYS = ['L', 'R', 'K', 'S', 'F'];
-  function cards(done, ends) {
-    ends = ends || {};
-    return LIST.map(function (d) {
-      var n = (ends[d.id] || []).length;
-      return '<button type="button" class="dr-fc" data-fact="' + d.id + '" style="--a:' + d.c[0] + ';--b:' + d.c[1] + '"><span class="dr-fc-t"><small>' + d.tag + ' · ' + d.y + '</small><b>' + esc(d.t) + '</b></span><em>' + (n ? n + '/5 zakończeń' : 'Zagraj') + '</em></button>';
-    }).join('');
-  }
-  var ST = [['k', 'Klikalność'], ['w', 'Wiarygodność'], ['p', 'Pozwy'], ['n', 'Nerwy']];
+  /* ====== SILNIK v3: Kariera reportera ====== */
+  var ST = [['k', 'Klikalność', '🔥'], ['w', 'Wiarygodność', '🛡️'], ['p', 'Pozwy', '⚖️'], ['n', 'Nerwy', '😰']];
+  var RELS = [['szef', '🧔', 'Szef'], ['ola', '📸', 'Ola'], ['wrona', '🐦', 'Wrona'], ['marta', '💼', 'Marta']];
   var FX = [{ k: 14, w: -8, p: 12, n: 2 }, { k: 6, w: 4, p: 2, n: 1 }, { k: -2, w: 10, p: -4, n: 3 }];
-  var cl = function (v) { return Math.max(0, Math.min(100, v)); };
-  function endOf(S) {
-    if (S.p >= 70 || S.w <= 20 || S.n >= 85) return 'F';
-    if (S.w >= 75 && S.k >= 62) return 'L';
-    if (S.w >= 68) return 'R';
-    if (S.k >= 72 && S.w < 60) return 'K';
-    return 'S';
-  }
-  /* ekipa redakcji (postacie fikcyjne) i internauci */
-  var WHO = { szef: ['redaktor', 'Szef'], pr: ['detektyw', 'Mec. Paragraf'], kuba: ['ziomek', 'Kuba, stażysta'], sl: ['sliska', 'Śliska'] };
+  var cl = function (v) { return Math.max(0, Math.min(100, Math.round(v))); };
   var BOSS = [['Kliki! Tak się robi newsy, {n}! 🔥', 'Licznik wariuje. Kawa na mój koszt ☕', 'Tego chcieliśmy. Prawnika nie pytaj.'], ['Ładnie, {n}. Elegancko i zjadliwie.', 'Dobry balans. Szanuję.', 'Nie boli, a klika. Może być.'], ['Hmm… rzetelnie. Nudno, ale rzetelnie.', 'Szkoda, że bez mocniejszego tytułu. Ale czytelnicy docenią.', 'Czysto. Prawnik się uśmiecha, ja nie.']];
   var LAW = [['Szefie, ten tytuł mi się nie podoba. Przygotowuję sprostowanie na wszelki wypadek. ⚖️', 'Zapisałem godzinę publikacji. Przyda się w sądzie.', 'Nie śpij spokojnie, {n}.'], ['Do obrony. Dziękuję. ⚖️', 'Mogło być gorzej. Jest dobrze.', 'Tak się to robi, {n}.'], ['Wzorowo. Wydrukuję i powieszę na ścianie.', 'Zero uwag. To się rzadko zdarza.', 'Dzięki, {n}. Śpię dziś spokojnie.']];
   var NET = [['mocne, szanuję 🍿', 'CO?! serio tak napisali?', 'kliknąłem i nie żałuję', 'clickbait, ale dobry', 'sprawdzę w innym źródle…', 'ktoś tu szuka pozwu 😬', 'xD nie mogę'], ['ciekawy tekst', 'czekam na ciąg dalszy', 'Śliska pisze po ludzku', 'w końcu ktoś bez krzyku', 'dobra robota, {n}'], ['rzetelnie, dzięki', 'czytam do końca', 'ktoś tu umie pracować', 'zapisuję do zakładek', 'trochę nudne, ale zaufam', '{n} szacun']];
@@ -120,101 +104,177 @@
     ['szef', 'Premia za wyniki. Księgowa prosi, żebym nie mówił, że chodzi o kliknięcia. 💰', { k: 2, n: -8 }],
     ['kuba', 'Na Twoim profilu fala hejtu. Połowa nawet nie przeczytała tekstu.', { n: 10, k: 4 }],
     ['kuba', 'Kawa wylała się na klawiaturę. Pół godziny pracy do kosza.', { n: 6 }],
-    ['szef', 'Zaprosili Cię na panel o rzetelności w mediach. Obiecali nie krytykować. 🎤', { w: 8, k: 2 }]
+    ['szef', 'Zaprosili Cię na panel o rzetelności w mediach. Obiecali nie krytykować. 🎤', { w: 8, k: 2 }],
+    ['ola', 'Zrobiłam Ci zdjęcie do profilu autora. Wyszedłeś nieprzyzwoicie dobrze. 📸', { ola: 8, k: 3 }],
+    ['marta', 'Widziałam Twój tekst. Gratuluję. Nie mogę się doczekać, jak go „zainspiruję”.', { marta: 8, n: 4 }]
   ];
   var rnd = function (a) { return a[Math.floor(Math.random() * a.length)]; };
-  var wait = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+  var SPD = function () { return window.__DF_FAST ? 0.01 : 1; };
+  var wait = function (ms) { return new Promise(function (r) { setTimeout(r, ms * SPD()); }); };
+  var RANKS = [[0, 'Praktykant'], [3, 'Stażysta'], [8, 'Reporter'], [16, 'Wydawca'], [30, 'Redaktor'], [50, 'Legenda Śliskiej']];
+  var rankOf = function (n) { var r = RANKS[0], nx = null; RANKS.forEach(function (x) { if (n >= x[0]) r = x; }); nx = RANKS.filter(function (x) { return x[0] > n; })[0]; return { name: r[1], next: nx ? nx[0] : null }; };
+  var CKEY = 'sn-drama-career';
+  var ldC = function () { try { var c = JSON.parse(localStorage.getItem(CKEY)); return c && c.order && c.idx < c.order.length ? c : null; } catch (e) { return null; } };
+  var svC = function (c) { try { if (c) localStorage.setItem(CKEY, JSON.stringify(c)); else localStorage.removeItem(CKEY); } catch (e) { /* - */ } };
+  function endOf(S, R, bonusOk) {
+    if (S.p >= 70 || S.w <= 20 || S.n >= 85) return 'F';
+    if (S.w >= 75 && S.k >= 62) return 'L';
+    var sp = [['X1', R.ola >= 65 ? R.ola : 0], ['X2', R.wrona >= 60 ? R.wrona : 0], ['X3', R.marta >= 60 ? R.marta : 0], ['X4', R.szef >= 75 ? R.szef : 0]].filter(function (x) { return x[1]; }).sort(function (a, b) { return b[1] - a[1]; });
+    if (sp.length && bonusOk !== false) return sp[0][0];
+    if (S.w >= 68) return 'R';
+    if (S.k >= 72 && S.w < 60) return 'K';
+    return 'S';
+  }
+  var endText = function (d, key) { var ST0 = window.DramaStory[d.id], W = window.DramaWatki; if (ST0.E[key]) return ST0.E[key]; var s = W.SPECIAL[key]; return [s[0], s[1].replace(/\{t\}/g, d.t)]; };
+  var ALLK = ['L', 'R', 'K', 'S', 'F', 'X1', 'X2', 'X3', 'X4'];
 
-  function play(box, H, id, back, nick) {
-    var d = LIST.filter(function (x) { return x.id === id; })[0], ST0 = window.DramaStory && window.DramaStory[id]; if (!d || !ST0) return;
-    nick = (nick || '').trim() || 'Reporter';
+  /* ---- ekran główny (hub) ---- */
+  function hub(box, H, back) {
+    var d = H.load(), fe = d.dramaEnd || {}, tot = 0; Object.keys(fe).forEach(function (x) { tot += fe[x].length; });
+    var rk = rankOf(tot), car = ldC(), cdone = d.dramaCareerDone || 0;
+    box.innerHTML = '<div class="dv"><div class="dv-hero"><div><small>Twoja kariera</small><b>' + rk.name + '</b><span>' + tot + ' z ' + (LIST.length * ALLK.length) + ' zakończeń' + (rk.next ? ' · następny stopień od ' + rk.next : ' · najwyższy stopień') + '</span></div><i class="dv-bar"><u style="width:' + Math.min(100, Math.round(tot / (LIST.length * ALLK.length) * 100)) + '%"></u></i></div>' +
+      '<label class="dr-nick dv-nick"><span>Twoja ksywka reportera</span><input type="text" id="dr-nick" maxlength="16" placeholder="np. Mokry Mati" value="' + esc(d.dramaNick || '') + '" autocomplete="off"></label>' +
+      (car ? '<button type="button" class="dv-cont" data-h="cont"><b>Kontynuuj karierę</b><span>Sprawa ' + (car.idx + 1) + ' z ' + car.order.length + ' · ' + esc(LIST.filter(function (x) { return x.id === car.order[car.idx]; })[0].t) + '</span></button>' : '') +
+      '<h2>Tryb kariery</h2><p class="dr-lead">Kilka spraw pod rząd. Zostają Ci relacje z ekipą (Szef, Ola, Wrona, Marta), a pozwy i nerwy tylko częściowo się resetują. Na końcu dostajesz zakończenie kariery.</p>' +
+      '<div class="dv-modes"><button type="button" class="dv-mode" data-h="car3"><b>Krótki sezon</b><span>3 sprawy · ok. 15 minut</span></button><button type="button" class="dv-mode" data-h="car6"><b>Długi sezon</b><span>6 spraw · ok. 30 minut</span></button><button type="button" class="dv-mode" data-h="car9"><b>Pełny sezon</b><span>wszystkie 9 · ok. godzina' + (cdone ? ' · ukończone ' + cdone + '×' : '') + '</span></button></div>' +
+      '<h2>Pojedyncza sprawa</h2><p class="dr-lead">Wybierz dramę, zagraj jedną sprawę od początku do końca i poluj na wszystkie 9 zakończeń.</p><div class="dr-fcs">' + LIST.map(function (x) {
+        var n = (fe[x.id] || []).length; return '<button type="button" class="dr-fc" data-fact="' + x.id + '" style="--a:' + x.c[0] + ';--b:' + x.c[1] + '"><span class="dr-fc-t"><small>' + x.tag + ' · ' + x.y + '</small><b>' + esc(x.t) + '</b></span><em>' + (n ? n + '/9' : 'Zagraj') + '</em></button>';
+      }).join('') + '</div></div>';
+    var nick = function () { var v = (box.querySelector('#dr-nick') || {}).value || ''; v = v.trim().slice(0, 16); var dd = H.load(); dd.dramaNick = v; H.save(dd); return v; };
+    box.onclick = function (e) {
+      var b = e.target.closest('[data-fact],[data-h]'); if (!b) return; window.scrollTo(0, 0);
+      if (b.dataset.fact) { var nk = nick(); box.onclick = null; return chapter(box, H, b.dataset.fact, { nick: nk, back: back }); }
+      var h = b.dataset.h, nk2 = nick();
+      if (h === 'cont') { var c = ldC(); if (c) { box.onclick = null; return runCareer(box, H, c, back); } return; }
+      var n = +h.slice(3), ids = shuffle(LIST.map(function (x) { return x.id; }), Math.random).slice(0, n);
+      var c2 = { n: n, order: ids, idx: 0, rel: { szef: 50, ola: 30, wrona: 25, marta: 20 }, last: null, scores: [], fails: 0, nick: nk2 || 'Reporter', tot: 0 }; svC(c2); box.onclick = null; runCareer(box, H, c2, back);
+    };
+  }
+
+  /* ---- kariera: kolejne rozdziały ---- */
+  function runCareer(box, H, c, back) {
+    var id = c.order[c.idx];
+    chapter(box, H, id, { nick: c.nick, back: back, career: c, onEnd: function (res) {
+      c.scores.push(res.score); c.rel = res.R; c.last = res.S; c.tot += 1; if (res.key === 'F') c.fails++; c.idx++;
+      if (c.idx >= c.order.length) { svC(null); return careerEnd(box, H, c, back); }
+      svC(c); runCareer(box, H, c, back);
+    } });
+  }
+  function careerEnd(box, H, c, back) {
+    var avg = Math.round(c.scores.reduce(function (a, b) { return a + b; }, 0) / c.scores.length), R = c.rel, E;
+    if (c.fails >= Math.ceil(c.n / 2)) E = ['Wywalony z Plotek24 i ze Śliskiej', 'Zbyt wiele wpadek. Zbyszek wyłącza światło w gabinecie i mówi „idź na urlop. Długi”.'];
+    else if (R.ola >= 70 && avg >= 50) E = ['Para roku redakcji', 'Ty i Ola jesteście tematem numer jeden na korytarzu. Wspólne zdjęcia z konferencji lądują w gablocie. Szef kręci głową z uśmiechem.'];
+    else if (R.szef >= 75 && avg >= 60) E = ['Redaktor naczelny', 'Zbyszek odchodzi na emeryturę i przekazuje Ci klucz do gabinetu z widokiem na parking. Pierwszą decyzją jest naprawa ekspresu do kawy.'];
+    else if (R.wrona >= 60 && avg >= 55) E = ['Człowiek z siatką informatorów', 'Wrona zostaje Twoim stałym informatorem. Dostajesz wyłączności i zero pytań. To brzmi za dobrze, by być prawdą.'];
+    else if (avg >= 75) E = ['Legenda Śliskiej', 'Twoje teksty są wzorem dla młodych reporterów. Prawnik wiesza je w ramce, Szef dopisuje Cię do tytułu portalu.'];
+    else if (R.marta >= 65) E = ['Wróg Plotek24', 'Marta nie odpuszcza. Wasza rywalizacja jest legendą branży, a oboje zarabiacie na tej wojnie.'];
+    else if (avg >= 55) E = ['Solidny reporter', 'Nikt Cię nie zwalnia i nikt na Ciebie nie czeka z kwiatami. Ale pensję dostajesz regularnie.'];
+    else E = ['Wolny strzelec', 'Po sezonie Zbyszek proponuje umowę zlecenie. „Na razie”, dodaje. Znasz ten ton.'];
+    var dd = H.load(); dd.dramaCareerDone = (dd.dramaCareerDone || 0) + 1; H.save(dd); H.xp('drama'); H.toast('Sezon ukończony: ' + E[0]);
+    box.innerHTML = '<div class="dv"><div class="dv-end"><small>Koniec sezonu · ' + c.n + ' spraw</small><h2>' + esc(E[0]) + '</h2><p>' + esc(E[1]) + '</p><div class="dv-sc"><span><b>' + avg + '</b>średni wynik</span><span><b>' + c.fails + '</b>wpadek</span><span><b>' + R.szef + '</b>zaufanie Szefa</span><span><b>' + R.ola + '</b>Ola</span><span><b>' + R.wrona + '</b>Wrona</span><span><b>' + R.marta + '</b>rywalizacja z Martą</span></div><div class="gm-acts"><button type="button" class="btn btn-primary" data-h="again">Nowy sezon</button><button type="button" class="btn" data-h="share">Udostępnij</button></div></div></div>';
+    box.onclick = function (e) { var b = e.target.closest('[data-h]'); if (!b) return; if (b.dataset.h === 'again') { box.onclick = null; back(); } else H.share('Śliska Drama Simulator: ukończyłem sezon (' + c.n + ' spraw) i zostałem: „' + E[0] + '”, średni wynik ' + avg + ' 💦\n' + H.LINK); };
+  }
+
+  /* ---- jeden rozdział (sprawa) ---- */
+  function chapter(box, H, id, ctx) {
+    var d = LIST.filter(function (x) { return x.id === id; })[0], ST0 = window.DramaStory && window.DramaStory[id], W = window.DramaWatki; if (!d || !ST0 || !W) return;
+    var nick = (ctx.nick || '').trim() || 'Reporter', car = ctx.career, n = d.q.length;
     var AVf = (window.DramaSim && window.DramaSim.AV) || function () { return 'F'; };
-    var $ = function (s) { return box.querySelector(s); }, i = 0, S = { k: 50, w: 50, p: 10, n: 20 }, alive = true, views = 0, coms = 0, busy = false;
+    var P = car && car.last ? car.last : null;
+    var S = P ? { k: cl((P.k + 50) / 2), w: cl((P.w + 50) / 2), p: cl(P.p / 2 + 5), n: cl(P.n / 2 + 10) } : { k: 50, w: 50, p: 10, n: 20 };
+    var R = car ? { szef: car.rel.szef, ola: car.rel.ola, wrona: car.rel.wrona, marta: car.rel.marta } : { szef: 50, ola: 30, wrona: 25, marta: 20 };
+    var $ = function (s) { return box.querySelector(s); }, i = 0, alive = true, views = 0, coms = 0, used = {}, resolver = null;
     var T = function (s) { return String(s).replace(/\{n\}/g, nick); };
-    function bars() { return ST.map(function (s) { var v = S[s[0]], bad = s[0] === 'p' || s[0] === 'n'; return '<span class="df-st"><small>' + s[1] + '</small><i><u style="width:' + v + '%" class="' + (bad ? 'is-bad' : '') + '"></u></i></span>'; }).join(''); }
-    function pips() { var h = '<i class="dr-pips" aria-hidden="true">'; for (var k = 0; k < d.q.length; k++) h += '<u class="' + (k < i ? 'is-done' : k === i ? 'is-now' : '') + '"></u>'; return h + '</i>'; }
+    function bars() { return ST.map(function (s) { var v = S[s[0]], bad = s[0] === 'p' || s[0] === 'n'; return '<span class="df-st"><small>' + s[2] + ' ' + s[1] + '</small><i><u style="width:' + v + '%" class="' + (bad ? 'is-bad' : '') + '"></u></i></span>'; }).join(''); }
+    function rels() { return RELS.map(function (r) { return '<span class="df-rl" title="' + r[2] + '"><b>' + r[1] + '</b><i><u style="width:' + R[r[0]] + '%"></u></i></span>'; }).join(''); }
+    function pips() { var h = '<i class="dr-pips" aria-hidden="true">'; for (var k = 0; k < n; k++) h += '<u class="' + (k < i ? 'is-done' : k === i ? 'is-now' : '') + '"></u>'; return h + '</i>'; }
     function bubble(cls, html) { var f = $('#df-feed'); if (!f) return; f.insertAdjacentHTML('beforeend', '<div class="dr-b ' + cls + '">' + html + '</div>'); f.scrollTop = f.scrollHeight; }
-    function av(w) { var x = WHO[w]; return '<span class="dr-av">' + AVf(x[0]) + '</span>'; }
-    /* wiadomość od postaci z „pisze…” */
+    function av(w) { var x = W.CAST[w] || W.CAST.sl; return '<span class="dr-av">' + AVf(x[0]) + '</span>'; }
     function say(w, text, cls) {
       var f = $('#df-feed'); if (!f || !alive) return Promise.resolve();
       f.insertAdjacentHTML('beforeend', '<div class="dr-b is-in" id="df-typ">' + av(w) + '<div class="dr-tp"><i></i><i></i><i></i></div></div>'); f.scrollTop = f.scrollHeight;
-      return wait(550 + Math.min(700, text.length * 8)).then(function () { var t = $('#df-typ'); if (t) t.remove(); if (!alive) return; bubble('is-in ' + (cls || ''), av(w) + '<div><small>' + esc(WHO[w][1]) + '</small><p>' + esc(T(text)) + '</p></div>'); return wait(250); });
+      return wait(500 + Math.min(700, text.length * 8)).then(function () { var t = $('#df-typ'); if (t) t.remove(); if (!alive) return; bubble('is-in ' + (cls || ''), av(w) + '<div><small>' + esc((W.CAST[w] || W.CAST.sl)[1]) + '</small><p>' + esc(T(text)) + '</p></div>'); return wait(250); });
     }
     function refresh() {
-      var st = $('#df-stats'); if (!st) return; st.innerHTML = bars();
-      $('#df-step').innerHTML = pips() + '<span class="dr-dtx">Dzień ' + Math.min(i + 1, d.q.length) + '/' + d.q.length + '</span>';
-      var m = $('#df-meta'); if (m) m.innerHTML = '<span>👁 ' + views.toLocaleString('pl-PL') + ' wyświetleń</span><span>💬 ' + coms.toLocaleString('pl-PL') + ' komentarzy</span><span class="' + (S.p >= 45 ? 'is-hot' : '') + '">⚖️ ryzyko pozwu ' + S.p + '%</span>';
+      var st = $('#df-stats'); if (!st) return; st.innerHTML = bars(); $('#df-rel').innerHTML = rels();
+      $('#df-step').innerHTML = pips() + '<span class="dr-dtx">Dzień ' + Math.min(i + 1, n) + '/' + n + (car ? ' · ' + (car.idx + 1) + '/' + car.order.length : '') + '</span>';
+      var m = $('#df-meta'); if (m) m.innerHTML = '<span>👁 ' + views.toLocaleString('pl-PL') + '</span><span>💬 ' + coms.toLocaleString('pl-PL') + '</span><span class="' + (S.p >= 45 ? 'is-hot' : '') + '">⚖️ ryzyko pozwu ' + S.p + '%</span>';
     }
-    box.innerHTML = '<div class="dr-phone nc-phone df"><div class="dr-top"><span class="dr-me"><span class="dr-me-k">' + AVf('sliska') + '</span><span><b>' + esc(d.t) + '</b><small>Prawdziwa drama · ' + esc(d.y) + ' · ' + esc(nick) + '</small></span></span><span class="dr-day" id="df-step"></span></div>' +
-      '<div class="df-stats" id="df-stats"></div><div class="df-meta" id="df-meta"></div>' +
-      '<div class="df-note">Jesteś reporterem Śliskiej. Wydarzenia i źródła są prawdziwe, a Twoje wybory, ekipa i reakcje internautów to gra. Prawdziwym osobom nie przypisujemy niczego poza udokumentowanymi faktami.</div>' +
+    function fx(e) { Object.keys(e).forEach(function (m) { if (m in S) S[m] = cl(S[m] + e[m]); else if (m in R) R[m] = cl(R[m] + e[m]); }); }
+    function choose(labels) {
+      var order = shuffle(labels.map(function (_, k) { return k; }), Math.random);
+      $('#df-ch').innerHTML = order.map(function (k) { return '<button type="button" class="dr-opt" data-fo="' + k + '"><span>' + esc(T(labels[k])) + '</span></button>'; }).join('');
+      return new Promise(function (r) { resolver = r; });
+    }
+    var fail = function () { return endOf(S, R) === 'F'; };
+    box.innerHTML = '<div class="dr-phone nc-phone df"><div class="dr-top"><span class="dr-me"><span class="dr-me-k">' + AVf('sliska') + '</span><span><b>' + esc(d.t) + '</b><small>' + esc(d.tag) + ' · ' + esc(d.y) + ' · ' + esc(nick) + '</small></span></span><span class="dr-day" id="df-step"></span></div>' +
+      '<div class="df-stats" id="df-stats"></div><div class="df-rels" id="df-rel"></div><div class="df-meta" id="df-meta"></div>' +
+      '<div class="df-note">Wydarzenia i źródła z prasy są prawdziwe. Redakcja, wątki i Twoje wybory to gra. Prawdziwym osobom nie przypisujemy niczego poza udokumentowanymi faktami.</div>' +
       '<div class="dr-feed" id="df-feed"></div><div class="dr-ch" id="df-ch"></div></div><div class="dr-bar"><span>' + esc(d.t) + '</span><button type="button" class="btn btn-sm" data-fa="back">Wróć do listy</button></div>';
     refresh();
-    function start() {
-      bubble('is-day', '<span>' + esc(d.y) + '</span>');
-      bubble('is-in', av('sl') + '<div><small>Tło</small><p>' + esc(d.intro) + '</p></div>');
-      return say('kuba', 'Szefie, {n} dostał temat na biurko. Wszyscy czekają, aż coś opublikuje. 👀').then(ask);
-    }
-    function ask() {
-      if (!alive) return; refresh();
-      if (i >= d.q.length) return end();
-      var q = d.q[i], s = ST0.s[i], order = shuffle([0, 1, 2], Math.random);
-      bubble('is-day', '<span>Dzień ' + (i + 1) + '</span>');
-      bubble('is-in', av('sl') + '<div><small>Fakt</small><p>' + esc(q[0]) + '</p></div>');
-      return say('szef', s[0]).then(function () {
-        if (!alive) return; $('#df-ch').innerHTML = order.map(function (k) { return '<button type="button" class="dr-opt" data-fo="' + k + '"><span>' + esc(s[k + 1][0]) + '</span></button>'; }).join(''); busy = false;
-      });
-    }
-    function count(from, to, key) { var m = $('#df-meta'); refresh(); }
-    function answer(k) {
-      if (busy) return; busy = true;
-      var q = d.q[i], s = ST0.s[i], fx = FX[k];
-      $('#df-ch').innerHTML = '';
-      Object.keys(fx).forEach(function (m) { S[m] = cl(S[m] + fx[m]); });
-      var dv = Math.round((2000 + Math.random() * 3000) * (k === 0 ? 3.2 : k === 1 ? 1.6 : 0.8)), dc = Math.round(dv / (20 + Math.random() * 15));
-      views += dv; coms += dc;
-      bubble('is-me', '<p>' + esc(s[k + 1][0]) + '</p>');
-      var chain = say('sl', s[k + 1][1], 'is-re');
-      chain = chain.then(function () { bubble('is-cm', '<p><b>' + rnd(USERS) + '</b> ' + esc(T(rnd(NET[k]))) + '</p><p><b>' + rnd(USERS) + '</b> ' + esc(T(rnd(NET[k]))) + '</p>'); refresh(); return wait(500); });
-      chain = chain.then(function () { return say('szef', rnd(BOSS[k])); });
-      if (k !== 1 || Math.random() < .6) chain = chain.then(function () { return say('pr', rnd(LAW[k])); });
-      chain = chain.then(function () { bubble('is-in df-ok', av('sl') + '<div><small>Tak było naprawdę</small><p>' + esc(q[4]) + '</p><span class="df-src">Źródło: ' + esc(q[5]) + '</span></div>'); return wait(700); });
-      i++;
-      chain = chain.then(function () {
-        if (!alive) return;
-        if (endOf(S) === 'F' || i >= d.q.length || Math.random() > .6) return;
-        var ev = rnd(EVS); Object.keys(ev[2]).forEach(function (m) { S[m] = cl(S[m] + ev[2][m]); });
-        if (ev[2].k > 8) { views += 9000; coms += 260; }
-        refresh();
-        return say(ev[0], ev[1], 'is-ev').then(function () { bubble('is-re', '<p>' + Object.keys(ev[2]).map(function (m) { var l = { k: 'Klikalność', w: 'Wiarygodność', p: 'Pozwy', n: 'Nerwy' }[m]; return (ev[2][m] > 0 ? '+' : '') + ev[2][m] + ' ' + l; }).join(' · ') + '</p>'); return wait(500); });
-      });
-      chain.then(function () { if (!alive) return; return wait(300).then(ask); });
+    async function run() {
+      bubble('is-day', '<span>' + esc(d.y) + '</span>'); bubble('is-in', av('sl') + '<div><small>Tło</small><p>' + esc(d.intro) + '</p></div>');
+      await say('kuba', car && car.idx ? '{n}, kolejna sprawa na biurku. Zbyszek już chodzi po redakcji. 👀' : 'Szefie, {n} dostał temat na biurko. Wszyscy czekają, aż coś opublikuje. 👀');
+      for (i = 0; i < n && alive; i++) {
+        var s0 = { k: S.k, w: S.w, p: S.p, n: S.n }, q = d.q[i], s = ST0.s[i];
+        refresh(); bubble('is-day dv-dayb', '<span>DZIEŃ ' + (i + 1) + '</span>');
+        bubble('is-in', av('sl') + '<div><small>Fakt</small><p>' + esc(q[0]) + '</p></div>');
+        await say('szef', s[0]); if (!alive) return;
+        var k = await choose([s[1][0], s[2][0], s[3][0]]); if (!alive) return; $('#df-ch').innerHTML = '';
+        fx(FX[k]); var dv = Math.round((2000 + Math.random() * 3000) * (k === 0 ? 3.2 : k === 1 ? 1.6 : 0.8)); views += dv; coms += Math.round(dv / (20 + Math.random() * 15));
+        bubble('is-me', '<p>' + esc(s[k + 1][0]) + '</p>'); await say('sl', s[k + 1][1], 'is-re'); if (!alive) return;
+        bubble('is-cm', '<p><b>' + rnd(USERS) + '</b> ' + esc(T(rnd(NET[k]))) + '</p><p><b>' + rnd(USERS) + '</b> ' + esc(T(rnd(NET[k]))) + '</p>'); refresh(); await wait(450);
+        await say('szef', rnd(BOSS[k])); if (k !== 1 || Math.random() < .6) await say('pr', rnd(LAW[k]));
+        bubble('is-in df-ok', av('sl') + '<div><small>Tak było naprawdę</small><p>' + esc(q[4]) + '</p><span class="df-src">Źródło: ' + esc(q[5]) + '</span></div>'); await wait(650);
+        if (fail()) break;
+        /* wątek poboczny z redakcji */
+        var pool = W.DAYS[Math.min(i, W.DAYS.length - 1)], sc = rnd(pool); if (sc) {
+          bubble('is-day', '<span>Redakcja</span>'); await say(sc[0], sc[1]); if (!alive) return;
+          var j = await choose([sc[2][0][0], sc[2][1][0], sc[2][2][0]]); if (!alive) return; $('#df-ch').innerHTML = '';
+          fx(sc[2][j][1]); bubble('is-me', '<p>' + esc(sc[2][j][0]) + '</p>'); await say(sc[0], sc[2][j][2], 'is-re'); refresh(); await wait(300);
+        }
+        if (fail()) break;
+        if (i < n - 1 && Math.random() < .55) {
+          var ev = rnd(EVS); fx(ev[2]); if (ev[2].k > 8) { views += 9000; coms += 260; } refresh();
+          await say(ev[0], ev[1], 'is-ev');
+          bubble('is-re', '<p>' + Object.keys(ev[2]).map(function (m) { var l = { k: 'Klikalność', w: 'Wiarygodność', p: 'Pozwy', n: 'Nerwy', szef: 'Szef', ola: 'Ola', wrona: 'Wrona', marta: 'Marta' }[m]; return (ev[2][m] > 0 ? '+' : '') + ev[2][m] + ' ' + l; }).join(' · ') + '</p>'); await wait(450);
+        }
+        if (fail()) break;
+        var dl = ST.map(function (x) { var v = S[x[0]] - s0[x[0]]; return v ? '<i class="' + ((x[0] === 'p' || x[0] === 'n' ? v > 0 : v < 0) ? 'is-bad' : 'is-good') + '">' + (v > 0 ? '+' : '') + v + ' ' + x[1] + '</i>' : ''; }).join('');
+        bubble('is-eve', '<b>Wieczór, dzień ' + (i + 1) + '</b><div class="dr-dl">' + dl + '</div>'); await wait(500);
+      }
+      if (alive) end();
     }
     function end() {
-      var key = endOf(S), E = ST0.E[key], dd = H.load(); dd.dramaEnd = dd.dramaEnd || {}; var got = dd.dramaEnd[d.id] = dd.dramaEnd[d.id] || [];
+      i = n; refresh();
+      var key = endOf(S, R), E = endText(d, key), dd = H.load(); dd.dramaEnd = dd.dramaEnd || {}; var got = dd.dramaEnd[d.id] = dd.dramaEnd[d.id] || [];
       var isNew = got.indexOf(key) < 0, first = !got.length; if (isNew) got.push(key);
       var total = 0; Object.keys(dd.dramaEnd).forEach(function (x) { total += dd.dramaEnd[x].length; }); dd.factDone = dd.factDone || {}; dd.factDone[d.id] = got.length; H.save(dd);
-      if (first) H.xp('drama');
-      H.submit('drama', Math.min(30, total), true); H.played('drama');
+      if (first) H.xp('drama'); H.submit('drama', Math.min(30, total), true); H.played('drama');
       if (isNew) H.toast('Nowe zakończenie: ' + E[0]);
-      var score = Math.round((S.k + S.w + (100 - S.p) + (100 - S.n)) / 4), fail = key === 'F';
-      refresh(); $('#df-step').innerHTML = '<span class="dr-dtx">Koniec</span>'; $('#df-ch').innerHTML = '';
-      var lead = fail ? 'say' : 'say';
-      say('szef', fail ? '{n}… zbierz swoje rzeczy z biurka. Rozmowa w moim gabinecie. Teraz.' : key === 'L' ? '{n}, dziś stawiam szampana. Całe miasto cytuje Twój tekst. 🍾' : key === 'K' ? '{n}, kliknęło się świetnie. Prawnik chce z Tobą pogadać. W trzy oczy.' : key === 'R' ? '{n}, dobra robota. Bezpiecznie i uczciwie. Może następnym razem coś odważniejszego?' : '{n}, przeszło. Bez fajerwerków, ale przeszło.').then(function () {
+      var score = Math.round((S.k + S.w + (100 - S.p) + (100 - S.n)) / 4);
+      $('#df-step').innerHTML = '<span class="dr-dtx">Koniec</span>'; $('#df-ch').innerHTML = '';
+      var line = key === 'F' ? '{n}… zbierz swoje rzeczy z biurka. Rozmowa w moim gabinecie. Teraz.' : key === 'L' ? '{n}, dziś stawiam szampana. Całe miasto cytuje Twój tekst. 🍾' : key === 'K' ? '{n}, kliknęło się świetnie. Prawnik chce z Tobą pogadać. W cztery oczy.' : key[0] === 'X' ? '{n}, zrobiłeś coś więcej niż wymagałem. Chyba muszę o tym pomyśleć.' : key === 'R' ? '{n}, dobra robota. Bezpiecznie i uczciwie. Może następnym razem coś odważniejszego?' : '{n}, przeszło. Bez fajerwerków, ale przeszło.';
+      say('szef', line).then(function () {
+        var nextBtn = car ? '<button type="button" class="btn btn-primary" data-fa="next">' + (car.idx + 1 >= car.order.length ? 'Podsumuj sezon' : 'Następna sprawa') + '</button>' : '<button type="button" class="btn btn-primary" data-fa="again">Zagraj inaczej</button>';
         bubble('is-end', '<div class="dr-card nc-card"><div class="dr-card-top"><span class="dr-card-av">' + AVf('sliska') + '</span><span><b>' + esc(nick) + '</b><small>' + esc(d.t) + ' · ' + esc(d.y) + '</small></span><i class="dr-lvl">' + score + ' pkt</i></div><h2>' + esc(E[0]) + '</h2><p>' + esc(E[1]) + '</p>' +
-          '<p class="dr-sum">👁 ' + views.toLocaleString('pl-PL') + ' wyświetleń · 💬 ' + coms.toLocaleString('pl-PL') + ' komentarzy<br>Zakończenia tej dramy: <b>' + got.length + '/5</b>' + (isNew ? ' (nowe!)' : '') + '</p>' +
-          '<div class="gm-acts"><button type="button" class="btn btn-primary" data-fa="again">Zagraj inaczej</button><button type="button" class="btn" data-fa="share">Udostępnij</button><button type="button" class="btn" data-fa="back">Inna drama</button></div></div>');
-        box.dataset.shareText = 'Śliska Drama Simulator: jako ' + nick + ' w sprawie „' + d.t + '” wyszedłem z zakończeniem „' + E[0] + '” (' + got.length + '/5), ' + views.toLocaleString('pl-PL') + ' wyświetleń 💦\n' + H.LINK;
+          '<p class="dr-sum">👁 ' + views.toLocaleString('pl-PL') + ' wyświetleń · 💬 ' + coms.toLocaleString('pl-PL') + ' komentarzy<br>Zakończenia tej dramy: <b>' + got.length + '/9</b>' + (isNew ? ' (nowe!)' : '') + '</p>' +
+          '<div class="gm-acts">' + nextBtn + '<button type="button" class="btn" data-fa="share">Udostępnij</button>' + (car ? '' : '<button type="button" class="btn" data-fa="back">Inna drama</button>') + '</div></div>');
+        box.dataset.shareText = 'Śliska Drama Simulator: jako ' + nick + ' w sprawie „' + d.t + '” wyszedłem z zakończeniem „' + E[0] + '” (' + got.length + '/9), ' + views.toLocaleString('pl-PL') + ' wyświetleń 💦\n' + H.LINK;
+        box.__res = { score: score, S: S, R: R, key: key };
       });
     }
     box.onclick = function (e) {
       var b = e.target.closest('[data-fo],[data-fa]'); if (!b) return;
-      if (b.dataset.fo != null) return answer(+b.dataset.fo);
-      var a = b.dataset.fa; if (a === 'back') { alive = false; box.onclick = null; back(); } else if (a === 'again') { alive = false; box.onclick = null; play(box, H, id, back, nick); } else if (a === 'share') H.share(box.dataset.shareText);
+      if (b.dataset.fo != null) { var r = resolver; resolver = null; if (r) r(+b.dataset.fo); return; }
+      var a = b.dataset.fa;
+      if (a === 'back') { alive = false; box.onclick = null; if (car) { box.onclick = null; } ctx.back(); }
+      else if (a === 'again') { alive = false; box.onclick = null; chapter(box, H, id, ctx); }
+      else if (a === 'next') { alive = false; box.onclick = null; ctx.onEnd(box.__res); }
+      else if (a === 'share') H.share(box.dataset.shareText);
       e.stopPropagation();
     };
-    start();
+    run();
   }
-  window.DramaFacts = { LIST: LIST, play: play, cards: cards };
+  window.DramaFacts = { LIST: LIST, hub: hub };
 })();

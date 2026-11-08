@@ -609,14 +609,14 @@
     var run = null, R = Math.random;
     /* ikonka: Knaga w stroju + odznaka na gradiencie (id afery albo zakończenia) */
     function tile(id, kind) { var c = COL[id] || ['#ffc4a8', '#e0407a']; return '<span class="dr-ico is-' + (kind || 'sc') + '" style="--a:' + c[0] + ';--b:' + c[1] + '"><svg class="dr-art" viewBox="0 0 48 48" aria-hidden="true">' + (ART[id] || '') + '</svg></span>'; }
-    H.shell(el, g, '<div class="dr" id="dr"></div>', { side: '<section class="gp-box"><h3>Twoje dramy <small id="dr-ec"></small></h3><div id="dr-ends"></div></section><section class="gp-box"><h3>Jak grać</h3><p class=\"dr-lead\">Jesteś reporterem Śliskiej. Każdy dzień sprawy to dylemat redakcji: wybierasz, co publikujesz, a paski Klikalność, Wiarygodność, Pozwy i Nerwy decydują o jednym z 5 zakończeń. Wydarzenia i źródła są prawdziwe.</p></section>' });
+    H.shell(el, g, '<div class="dr" id="dr"></div>', { side: '<section class="gp-box"><h3>Twoje dramy <small id="dr-ec"></small></h3><div id="dr-ends"></div></section><section class="gp-box"><h3>Jak grać</h3><p class=\"dr-lead\">Jesteś reporterem Śliskiej. Zagraj pojedynczą sprawę albo cały sezon. Każdy dzień to dylemat, wątek z redakcją i losowe wydarzenia. Paski i relacje z ekipą decydują o jednym z 9 zakończeń każdej dramy.</p></section>' });
     var d0 = H.load();
     (function () { var f = $('#dr-fold'); if (!f) return; try { f.open = localStorage.getItem('sn-dr-fold') === '1'; } catch (e) { /* - */ } f.addEventListener('toggle', function () { try { localStorage.setItem('sn-dr-fold', f.open ? '1' : '0'); } catch (e) { /* - */ } }); })();
     function data() { var d = H.load(); d.endings = d.endings || []; d.dramaAch = d.dramaAch || []; d.dramaDone = d.dramaDone || []; d.dramaNick = d.dramaNick || ''; return d; }
     function endsBox() {
       var d = data(), fe = d.dramaEnd || {}, L = window.DramaFacts ? window.DramaFacts.LIST : [], tot = 0;
-      $('#dr-ends').innerHTML = L.map(function (x) { var n = (fe[x.id] || []).length; tot += n; return '<div class="dr-end' + (n ? ' is-on' : '') + '" style="display:flex;justify-content:space-between;gap:8px;padding:7px 0;font-size:.85rem"><span>' + esc(x.t) + '</span><b>' + n + '/5</b></div>'; }).join('');
-      $('#dr-ec').textContent = tot + '/' + (L.length * 5);
+      $('#dr-ends').innerHTML = L.map(function (x) { var n = (fe[x.id] || []).length; tot += n; return '<div class="dr-end' + (n ? ' is-on' : '') + '" style="display:flex;justify-content:space-between;gap:8px;padding:7px 0;font-size:.85rem"><span>' + esc(x.t) + '</span><b>' + n + '/9</b></div>'; }).join('');
+      $('#dr-ec').textContent = tot + '/' + (L.length * 9);
     }
     function saveRun() { try { if (run && !run.done) localStorage.setItem(RUN_KEY, JSON.stringify(run)); else localStorage.removeItem(RUN_KEY); } catch (e) { /* - */ } }
     function loadRun() { try { var r = JSON.parse(localStorage.getItem(RUN_KEY)); return r && r.sc && !r.done ? r : null; } catch (e) { return null; } }
@@ -628,10 +628,11 @@
     /* ----- ekran wyboru: postać + afera ----- */
     function pick() {
       try { localStorage.removeItem(RUN_KEY); } catch (er) { /* - */ }
-      var d = data();
-      $('#dr').innerHTML = '<div class="dr-pick"><h2>Prawdziwe dramy</h2><p class="dr-lead">Najgłośniejsze polskie afery, wyłącznie fakty z prasy i sądów. Wejdź do redakcji jako reporter, podejmuj decyzje i zbieraj zakończenia. Po każdym wyborze dostajesz prawdziwy fakt ze źródłem.</p><label class="dr-nick" style="display:block;margin:0 0 12px"><span>Twoja ksywka reportera</span><input type="text" id="dr-nick" maxlength="16" placeholder="np. Mokry Mati" value="' + esc(d.dramaNick || '') + '" autocomplete="off"></label><div class="dr-fcs">' + (window.DramaFacts ? window.DramaFacts.cards(d.factDone, d.dramaEnd) : '') + '</div></div>';
+      window.scrollTo(0, 0);
+      if (window.DramaFacts) window.DramaFacts.hub($('#dr'), H, pick);
       endsBox();
     }
+
 
     /* ----- gra ----- */
     function begin(scId) {
@@ -775,7 +776,6 @@
     el.addEventListener('click', function (ev) {
       var b = ev.target.closest('[data-role]'); if (b) { [].forEach.call(el.querySelectorAll('.dr-role'), function (x) { x.classList.toggle('is-on', x === b); x.setAttribute('aria-checked', x === b); }); return; }
       b = ev.target.closest('[data-diff]'); if (b) { [].forEach.call(el.querySelectorAll('.dr-df'), function (x) { x.classList.toggle('is-on', x === b); x.setAttribute('aria-checked', x === b); }); return; }
-      b = ev.target.closest('[data-fact]'); if (b && window.DramaFacts) { window.scrollTo(0, 0); var nk = ($('#dr-nick') || {}).value || ''; var dd0 = data(); dd0.dramaNick = nk.trim().slice(0, 16); H.save(dd0); return window.DramaFacts.play($('#dr'), H, b.dataset.fact, pick, nk); }
       b = ev.target.closest('[data-sc]'); if (b) return begin(b.dataset.sc);
       b = ev.target.closest('[data-crew]'); if (b && !b.disabled) return hire(b.dataset.crew);
       b = ev.target.closest('[data-c]'); if (b) return choose(+b.dataset.c);
