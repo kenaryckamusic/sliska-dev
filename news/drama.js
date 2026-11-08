@@ -609,14 +609,14 @@
     var run = null, R = Math.random;
     /* ikonka: Knaga w stroju + odznaka na gradiencie (id afery albo zakończenia) */
     function tile(id, kind) { var c = COL[id] || ['#ffc4a8', '#e0407a']; return '<span class="dr-ico is-' + (kind || 'sc') + '" style="--a:' + c[0] + ';--b:' + c[1] + '"><svg class="dr-art" viewBox="0 0 48 48" aria-hidden="true">' + (ART[id] || '') + '</svg></span>'; }
-    H.shell(el, g, '<div class="dr" id="dr"></div>', { side: '<section class="gp-box"><h3>Twoje dramy <small id="dr-ec"></small></h3><div id="dr-ends"></div></section><section class="gp-box"><h3>Zasady</h3><p class="dr-lead">Fakty z publikacji prasowych i wyroków sądów, ze źródłem przy każdej odpowiedzi. Gra nie ocenia osób, tylko sprawdza, ile wiesz.</p></section>' });
+    H.shell(el, g, '<div class="dr" id="dr"></div>', { side: '<section class="gp-box"><h3>Twoje dramy <small id="dr-ec"></small></h3><div id="dr-ends"></div></section><section class="gp-box"><h3>Jak grać</h3><p class=\"dr-lead\">Jesteś reporterem Śliskiej. Każdy dzień sprawy to dylemat redakcji: wybierasz, co publikujesz, a paski Klikalność, Wiarygodność, Pozwy i Nerwy decydują o jednym z 5 zakończeń. Wydarzenia i źródła są prawdziwe.</p></section>' });
     var d0 = H.load();
     (function () { var f = $('#dr-fold'); if (!f) return; try { f.open = localStorage.getItem('sn-dr-fold') === '1'; } catch (e) { /* - */ } f.addEventListener('toggle', function () { try { localStorage.setItem('sn-dr-fold', f.open ? '1' : '0'); } catch (e) { /* - */ } }); })();
     function data() { var d = H.load(); d.endings = d.endings || []; d.dramaAch = d.dramaAch || []; d.dramaDone = d.dramaDone || []; d.dramaNick = d.dramaNick || ''; return d; }
     function endsBox() {
-      var d = data(), fd = d.factDone || {}, L = window.DramaFacts ? window.DramaFacts.LIST : [];
-      $('#dr-ec').textContent = Object.keys(fd).length + '/' + L.length;
-      $('#dr-ends').innerHTML = L.map(function (x) { var on = fd[x.id] != null; return '<div class="dr-end' + (on ? ' is-on' : '') + '" style="display:flex;justify-content:space-between;gap:8px;padding:7px 0;font-size:.85rem"><span>' + esc(x.t) + '</span><b>' + (on ? fd[x.id] + '/' + x.q.length : '–') + '</b></div>'; }).join('');
+      var d = data(), fe = d.dramaEnd || {}, L = window.DramaFacts ? window.DramaFacts.LIST : [], tot = 0;
+      $('#dr-ends').innerHTML = L.map(function (x) { var n = (fe[x.id] || []).length; tot += n; return '<div class="dr-end' + (n ? ' is-on' : '') + '" style="display:flex;justify-content:space-between;gap:8px;padding:7px 0;font-size:.85rem"><span>' + esc(x.t) + '</span><b>' + n + '/5</b></div>'; }).join('');
+      $('#dr-ec').textContent = tot + '/' + (L.length * 5);
     }
     function saveRun() { try { if (run && !run.done) localStorage.setItem(RUN_KEY, JSON.stringify(run)); else localStorage.removeItem(RUN_KEY); } catch (e) { /* - */ } }
     function loadRun() { try { var r = JSON.parse(localStorage.getItem(RUN_KEY)); return r && r.sc && !r.done ? r : null; } catch (e) { return null; } }
@@ -629,7 +629,7 @@
     function pick() {
       try { localStorage.removeItem(RUN_KEY); } catch (er) { /* - */ }
       var d = data();
-      $('#dr').innerHTML = '<div class="dr-pick"><h2>Prawdziwe dramy</h2><p class="dr-lead">Najgłośniejsze polskie afery, wyłącznie fakty z prasy i sądów. Wybierz sprawę i zgadnij, co wydarzyło się dalej. Każda odpowiedź ma podane źródło.</p><div class="dr-fcs">' + (window.DramaFacts ? window.DramaFacts.cards(d.factDone) : '') + '</div></div>';
+      $('#dr').innerHTML = '<div class="dr-pick"><h2>Prawdziwe dramy</h2><p class="dr-lead">Najgłośniejsze polskie afery, wyłącznie fakty z prasy i sądów. Wybierz sprawę i zgadnij, co wydarzyło się dalej. Każda odpowiedź ma podane źródło.</p><div class="dr-fcs">' + (window.DramaFacts ? window.DramaFacts.cards(d.factDone, d.dramaEnd) : '') + '</div></div>';
     }
 
     /* ----- gra ----- */

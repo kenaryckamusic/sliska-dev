@@ -58,8 +58,9 @@
       how: 'Strzałki, WASD albo przesunięcie palcem zmienia kierunek. Z każdym mikrofonem Knaga robi się dłuższa (Długość widać w cm). Złoty mikrofon +3 (znika po kilku sekundach). Nie uderzaj w ściany, kolumny ani w samą siebie.' },
     { id: 'ukladanka', name: 'Śliska Układanka', knaga: 'detektyw', sub: 'Ułóż zdjęcie z artykułu.', tag: 'Logiczna', unit: 'ruchów', low: true, c: ['#7a3d00', '#ffae2b'],
       how: 'Przesuwaj kafelki na puste pole, aż ułożysz zdjęcie z artykułu. Rekordem jest najmniejsza liczba ruchów. „Podgląd” pokazuje całe zdjęcie.' },
-    { id: 'drama', name: 'Drama Simulator', knaga: 'wsciekla', sub: '9 prawdziwych dram z polskiej sceny. Co było dalej?', tag: 'Fabularna', kind: 'story', c: ['#5c0716', '#ff3b3b'],
-      how: 'Wybierz jedną z 9 prawdziwych dram z polskiej sceny (sądy, radio, telewizja, Eurowizja). W każdej odpowiadasz na pytania „co było dalej?”. Po każdej odpowiedzi dostajesz wyjaśnienie i źródło. Fakty pochodzą z publikacji prasowych i orzeczeń, a błędne odpowiedzi to tylko hipotezy. Pierwsze ukończenie dramy daje XP, a do rankingu liczy się liczba ukończonych dram.', name: 'Redaktor Naczelny', knaga: 'redaktor', sub: 'Tydzień w redakcji: klik czy prawda?', tag: 'Fabularna', kind: 'sim', unit: 'pkt', c: ['#0c3b66', '#2fa8ff'],
+    { id: 'drama', name: 'Drama Simulator', knaga: 'wsciekla', sub: '9 prawdziwych dram, 45 zakończeń. Jesteś reporterem.', tag: 'Fabularna', kind: 'story', c: ['#5c0716', '#ff3b3b'],
+      how: 'Jesteś reporterem Śliskiej i prowadzisz jedną z 9 prawdziwych dram (sądy, radio, telewizja, Eurowizja). Każdy dzień sprawy to dylemat: co publikujesz? Skutki zmieniają paski Klikalność, Wiarygodność, Pozwy i Nerwy, a historia kończy się jednym z 5 zakończeń (45 w całej grze). Po każdym wyborze dostajesz prawdziwy fakt ze źródłem. Pierwsze ukończenie dramy daje XP, a do rankingu liczy się liczba odkrytych zakończeń (max 30).' },
+    { id: 'naczelny', name: 'Redaktor Naczelny', knaga: 'redaktor', sub: 'Tydzień w redakcji: klik czy prawda?', tag: 'Fabularna', kind: 'sim', unit: 'pkt', c: ['#0c3b66', '#2fa8ff'],
       how: 'Przez 5 dni dostajesz 10 tematów i za każdym razem wybierasz: opublikować od razu, sprawdzić albo odpuścić. Cztery paski: Klikalność, Wiarygodność, Pozwy i Nerwy. Zero Klikalności lub Wiarygodności, 100 Pozwów albo 100 Nerwów kończą grę. Na koniec dostajesz wynik (maks. 100) i jedno z 12 zakończeń.' },
     { id: 'slizgawka', name: 'Ślizgawka', knaga: 'surfer', sub: 'Tajna gra. Surfuj i skacz.', tag: 'Sekret', unit: 'm', secret: true, c: ['#b33a1a', '#ffb36b'],
       how: 'Spacja albo stuknięcie – skok (drugi raz w powietrzu = podwójny skok). Przeskakuj pozwy, dissy i fejki, zbieraj krople (+25 m).' }
@@ -75,7 +76,7 @@
   function fmt(g, v) {
     if (!v) return '–';
     if (g === 'slizgle') return (7 - v) + '/6';
-    if (g === 'drama') return v + '/9';
+    if (g === 'drama') return v + ' zakończeń';
     if (g === 'krzyzowka') return v + '×';
     return v + ' ' + (G(g).unit || '');
   }

@@ -86,48 +86,71 @@
   var TITLES = function (ok, n) { return ok === n ? ['Archiwum Śliskiej', 'Znasz to na pamięć. Pudelek by się nie powstydził.'] : ok >= Math.ceil(n * .6) ? ['Czytasz newsy', 'Wiesz sporo. Jeszcze trochę i będziesz redaktorem.'] : ['Nowy w mieście', 'Dopiero zaczynasz. Przeczytaj artykuły i wróć.']; };
   function shuffle(a, r) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(r() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
 
-  /* karty na ekranie wyboru (HTML) */
-  function cards(done) {
+  /* karty na ekranie wyboru (HTML): postęp = odkryte zakończenia danej dramy */
+  var KEYS = ['L', 'R', 'K', 'S', 'F'];
+  function cards(done, ends) {
+    ends = ends || {};
     return LIST.map(function (d) {
-      var s = done && done[d.id];
-      return '<button type="button" class="dr-fc" data-fact="' + d.id + '" style="--a:' + d.c[0] + ';--b:' + d.c[1] + '"><span class="dr-fc-t"><small>' + d.tag + ' · ' + d.y + '</small><b>' + esc(d.t) + '</b></span><em>' + (s != null ? s + '/' + d.q.length : 'Zagraj') + '</em></button>';
+      var n = (ends[d.id] || []).length;
+      return '<button type="button" class="dr-fc" data-fact="' + d.id + '" style="--a:' + d.c[0] + ';--b:' + d.c[1] + '"><span class="dr-fc-t"><small>' + d.tag + ' · ' + d.y + '</small><b>' + esc(d.t) + '</b></span><em>' + (n ? n + '/5 zakończeń' : 'Zagraj') + '</em></button>';
     }).join('');
   }
-
+  var ST = [['k', 'Klikalność'], ['w', 'Wiarygodność'], ['p', 'Pozwy'], ['n', 'Nerwy']];
+  var FX = [{ k: 14, w: -8, p: 12, n: 2 }, { k: 6, w: 4, p: 2, n: 1 }, { k: -2, w: 10, p: -4, n: 3 }];
+  var cl = function (v) { return Math.max(0, Math.min(100, v)); };
+  function endOf(S) {
+    if (S.p >= 70 || S.w <= 20 || S.n >= 85) return 'F';
+    if (S.w >= 75 && S.k >= 62) return 'L';
+    if (S.w >= 68) return 'R';
+    if (S.k >= 72 && S.w < 60) return 'K';
+    return 'S';
+  }
   function play(box, H, id, back) {
-    var d = LIST.filter(function (x) { return x.id === id; })[0]; if (!d) return;
-    var $ = function (s) { return box.querySelector(s); }, i = 0, ok = 0, log = [];
+    var d = LIST.filter(function (x) { return x.id === id; })[0], ST0 = window.DramaStory && window.DramaStory[id]; if (!d || !ST0) return;
+    var $ = function (s) { return box.querySelector(s); }, i = 0, S = { k: 50, w: 50, p: 10, n: 20 };
+    function bars() { return ST.map(function (s) { var v = S[s[0]], bad = s[0] === 'p' || s[0] === 'n'; return '<span class="df-st"><small>' + s[1] + '</small><i><u style="width:' + v + '%" class="' + (bad ? 'is-bad' : '') + '"></u></i></span>'; }).join(''); }
     function pips() { var h = '<i class="dr-pips" aria-hidden="true">'; for (var k = 0; k < d.q.length; k++) h += '<u class="' + (k < i ? 'is-done' : k === i ? 'is-now' : '') + '"></u>'; return h + '</i>'; }
     function bubble(cls, html) { var f = $('#df-feed'); f.insertAdjacentHTML('beforeend', '<div class="dr-b ' + cls + '">' + html + '</div>'); f.scrollTop = f.scrollHeight; }
     var av = '<span class="dr-av nc-av">F</span>';
     box.innerHTML = '<div class="dr-phone nc-phone df"><div class="dr-top"><span class="dr-me"><span class="dr-me-k nc-av">F</span><span><b>' + esc(d.t) + '</b><small>Prawdziwa drama · ' + esc(d.y) + '</small></span></span><span class="dr-day" id="df-step"></span></div>' +
-      '<div class="df-note">Fakty z publikacji prasowych i orzeczeń sądów. Gra polega na zgadywaniu, co było dalej. Błędne odpowiedzi to tylko hipotezy, a nie zarzuty wobec kogokolwiek.</div>' +
+      '<div class="df-stats" id="df-stats"></div>' +
+      '<div class="df-note">Jesteś reporterem Śliskiej. Wydarzenia i źródła są prawdziwe, a Twoje wybory i ich skutki to gra. Prawdziwym osobom nie przypisujemy niczego poza udokumentowanymi faktami.</div>' +
       '<div class="dr-feed" id="df-feed"></div><div class="dr-ch" id="df-ch"></div></div><div class="dr-bar"><span>' + esc(d.t) + '</span><button type="button" class="btn btn-sm" data-fa="back">Wróć do listy</button></div>';
+    function refresh() { $('#df-stats').innerHTML = bars(); $('#df-step').innerHTML = pips() + '<span class="dr-dtx">Dzień ' + Math.min(i + 1, d.q.length) + '/' + d.q.length + '</span>'; }
     bubble('is-day', '<span>' + esc(d.y) + '</span>'); bubble('is-in', av + '<div><small>Tło</small><p>' + esc(d.intro) + '</p></div>');
     function ask() {
+      refresh();
       if (i >= d.q.length) return end();
-      var q = d.q[i], order = shuffle([0, 1, 2], Math.random);
-      $('#df-step').innerHTML = pips() + '<span class="dr-dtx">Pytanie ' + (i + 1) + '/' + d.q.length + '</span>';
+      var q = d.q[i], s = ST0.s[i], order = shuffle([0, 1, 2], Math.random);
+      bubble('is-day', '<span>Dzień ' + (i + 1) + '</span>');
       bubble('is-in', av + '<div><small>Fakt</small><p>' + esc(q[0]) + '</p></div>');
-      bubble('is-in', av + '<div><small>Pytanie</small><p><b>' + esc(q[1]) + '</b></p></div>');
-      $('#df-ch').innerHTML = order.map(function (k) { return '<button type="button" class="dr-opt" data-fo="' + k + '"><span>' + esc(q[2][k]) + '</span></button>'; }).join('');
+      bubble('is-in', av + '<div><small>Redakcja</small><p><b>' + esc(s[0]) + '</b></p></div>');
+      $('#df-ch').innerHTML = order.map(function (k) { return '<button type="button" class="dr-opt" data-fo="' + k + '"><span>' + esc(s[k + 1][0]) + '</span></button>'; }).join('');
     }
     function answer(k) {
-      var q = d.q[i], good = k === q[3]; if (good) ok++;
+      var q = d.q[i], s = ST0.s[i], fx = FX[k];
       $('#df-ch').innerHTML = '';
-      bubble('is-me', '<p>' + esc(q[2][k]) + '</p>');
-      bubble('is-re ' + (good ? 'df-ok' : 'df-no'), '<p><b>' + (good ? 'Zgadza się.' : 'Nie tak.') + '</b> ' + (good ? '' : 'Było tak: ') + esc(q[4]) + '</p><span class="df-src">Źródło: ' + esc(q[5]) + '</span>');
-      i++; setTimeout(ask, 450);
+      Object.keys(fx).forEach(function (m) { S[m] = cl(S[m] + fx[m]); });
+      bubble('is-me', '<p>' + esc(s[k + 1][0]) + '</p>');
+      bubble('is-re', '<p>' + esc(s[k + 1][1]) + '</p>');
+      bubble('is-in df-ok', av + '<div><small>Tak było naprawdę</small><p>' + esc(q[4]) + '</p><span class="df-src">Źródło: ' + esc(q[5]) + '</span></div>');
+      i++; refresh();
+      var fail = endOf(S) === 'F';
+      setTimeout(fail ? end : ask, 500);
     }
     function end() {
-      var t = TITLES(ok, d.q.length), dd = H.load(); dd.factDone = dd.factDone || {};
-      var first = dd.factDone[d.id] == null, bestOk = Math.max(dd.factDone[d.id] || 0, ok); dd.factDone[d.id] = bestOk; H.save(dd);
-      if (first) { H.xp('drama'); H.toast('Prawdziwa drama ukończona'); }
-      H.submit('drama', Math.min(30, Object.keys(dd.factDone).length), true); H.played('drama');
-      $('#df-step').innerHTML = '<span class="dr-dtx">Koniec</span>';
-      bubble('is-end', '<div class="dr-card nc-card"><div class="dr-card-top"><span class="dr-card-av nc-av">F</span><span><b>' + esc(d.t) + '</b><small>Prawdziwa drama · ' + esc(d.y) + '</small></span><i class="dr-lvl">' + ok + '/' + d.q.length + '</i></div><h2>' + esc(t[0]) + '</h2><p>' + esc(t[1]) + '</p>' +
-        '<div class="gm-acts"><button type="button" class="btn btn-primary" data-fa="again">Jeszcze raz</button><button type="button" class="btn" data-fa="share">Udostępnij</button><button type="button" class="btn" data-fa="back">Inna drama</button></div></div>');
-      box.dataset.shareText = 'Prawdziwa drama „' + d.t + '” na Śliskiej: ' + ok + '/' + d.q.length + ' (' + t[0] + '). Wiesz więcej? 💦\n' + H.LINK;
+      var key = endOf(S), E = ST0.E[key], dd = H.load(); dd.dramaEnd = dd.dramaEnd || {}; var got = dd.dramaEnd[d.id] = dd.dramaEnd[d.id] || [];
+      var isNew = got.indexOf(key) < 0, first = !got.length; if (isNew) got.push(key);
+      var total = 0; Object.keys(dd.dramaEnd).forEach(function (x) { total += dd.dramaEnd[x].length; }); dd.factDone = dd.factDone || {}; dd.factDone[d.id] = got.length; H.save(dd);
+      if (first) H.xp('drama');
+      H.submit('drama', Math.min(30, total), true); H.played('drama');
+      if (isNew) H.toast('Nowe zakończenie: ' + E[0]);
+      var score = Math.round((S.k + S.w + (100 - S.p) + (100 - S.n)) / 4);
+      $('#df-step').innerHTML = '<span class="dr-dtx">Koniec</span>'; $('#df-ch').innerHTML = '';
+      bubble('is-end', '<div class="dr-card nc-card"><div class="dr-card-top"><span class="dr-card-av nc-av">F</span><span><b>' + esc(d.t) + '</b><small>Prawdziwa drama · ' + esc(d.y) + '</small></span><i class="dr-lvl">' + score + ' pkt</i></div><h2>' + esc(E[0]) + '</h2><p>' + esc(E[1]) + '</p>' +
+        '<p class="dr-sum">Zakończenia tej dramy: <b>' + got.length + '/5</b>' + (isNew ? ' (nowe!)' : '') + '</p>' +
+        '<div class="gm-acts"><button type="button" class="btn btn-primary" data-fa="again">Zagraj inaczej</button><button type="button" class="btn" data-fa="share">Udostępnij</button><button type="button" class="btn" data-fa="back">Inna drama</button></div></div>');
+      box.dataset.shareText = 'Śliska Drama Simulator: w sprawie „' + d.t + '” wyszedłem z zakończeniem „' + E[0] + '” (' + got.length + '/5) 💦\n' + H.LINK;
     }
     box.onclick = function (e) {
       var b = e.target.closest('[data-fo],[data-fa]'); if (!b) return;

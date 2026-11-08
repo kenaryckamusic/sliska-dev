@@ -840,3 +840,8 @@ kbd { padding: 2px 7px; border: 1px solid var(--border); border-bottom-width: 3p
 .df .df-note{font-size:.74rem;opacity:.75;padding:8px 14px;border-bottom:1px solid rgba(255,255,255,.08);line-height:1.4}
 .df .df-ok{border-left:3px solid #2fd37a}.df .df-no{border-left:3px solid #ff5a6e}
 .df .df-src{display:block;margin-top:6px;font-size:.7rem;opacity:.65}
+.df-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+.df-st small{display:block;font-size:.62rem;opacity:.75;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.df-st i{display:block;height:6px;border-radius:99px;background:rgba(255,255,255,.14);overflow:hidden}
+.df-st u{display:block;height:100%;border-radius:99px;background:#2fa8ff;transition:width .35s}
+.df-st u.is-bad{background:#ff5a6e}
