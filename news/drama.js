@@ -629,7 +629,8 @@
     function pick() {
       try { localStorage.removeItem(RUN_KEY); } catch (er) { /* - */ }
       var d = data();
-      $('#dr').innerHTML = '<div class="dr-pick"><h2>Prawdziwe dramy</h2><p class="dr-lead">Najgłośniejsze polskie afery, wyłącznie fakty z prasy i sądów. Wybierz sprawę i zgadnij, co wydarzyło się dalej. Każda odpowiedź ma podane źródło.</p><div class="dr-fcs">' + (window.DramaFacts ? window.DramaFacts.cards(d.factDone, d.dramaEnd) : '') + '</div></div>';
+      $('#dr').innerHTML = '<div class="dr-pick"><h2>Prawdziwe dramy</h2><p class="dr-lead">Najgłośniejsze polskie afery, wyłącznie fakty z prasy i sądów. Wejdź do redakcji jako reporter, podejmuj decyzje i zbieraj zakończenia. Po każdym wyborze dostajesz prawdziwy fakt ze źródłem.</p><label class="dr-nick" style="display:block;margin:0 0 12px"><span>Twoja ksywka reportera</span><input type="text" id="dr-nick" maxlength="16" placeholder="np. Mokry Mati" value="' + esc(d.dramaNick || '') + '" autocomplete="off"></label><div class="dr-fcs">' + (window.DramaFacts ? window.DramaFacts.cards(d.factDone, d.dramaEnd) : '') + '</div></div>';
+      endsBox();
     }
 
     /* ----- gra ----- */
@@ -774,7 +775,7 @@
     el.addEventListener('click', function (ev) {
       var b = ev.target.closest('[data-role]'); if (b) { [].forEach.call(el.querySelectorAll('.dr-role'), function (x) { x.classList.toggle('is-on', x === b); x.setAttribute('aria-checked', x === b); }); return; }
       b = ev.target.closest('[data-diff]'); if (b) { [].forEach.call(el.querySelectorAll('.dr-df'), function (x) { x.classList.toggle('is-on', x === b); x.setAttribute('aria-checked', x === b); }); return; }
-      b = ev.target.closest('[data-fact]'); if (b && window.DramaFacts) { window.scrollTo(0, 0); return window.DramaFacts.play($('#dr'), H, b.dataset.fact, pick); }
+      b = ev.target.closest('[data-fact]'); if (b && window.DramaFacts) { window.scrollTo(0, 0); var nk = ($('#dr-nick') || {}).value || ''; var dd0 = data(); dd0.dramaNick = nk.trim().slice(0, 16); H.save(dd0); return window.DramaFacts.play($('#dr'), H, b.dataset.fact, pick, nk); }
       b = ev.target.closest('[data-sc]'); if (b) return begin(b.dataset.sc);
       b = ev.target.closest('[data-crew]'); if (b && !b.disabled) return hire(b.dataset.crew);
       b = ev.target.closest('[data-c]'); if (b) return choose(+b.dataset.c);
@@ -785,5 +786,5 @@
     });
     endsBox(); pick();
   }
-  window.DramaSim = { mount: mount, ENDS: ENDS.length };
+  window.DramaSim = { mount: mount, ENDS: ENDS.length, AV: AV };
 })();

@@ -845,3 +845,6 @@ kbd { padding: 2px 7px; border: 1px solid var(--border); border-bottom-width: 3p
 .df-st i{display:block;height:6px;border-radius:99px;background:rgba(255,255,255,.14);overflow:hidden}
 .df-st u{display:block;height:100%;border-radius:99px;background:#2fa8ff;transition:width .35s}
 .df-st u.is-bad{background:#ff5a6e}
+.df-meta{display:flex;flex-wrap:wrap;gap:6px 14px;padding:7px 14px;font-size:.72rem;font-weight:700;border-bottom:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.85)}
+.df-meta .is-hot{color:#ff7a8a}
+.dr-b.is-ev>div{background:#3a2412;border:1px solid rgba(255,170,60,.4)}
