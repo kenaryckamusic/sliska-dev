@@ -489,3 +489,7 @@ kbd { padding: 2px 7px; border: 1px solid var(--border); border-bottom-width: 3p
 .zone-pill { flex: none; width: 8px; height: 8px; margin-left: auto; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
 .zone-pill[hidden] { display: none; }
 #layout:not([data-view="home"]) .side-left .zone-card { display: none; }
+.zone-list .chip-btn { position: relative; }
+@media (min-width: 1100px) {
+  html.rail-on body.rail-c .zone-list .zone-pill { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; margin: 0; box-shadow: 0 0 0 2px var(--surface); }
+}
