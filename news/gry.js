@@ -51,7 +51,7 @@
     { id: 'krzyzowka', name: 'Krzyżówka Tygodnia', knaga: 'szlafrok', sub: 'Odgadnij wyrazy i odkryj hasło tygodnia.', tag: 'Co tydzień', kind: 'weekly', c: ['#1f2470', '#5b63ff'],
       how: 'Wpisz wyrazy według podpowiedzi. Litery w złotej kolumnie czytane z góry na dół tworzą hasło tygodnia. Nowa krzyżówka w każdy poniedziałek.' },
     { id: 'krople', name: 'Łap Krople', knaga: 'kapiel', sub: 'Łap krople do wanny, unikaj pozwów.', tag: 'Zręcznościowa', unit: 'pkt', c: ['#075985', '#38bdf8'],
-      how: 'Przesuwaj wannę z Knagą: myszką, palcem albo strzałkami. Kropla +1, złota kropla +5, serduszko oddaje życie. Pozew zabiera życie. Co 10 złapanych kropli bez pudła – bonus.' },
+      how: 'Przesuwaj wannę z Knagą: myszką, palcem albo strzałkami. Kropla +1, Złoty Mocz +5, serduszko oddaje życie. Pozew zabiera życie. Co 10 złapanych kropli bez pudła – bonus.' },
     { id: 'flappy', name: 'Knaga Flappy', knaga: 'super', sub: 'Leć nad sceną między mikrofonami.', tag: 'Zręcznościowa', unit: 'pkt', c: ['#2b0f55', '#c0164a'],
       how: 'Spacja, kliknięcie albo stuknięcie – Super Knaga macha peleryną i podlatuje. Przelatuj między statywami z mikrofonami. Z każdym punktem robi się ciaśniej.' },
     { id: 'waz', name: 'Śliski Wąż', knaga: 'ikona', sub: 'Zbieraj mikrofony, nie gryź się w ogon.', tag: 'Klasyk', unit: 'pkt', c: ['#3a0a33', '#ff2d77'],
@@ -356,7 +356,7 @@
     var img = knagaImg('kapiel'), P, items, lives, spawn, combo, keys = {}, bub = [], pw, lvl, PW = ['mag', 'shield', 'slow'], PN = { mag: 'Magnes!', shield: 'Parasol!', slow: 'Sauna: wolniej!' }, PB = function (t) { return .2 + Math.min(.1, t * .0015); };
     for (var i = 0; i < 16; i++) bub.push({ x: Math.random(), y: Math.random(), r: 3 + Math.random() * 9, v: .03 + Math.random() * .06 });
     canvasGame(el, G('krople'), {
-      lives: true, intro: 'Przesuwaj wannę z Knagą i łap krople. Złota kropla +5, serduszko oddaje życie, a pozew je zabiera. Łap bonusy: magnes przyciąga krople, parasol łapie pozew, sauna zwalnia czas. Co 30 punktów nowy poziom.',
+      lives: true, intro: 'Przesuwaj wannę z Knagą i łap krople. Złoty Mocz +5, serduszko oddaje życie, a pozew je zabiera. Łap bonusy: magnes przyciąga krople, parasol łapie pozew, sauna zwalnia czas. Co 30 punktów nowy poziom.',
       keys: [['← →', 'ruch'], ['mysz / palec', 'przesuń'], ['Esc', 'pauza']],
       endText: function (s) { return s > 120 ? ['Wanna pełna po brzegi. Mokro jak nigdy!', 'imprezowa'] : s > 50 ? ['Porządnie się zmoczyła.', 'kapiel'] : s > 15 ? ['Ledwo wilgotno. Stać Cię na więcej.', 'sauna'] : ['Sucho jak na Saharze. Knaga się nie zmoczyła.', 'niesmiala']; },
       init: function (a, cv) {
