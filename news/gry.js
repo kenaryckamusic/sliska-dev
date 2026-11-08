@@ -201,7 +201,7 @@
       stats.played++; if (win) { stats.wins++; stats.dist[st.rows.length - 1]++; stats.streak = stats.last === di - 1 ? stats.streak + 1 : 1; stats.max = Math.max(stats.max, stats.streak); } else stats.streak = 0;
       stats.last = win ? di : -9; lsSet('sn-slizgle-stats', stats);
       if (win) { submit('slizgle', 7 - st.rows.length); xp('slizgle'); } else { var d = load(); d.played = (d.played || 0) + 1; save(d); xp('game'); }
-      played('slizgle');
+      played('slizgle'); setTimeout(zone, 0);
     }
     function press(k) {
       if (st.end) return;
@@ -714,13 +714,15 @@
     { h: 'MOKRO', r: [['MERCH', 'Koszulki i bluzy z logo artysty', 0], ['SOLO', 'Występ w pojedynkę', 1], ['SKANDAL', 'Afera, o której mówią wszyscy', 1], ['REFREN', 'Powtarzająca się część piosenki', 0], ['PODCAST', 'Audycja do słuchania w internecie', 1]] },
     { h: 'KNAGA', r: [['KONCERT', 'Występ na żywo', 0], ['NAGRODA', 'Statuetka dla najlepszych', 0], ['PLAYLISTA', 'Lista utworów w aplikacji', 2], ['GALA', 'Uroczysta impreza z wręczeniem nagród', 0], ['SAMPEL', 'Fragment cudzego utworu użyty w nowym', 1]] }
   ];
-  function krzyzowka(el) {
-    var g = G('krzyzowka');
+  function krzyzowka(el, ctx) {
+    var g = G('krzyzowka'), arts = (ctx && ctx.articles) || [];
     shell(el, g, '<div class="kz"><p class="sz-load">Ładowanie krzyżówki…</p></div>', { tag: 'Tydzień #' + weekIndex() });
     cfg().then(function (c) {
       if (!$('.gp[data-game="krzyzowka"]')) return;
-      var set = c && c.krzyz && c.krzyz.week === weekIndex() && c.krzyz.h ? c.krzyz : KRZ[((weekIndex() % KRZ.length) + KRZ.length) % KRZ.length];
-      krzRun(set, !!(c && c.krzyz && c.krzyz.week === weekIndex()));
+      if (!arts.length && typeof state !== 'undefined') arts = state.articles || [];
+      var own = !!(c && c.krzyz && c.krzyz.week === weekIndex() && c.krzyz.h);
+      var set = own ? c.krzyz : (window.KrzGen && KrzGen.generate(arts, weekIndex())) || KRZ[((weekIndex() % KRZ.length) + KRZ.length) % KRZ.length];
+      krzRun(set, own ? 'Ułożona przez redakcję' : set.gen ? 'Z artykułów tygodnia' : 'Krzyżówka z hasłem');
     });
   }
   function krzRun(set, own) {
@@ -780,6 +782,15 @@
     pass();
     if (st.done) win();
   }
+
+  /* sekcja „Śliska strefa” w lewym pasku: podświetlenie bieżącej strony i plakietka „Nowe słowo”, dopóki dzisiejsze Ślizgle nie są rozwiązane */
+  function zone() {
+    var h = location.hash || '#/', st = slizgleState(), pill = document.querySelector('.zone-pill');
+    [].forEach.call(document.querySelectorAll('.zone-list a'), function (a) { var p = a.getAttribute('href'); a.classList.toggle('active', h === p || h.indexOf(p + '/') === 0 || (p === '#/dramy' && /^#\/drama\//.test(h))); });
+    if (pill) pill.hidden = !!(st && st.end);
+  }
+  window.addEventListener('hashchange', function () { setTimeout(zone, 0); });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', zone); else zone();
 
   var RUN = { krzyzowka: krzyzowka, slizgle: slizgle, krople: krople, flappy: flappy, waz: waz, ukladanka: ukladanka, drama: drama, slizgawka: slizgawka };
   window.SliskieGry = {

@@ -483,22 +483,9 @@ kbd { padding: 2px 7px; border: 1px solid var(--border); border-bottom-width: 3p
   .wr-card { flex: 0 0 72%; scroll-snap-align: center; }
 }
 
-/* Śliska strefa – karta w lewej kolumnie */
-.zone-card { display: grid; gap: 2px; margin: 0 0 14px; padding: 8px; border-radius: 20px; background: var(--surface); border: 1px solid var(--border); }
-.zone-head { position: relative; display: flex; align-items: center; gap: 10px; overflow: hidden; margin-bottom: 4px; padding: 14px 14px; border-radius: 14px; color: #fff; text-decoration: none; background: radial-gradient(80% 120% at 100% 0%, rgba(255, 207, 74, .4), transparent 60%), linear-gradient(135deg, #2b0f55, #c0164a); }
-.zone-head span { flex: 1; display: grid; gap: 1px; }
-.zone-head small { color: #ffcf4a; font-size: .66rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
-.zone-head b { font-size: 1.05rem; font-weight: 900; }
-.zone-head em { color: rgba(255, 255, 255, .8); font-size: .74rem; font-style: normal; }
-.zone-head i { font-style: normal; font-size: 1.6rem; }
-.zone-link { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; color: var(--text); text-decoration: none; font-size: .88rem; font-weight: 600; }
-.zone-link:hover, .zone-link.active { background: var(--soft); }
-.zone-link i { font-style: normal; width: 20px; text-align: center; }
+/* Śliska strefa – sekcja w lewym pasku (wygląda jak Kategorie) */
+.zone-list .chip-btn { text-decoration: none; color: inherit; }
+.zone-list .chip-btn span { flex: 1; }
+.zone-pill { flex: none; width: 8px; height: 8px; margin-left: auto; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+.zone-pill[hidden] { display: none; }
 #layout:not([data-view="home"]) .side-left .zone-card { display: none; }
-html.rail-on .rail-scroll .zone-card { margin: 6px 0 10px; padding: 6px; border-radius: 16px; box-shadow: none; }
-html.rail-on .rail-scroll .zone-head { padding: 10px 12px; border-radius: 12px; }
-html.rail-on .rail-scroll .zone-head b { font-size: .95rem; }
-html.rail-on .rail-scroll .zone-head em { display: none; }
-html.rail-on .rail-scroll .zone-head i { font-size: 1.2rem; }
-html.rail-on .rail-scroll .zone-link { padding: 6px 8px; font-size: .84rem; }
-html.rail-on body.rail-c .rail-scroll .zone-card { display: none; }

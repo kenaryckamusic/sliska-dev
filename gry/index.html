@@ -9,7 +9,7 @@
 :root{--accent:#d6001c;--text:#1a1a1a;--muted:#667085;--bg:#f4f5f7;--card:#fff;--line:#e4e7ec;--soft:#eef0f3;--ok:#16a34a;--gold:#ffcf4a}
 @media(prefers-color-scheme:dark){:root:not([data-theme=light]){--text:#ececec;--muted:#a3a3a3;--bg:#121212;--card:#1c1c1c;--line:#2e2e2e;--soft:#262626}}
 :root[data-theme=dark]{--text:#ececec;--muted:#a3a3a3;--bg:#121212;--card:#1c1c1c;--line:#2e2e2e;--soft:#262626}
-*{box-sizing:border-box}button,input,select,textarea{font-family:inherit}html{-webkit-text-size-adjust:100%}
+*{box-sizing:border-box}[hidden]{display:none!important}button,input,select,textarea{font-family:inherit}html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Figtree,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:0 0 calc(24px + env(safe-area-inset-bottom))}
 .w{max-width:1180px;margin:0 auto;padding:22px 28px}
 .tabs{display:flex;gap:6px;margin:0 0 16px;overflow-x:auto;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
@@ -64,7 +64,7 @@ td input[type=number]{width:96px;height:32px}
   <section id="p-stats"><div id="stats"><p class="empty">Ładowanie…</p></div></section>
 
   <section id="p-users" hidden>
-    <div class="box"><h3>Gracze i punkty XP</h3><p class="sub">Poziom wynika z sumy XP. Możesz poprawić XP (np. po oszustwie), punkty w bieżącym sezonie i usunąć rekord w grze (× przy rekordzie).</p>
+    <div class="box"><h3>Gracze i punkty XP</h3><p class="sub">Poziom wynika z sumy XP. Możesz poprawić XP (np. po oszustwie), punkty w bieżącym sezonie, usunąć pojedynczy rekord (× przy rekordzie) albo „Resetuj” – wyzerować wszystkie statystyki danej osoby.</p>
       <div class="bar"><input type="search" id="uq" placeholder="Szukaj po nazwie użytkownika…" style="max-width:360px"><button type="button" class="btn g s" id="ugo">Szukaj</button></div>
       <div class="tw" id="users"><p class="empty">Ładowanie…</p></div></div>
   </section>
@@ -80,12 +80,12 @@ td input[type=number]{width:96px;height:32px}
 
   <section id="p-krzyz" hidden>
     <div class="box"><h3>Krzyżówka Tygodnia</h3>
-      <p class="sub">Wybierz tydzień, wpisz hasło i dla każdej jego litery wyraz z podpowiedzią. Litera hasła musi występować w wyrazie (zaznaczy się sama). „Propozycje z artykułów” podpowiadają wyrazy i pytania na podstawie ostatnich tekstów – kliknij propozycję, żeby ją wstawić i ewentualnie popraw pytanie. Tydzień bez Twojej krzyżówki dostaje wbudowaną.</p>
+      <p class="sub">Co tydzień krzyżówka układa się sama z artykułów opublikowanych przed poniedziałkiem (hasło, wyrazy i pytania). Tutaj widzisz wygenerowaną wersję – możesz zmienić hasło, wyrazy i pytania i zapisać ją jako swoją. Litera hasła musi występować w wyrazie (zaznaczy się sama). „Propozycje” podpowiadają wyrazy z artykułów. „Usuń” przywraca wersję wygenerowaną.</p>
       <div class="bar"><select id="kz-week" style="max-width:320px"></select><span class="grow"></span><span id="kz-state" class="lv"></span></div>
       <div class="bar"><input type="text" id="kz-h" maxlength="12" placeholder="HASŁO (3–12 liter), np. SKANDAL" style="max-width:320px;text-transform:uppercase"><button type="button" class="btn g s" id="kz-auto">Wypełnij propozycjami</button></div>
       <div class="kz-rows" id="kz-rows"></div>
       <div class="prev" id="kz-prev"></div>
-      <div class="stick"><button type="button" class="btn" id="kz-save">Zapisz krzyżówkę</button><button type="button" class="btn d s" id="kz-del">Usuń (wróci wbudowana)</button><span class="msg" id="kz-msg" style="margin:0"></span></div>
+      <div class="stick"><button type="button" class="btn" id="kz-save">Zapisz krzyżówkę</button><button type="button" class="btn g s" id="kz-regen">Wygeneruj od nowa</button><button type="button" class="btn d s" id="kz-del">Usuń moją (wróci wygenerowana)</button><span class="msg" id="kz-msg" style="margin:0"></span></div>
     </div>
   </section>
 
@@ -98,6 +98,7 @@ td input[type=number]{width:96px;height:32px}
 </div>
 <script src="/news/knaga.js"></script>
 <script src="/news/knaga-teksty.js"></script>
+<script src="/news/krzyz-gen.js"></script>
 <script>
 (function () {
   'use strict';
@@ -160,7 +161,7 @@ td input[type=number]{width:96px;height:32px}
       if (!d.users.length) { $('#users').innerHTML = '<p class="empty">Brak graczy.</p>'; return; }
       $('#users').innerHTML = '<table><tr><th>Użytkownik</th><th>Poziom</th><th>XP razem</th><th>Sezon</th><th>Czyt. / gry / kom.</th><th>Rekordy</th><th></th></tr>' + d.users.map(function (u) {
         return '<tr data-u="' + esc(u.pub) + '"><td><b>' + esc(u.name) + '</b></td><td><span class="lv">' + u.lv + ' · ' + LV[u.lv - 1] + '</span></td><td><input type="number" min="0" data-f="total" value="' + u.total + '"></td><td><input type="number" min="0" data-f="pts" value="' + u.pts + '"></td><td>' + u.reads + ' / ' + u.games + ' / ' + u.comments + '</td>' +
-          '<td><div class="recs">' + Object.keys(u.best || {}).map(function (g) { return '<span>' + (GN[g] || g) + ': <b>' + fmtBest(g, u.best[g]) + '</b><button type="button" data-del="' + g + '" title="Usuń rekord">×</button></span>'; }).join('') + '</div></td><td><button type="button" class="btn g s" data-save>Zapisz</button></td></tr>';
+          '<td><div class="recs">' + Object.keys(u.best || {}).map(function (g) { return '<span>' + (GN[g] || g) + ': <b>' + fmtBest(g, u.best[g]) + '</b><button type="button" data-del="' + g + '" title="Usuń rekord">×</button></span>'; }).join('') + '</div></td><td style="white-space:nowrap"><button type="button" class="btn g s" data-save>Zapisz</button> <button type="button" class="btn d s" data-reset title="Wyzeruj wszystkie statystyki tej osoby">Resetuj</button></td></tr>';
       }).join('') + '</table>';
     }).catch(function (e) { $('#users').innerHTML = '<p class="empty">' + esc(e.message) + '</p>'; });
   }
@@ -169,6 +170,8 @@ td input[type=number]{width:96px;height:32px}
     var tr = e.target.closest('tr[data-u]'); if (!tr) return;
     var del = e.target.closest('[data-del]');
     if (del) { if (!confirm('Usunąć rekord w grze ' + GN[del.dataset.del] + '?')) return; api('/gry/admin/record', { u: tr.dataset.u, game: del.dataset.del }).then(function () { del.parentNode.remove(); }).catch(function (x) { alert(x.message); }); return; }
+    var rs = e.target.closest('[data-reset]');
+    if (rs) { var nm = $('td b', tr).textContent; if (!confirm('Zresetować WSZYSTKIE statystyki użytkownika ' + nm + '?\n\nZniknie: XP i poziom, punkty we wszystkich sezonach, rekordy w grach. Tego nie da się cofnąć.')) return; rs.disabled = true; api('/gry/admin/user-reset', { u: tr.dataset.u, confirm: 'RESET' }).then(function () { loadUsers(); }).catch(function (x) { alert(x.message); rs.disabled = false; }); return; }
     var sv = e.target.closest('[data-save]');
     if (sv) { sv.disabled = true; api('/gry/admin/xp', { u: tr.dataset.u, total: +$('[data-f="total"]', tr).value, pts: +$('[data-f="pts"]', tr).value }).then(function (d) { sv.textContent = 'Zapisano ✓'; $('.lv', tr).textContent = d.lv + ' · ' + LV[d.lv - 1]; setTimeout(function () { sv.textContent = 'Zapisz'; sv.disabled = false; }, 1500); }).catch(function (x) { alert(x.message); sv.disabled = false; }); }
   });
@@ -201,8 +204,11 @@ td input[type=number]{width:96px;height:32px}
   }
   function krzLoad() {
     var w = +$('#kz-week').value, s = D.cfg && D.cfg.krzyz && D.cfg.krzyz[w];
-    cur = s ? { h: s.h, r: s.r.map(function (x) { return [x[0], x[1], x[2]]; }) } : { h: '', r: [] };
-    $('#kz-h').value = cur.h; $('#kz-state').textContent = s ? 'Twoja krzyżówka' : 'Wbudowana (brak Twojej)'; krzDraw();
+    var gen = !s && window.KrzGen ? KrzGen.generate(arts, w) : null, src = s || gen;
+    cur = src ? { h: src.h, r: src.r.map(function (x) { return [x[0], x[1], x[2]]; }) } : { h: '', r: [] };
+    $('#kz-h').value = cur.h;
+    $('#kz-state').textContent = s ? 'Twoja krzyżówka' : gen ? 'Wygenerowana z artykułów – możesz ją poprawić i zapisać' : 'Brak artykułów – ułóż własną';
+    $('#kz-del').hidden = !s; krzDraw();
   }
   function krzSync() { var h = $('#kz-h').value.toUpperCase().replace(/[^A-ZĄĆĘŁŃÓŚŹŻ]/g, ''); cur.h = h; var r = []; for (var i = 0; i < h.length; i++) r.push(cur.r[i] || ['', '', -1]); cur.r = r; }
   function krzDraw() {
@@ -220,26 +226,15 @@ td input[type=number]{width:96px;height:32px}
     $('#kz-prev').innerHTML = rows.map(function (x) { var s = ''; for (var c = 0; c < Lm + Rm; c++) { var k = c - (Lm - x.p); s += k < 0 || k >= x.w.length ? '<span class="x"></span>' : '<span' + (k === x.p ? ' class="h"' : '') + '>' + x.w[k] + '</span>'; } return '<div>' + s + '</div>'; }).join('');
   }
   $('#kz-week').onchange = krzLoad;
+  $('#kz-regen').onclick = function () { var w = +$('#kz-week').value, g = window.KrzGen && KrzGen.generate(arts, w + Math.floor(Math.random() * 1000) * 100); if (!g) { say($('#kz-msg'), 'Za mało artykułów do wygenerowania.'); return; } cur = { h: g.h, r: g.r.map(function (x) { return [x[0], x[1], x[2]]; }) }; $('#kz-h').value = cur.h; krzDraw(); say($('#kz-msg'), 'Nowa propozycja – zapisz, jeśli Ci pasuje.', 1); };
   $('#kz-h').addEventListener('input', krzDraw);
   $('#kz-rows').addEventListener('input', function (e) {
     var row = e.target.closest('.kz-r'); if (!row) return; var i = +row.dataset.i;
     if (e.target.dataset.k === 'w') { cur.r[i][0] = e.target.value.toUpperCase().replace(/[^A-ZĄĆĘŁŃÓŚŹŻ]/g, ''); cur.r[i][2] = -1; row.classList.toggle('bad', !!cur.r[i][0] && cur.r[i][0].indexOf(cur.h[i]) < 0); krzPrev(); }
     else cur.r[i][1] = e.target.value;
   });
-  /* propozycje wyrazów i pytań z ostatnich artykułów (wykonawcy, tagi, słowa z tytułów) */
-  var STOP = /^(KTÓRY|KTÓRA|KTÓRE|PRZEZ|TYLKO|BĘDZIE|JESZCZE|BARDZO|WSZYSTKO|DLACZEGO|PODCZAS|NOWY|NOWA|NOWE|JEST|BYŁO|ZOSTAŁ|ZNOWU|MOŻE|PO|ORAZ|TAKŻE|NAWET|SWOJE|SWOJĄ|CZYLI|ALBO|TERAZ|DZIŚ|KIEDY|JAKIE|PONAD)$/;
-  function pool() {
-    var out = [], seen = {};
-    function add(w, clue, kind) { w = String(w || '').toUpperCase().replace(/[^A-ZĄĆĘŁŃÓŚŹŻ]/g, ''); if (w.length < 3 || w.length > 12 || seen[w] || STOP.test(w)) return; seen[w] = 1; out.push({ w: w, c: clue, kind: kind }); }
-    arts.slice(0, 60).forEach(function (a) {
-      var t = '„' + a.title + '”';
-      if (a.review && a.review.artist && !/\s/.test(a.review.artist.trim())) add(a.review.artist, 'Wykonawca z recenzji ' + t, 'wykonawca');
-      if (a.review && a.review.work && !/\s/.test(a.review.work.trim())) add(a.review.work, 'Tytuł zrecenzowanego dzieła (' + (a.review.artist || 'artykuł') + ')', 'tytuł');
-      (a.tags || []).forEach(function (g) { if (!/\s/.test(String(g).trim())) add(g, 'Bohater / temat artykułu ' + t, 'tag'); });
-      String(a.title || '').split(/[\s,.:;!?„”"()–-]+/).forEach(function (w) { if (w.length >= 5 && /^[A-ZĄĆĘŁŃÓŚŹŻ]/.test(w)) add(w, 'Brakujące słowo z tytułu: ' + a.title.replace(w, '…'), 'z tytułu'); });
-    });
-    return out;
-  }
+  /* propozycje wyrazów i pytań z ostatnich artykułów (wspólne z generatorem: news/krzyz-gen.js) */
+  function pool() { return window.KrzGen ? KrzGen.pool(arts.slice(0, 60)) : []; }
   function sugFor(L, n) { var p = pool().filter(function (x) { return x.w.indexOf(L) >= 0 && cur.r.every(function (r) { return r[0] !== x.w; }); }); p.sort(function () { return Math.random() - .5; }); return p.slice(0, n || 6); }
   $('#kz-rows').addEventListener('click', function (e) {
     var b = e.target.closest('[data-sug]'); if (b) { var i = +b.dataset.sug, s = sugFor(cur.h[i]); $('#sug-' + i).innerHTML = s.length ? s.map(function (x, k) { return '<button type="button" data-pick="' + i + '" data-w="' + esc(x.w) + '" data-c="' + esc(x.c) + '"><b>' + esc(x.w) + '</b> · ' + x.kind + '</button>'; }).join('') : '<span class="sub">Brak propozycji z artykułów na literę ' + cur.h[i] + ' – wpisz własny wyraz.</span>'; return; }
@@ -285,8 +280,7 @@ td input[type=number]{width:96px;height:32px}
   $('#kn-reset').onclick = function () { if (!confirm('Przywrócić domyślne teksty Knagi? Twoje zmiany znikną.')) return; api('/gry/admin/cfg', { knaga: null }).then(function (d) { D.cfg = d.cfg; knaga(); say($('#kn-msg'), 'Przywrócono domyślne.', 1); }).catch(function (e) { say($('#kn-msg'), e.message); }); };
 
   function start() {
-    fetch(API + '/articles?limit=120', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (d) { arts = (d.articles || []).filter(function (a) { return a.status !== 'draft'; }); }).catch(function () {});
-    load();
+    fetch(API + '/articles?limit=120', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (d) { arts = (d.articles || []).filter(function (a) { return a.status !== 'draft'; }); }).catch(function () {}).then(load);
   }
   var started = false;
   function go() { if (started) return; started = true; start(); }
