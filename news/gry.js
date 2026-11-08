@@ -10,6 +10,7 @@
   function save(d) { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) { /* ignoruj */ } }
   function best(game) { return (load().best || {})[game] || 0; }
   function setBest(game, v) { var d = load(); d.best = d.best || {}; var nb = v > (d.best[game] || 0); if (nb) d.best[game] = v; d.played = (d.played || 0) + 1; save(d); return nb; }
+  function xp(kind) { if (window.SnXP) SnXP.earn(kind); }
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var stopFns = [];
   function stopAll() { stopFns.forEach(function (f) { try { f(); } catch (e) { /* ignoruj */ } }); stopFns = []; }
@@ -31,7 +32,7 @@
     { id: 'waz', name: 'Śliski Wąż', knaga: 'diabelek', sub: 'Zbieraj mikrofony, nie gryź się w ogon.', tag: 'Klasyk', unit: 'pkt' },
     { id: 'ukladanka', name: 'Śliska Układanka', knaga: 'detektyw', sub: 'Ułóż zdjęcie z artykułu.', tag: 'Logiczna', unit: 'ruchów', low: true },
     { id: 'drama', name: 'Drama Simulator', knaga: 'wsciekla', sub: 'Jesteś w środku afery. Co robisz?', tag: 'Fabularna', kind: 'story' },
-    { id: 'krzyzowka', name: 'Krzyżówka Tygodnia', knaga: 'szlafrok', sub: 'Hasła z newsów tygodnia.', tag: 'Wkrótce', soon: true },
+    { id: 'krzyzowka', name: 'Krzyżówka Tygodnia', knaga: 'szlafrok', sub: 'Odgadnij wyrazy, odkryj hasło.', tag: 'Co tydzień', kind: 'weekly' },
     { id: 'slizgawka', name: 'Ślizgawka', knaga: 'surfer', sub: 'Tajna gra. Skacz nad przeszkodami.', tag: 'Sekret', unit: 'm', secret: true }
   ];
   var unlocked = function () { return !!load().slizgawka; };
@@ -40,12 +41,12 @@
   function hub(el) {
     var d = load(), hidden = !unlocked();
     el.innerHTML = '<div class="gry">' +
-      '<header class="gry-hero"><div class="gry-hero-t"><span class="gry-eyebrow">Nowość</span><h1>Śliskie Gry</h1><p>Codzienne wyzwania, zręcznościówki i drama do rozegrania. Rekordy zapisują się na tym urządzeniu – ranking i punkty XP dojdą wkrótce razem z poziomami.</p>' +
-      '<div class="gry-stats"><span><b>' + (d.played || 0) + '</b> rozegranych</span><span><b>' + Object.keys(d.best || {}).length + '</b> rekordów</span></div></div>' +
+      '<header class="gry-hero"><div class="gry-hero-t"><span class="gry-eyebrow">Nowość</span><h1>Śliskie Gry</h1><p>Codzienne wyzwania, zręcznościówki i drama do rozegrania. Rekordy zapisują się na tym urządzeniu, a zalogowani zbierają za gry punkty XP do <a href="#/sezon">rankingu sezonu</a>.</p>' +
+      '<div class="gry-stats"><span><b>' + (d.played || 0) + '</b> rozegranych</span><span><b>' + Object.keys(d.best || {}).length + '</b> rekordów</span><a class="btn btn-sm" href="#/sezon">Ranking sezonu →</a></div></div>' +
       '<button type="button" class="gry-hero-k" id="gry-hero-k" aria-label="Knaga">' + K('imprezowa', 'gk gk-hero') + '</button></header>' +
       '<div class="gry-grid">' + GAMES.filter(function (g) { return !g.secret || !hidden; }).map(function (g) {
         var b = best(g.id), sl = g.id === 'slizgle' ? slizgleDone() : null;
-        var meta = g.soon ? 'Pierwsza krzyżówka w poniedziałek' : g.kind === 'daily' ? (sl ? 'Dziś: ' + sl : 'Nowe słowo codziennie o północy') : g.kind === 'story' ? ((d.endings || []).length + '/4 zakończeń') : (b ? 'Rekord: ' + b + ' ' + g.unit : 'Bez rekordu – zagraj!');
+        var meta = g.kind === 'weekly' ? (krzDone() ? 'Rozwiązana ✓ · nowa w poniedziałek' : 'Nowa w każdy poniedziałek') : g.kind === 'daily' ? (sl ? 'Dziś: ' + sl : 'Nowe słowo codziennie o północy') : g.kind === 'story' ? ((d.endings || []).length + '/4 zakończeń') : (b ? 'Rekord: ' + b + ' ' + g.unit : 'Bez rekordu – zagraj!');
         return '<a class="gry-tile' + (g.soon ? ' is-soon' : '') + (g.secret ? ' is-secret' : '') + '" ' + (g.soon ? 'aria-disabled="true"' : 'href="#/gry/' + g.id + '"') + '>' +
           '<span class="gry-tile-k">' + K(g.knaga) + '</span><span class="gry-tile-t"><span class="gry-tag">' + g.tag + '</span><b>' + g.name + '</b><small>' + g.sub + '</small><em>' + meta + '</em></span></a>';
       }).join('') + '</div>' +
@@ -103,8 +104,8 @@
       else if (k === '⏎' || k === 'Enter') {
         if (cur.length < 5) { $('#sz-msg').textContent = 'Za mało liter.'; return; }
         st.rows.push(cur); cur = '';
-        if (st.rows[st.rows.length - 1] === answer) { st.end = true; st.win = true; setBest('slizgle', 7 - st.rows.length); }
-        else if (st.rows.length >= 6) { st.end = true; setBest('slizgle', 0); }
+        if (st.rows[st.rows.length - 1] === answer) { st.end = true; st.win = true; setBest('slizgle', 7 - st.rows.length); xp('slizgle'); }
+        else if (st.rows.length >= 6) { st.end = true; setBest('slizgle', 0); xp('game'); }
         $('#sz-msg').textContent = '';
         try { localStorage.setItem(slizgleKey(), JSON.stringify(st)); } catch (e) { /* ignoruj */ }
       } else if (/^[A-ZĄĆĘŁŃÓŚŹŻ]$/i.test(k) && cur.length < 5) cur += k.toUpperCase();
@@ -129,6 +130,7 @@
       over: function () {
         running = false; cancelAnimationFrame(raf);
         var nb = setBest(g.id, api.score); $('#gry-best').textContent = best(g.id) || '–';
+        if (api.score > 0) { xp('game'); if (nb) xp('record'); }
         menu((nb ? '<b class="gry-new">Nowy rekord!</b>' : '') + '<h2>' + api.score + ' ' + (g.unit || '') + '</h2><p>' + (opts.endText ? opts.endText(api.score) : '') + '</p>', 'Jeszcze raz', g.knaga);
       }
     };
@@ -319,7 +321,7 @@
       draw();
       if (tiles.every(function (v, k) { return v === k; })) {
         clearInterval(timer); var d = load(); d.best = d.best || {}; var k = 'ukladanka', nb = !d.best[k] || moves < d.best[k]; if (nb) d.best[k] = moves; d.played = (d.played || 0) + 1; save(d);
-        $('#gry-best').textContent = d.best[k];
+        $('#gry-best').textContent = d.best[k]; xp('game'); if (nb) xp('record');
         $('#uk-board').classList.add('is-done'); toast(nb ? 'Ułożone! Nowy rekord: ' + moves + ' ruchów' : 'Ułożone w ' + moves + ' ruchach!');
       }
     });
@@ -350,7 +352,7 @@
     shell(el, g, '<div class="dr" id="dr"></div>');
     function go(id) {
       var n = STORY[id], box = $('#dr');
-      if (n.end) { var d = load(); d.endings = d.endings || []; if (d.endings.indexOf(n.end) < 0) d.endings.push(n.end); d.played = (d.played || 0) + 1; save(d); }
+      if (n.end) { var d = load(); d.endings = d.endings || []; if (d.endings.indexOf(n.end) < 0) d.endings.push(n.end); d.played = (d.played || 0) + 1; save(d); xp('drama'); }
       box.innerHTML = '<div class="dr-card' + (n.end ? ' is-end' : '') + '"><div class="dr-k">' + K(n.k, 'gk') + '</div><div class="dr-t">' + (n.end ? '<span class="gry-tag">Zakończenie</span><h2>' + n.end + '</h2>' : '') + '<p>' + n.t + '</p>' +
         (n.end ? '<p class="dr-sum">Odkryte zakończenia: <b>' + (load().endings || []).length + '/4</b></p><div class="dr-c"><button type="button" class="btn btn-primary" data-go="start">Zagraj jeszcze raz</button><button type="button" class="btn" id="dr-share">Udostępnij</button></div>'
           : '<div class="dr-c">' + n.c.map(function (c) { return '<button type="button" class="btn dr-opt" data-go="' + c[1] + '">' + c[0] + '</button>'; }).join('') + '</div>') + '</div></div>';
@@ -360,7 +362,73 @@
     go('start');
   }
 
-  var RUN = { slizgle: slizgle, krople: krople, flappy: flappy, waz: waz, ukladanka: ukladanka, drama: drama, slizgawka: slizgawka };
+  /* ============== KRZYŻÓWKA TYGODNIA (krzyżówka z hasłem) ============== */
+  // [wyraz, podpowiedź, pozycja litery hasła w wyrazie]
+  var KRZ = [
+    { h: 'ŚLISKA', r: [['ŚLIZG', 'Ruch po mokrej powierzchni', 0], ['ALBUM', 'Płyta z kilkoma utworami', 1], ['WINYL', 'Czarna płyta dla kolekcjonerów', 1], ['SCENA', 'Miejsce, na którym gra się koncert', 0], ['KLIP', 'Teledysk, inaczej', 0], ['AFERA', 'Głośny skandal', 0]] },
+    { h: 'DRAMA', r: [['DISS', 'Utwór, w którym raper atakuje innego', 0], ['TRASA', 'Seria koncertów w różnych miastach', 1], ['FEAT', 'Gościnny udział innego artysty w numerze', 2], ['MIKROFON', 'Bez niego wokalista nic nie zdziała', 0], ['FANKA', 'Wierna słuchaczka artysty', 1]] },
+    { h: 'MOKRO', r: [['MERCH', 'Koszulki i bluzy z logo artysty', 0], ['SOLO', 'Występ w pojedynkę', 1], ['SKANDAL', 'Afera, o której mówią wszyscy', 1], ['REFREN', 'Powtarzająca się część piosenki', 0], ['PODCAST', 'Audycja do słuchania w internecie', 1]] },
+    { h: 'KNAGA', r: [['KONCERT', 'Występ na żywo', 0], ['NAGRODA', 'Statuetka dla najlepszych', 0], ['PLAYLISTA', 'Lista utworów w aplikacji', 2], ['GALA', 'Uroczysta impreza z wręczeniem nagród', 0], ['SAMPEL', 'Fragment cudzego utworu użyty w nowym', 1]] }
+  ];
+  function weekIndex() { return Math.floor((dayIndex() + 6) / 7); }
+  function krzKey() { return 'sn-krzyz-' + weekIndex(); }
+  function krzDone() { try { return !!(JSON.parse(localStorage.getItem(krzKey())) || {}).done; } catch (e) { return false; } }
+  function krzyzowka(el) {
+    var g = GAMES[6], set = KRZ[((weekIndex() % KRZ.length) + KRZ.length) % KRZ.length];
+    var L = Math.max.apply(null, set.r.map(function (r) { return r[2]; })), R = Math.max.apply(null, set.r.map(function (r) { return r[0].length - r[2]; }));
+    var st; try { st = JSON.parse(localStorage.getItem(krzKey())) || {}; } catch (e) { st = {}; } st.v = st.v || {};
+    var nxt = new Date(); nxt.setDate(nxt.getDate() + ((8 - nxt.getDay()) % 7 || 7));
+    shell(el, g, '<div class="kz"><div class="kz-head">' + K('szlafrok', 'gk') + '<p>Wpisz wyrazy według podpowiedzi. Litery w zaznaczonej kolumnie utworzą <b>hasło tygodnia</b>. Nowa krzyżówka: ' + nxt.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' }) + '.</p></div>' +
+      '<div class="kz-wrap"><div class="kz-grid" id="kz-grid" style="--cols:' + (L + R) + '">' + set.r.map(function (r, ri) {
+        var cells = ''; for (var c = 0; c < L + R; c++) {
+          var k = c - (L - r[2]);
+          cells += k < 0 || k >= r[0].length ? '<span class="kz-x"></span>' : '<input class="kz-c' + (k === r[2] ? ' is-h' : '') + '" data-r="' + ri + '" data-k="' + k + '" maxlength="1" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Wyraz ' + (ri + 1) + ', litera ' + (k + 1) + '" value="' + esc((st.v[ri] || '')[k] || '').trim() + '">';
+        }
+        return '<div class="kz-row" data-r="' + ri + '"><span class="kz-n">' + (ri + 1) + '</span>' + cells + '</div>';
+      }).join('') + '</div></div>' +
+      '<ol class="kz-clues">' + set.r.map(function (r, ri) { return '<li data-r="' + ri + '"><b>' + (ri + 1) + '.</b> ' + r[1] + ' <small>(' + r[0].length + (r[0].length < 5 ? ' litery' : ' liter') + ')</small></li>'; }).join('') + '</ol>' +
+      '<div class="kz-act"><button type="button" class="btn btn-primary" id="kz-check">Sprawdź</button><button type="button" class="btn" id="kz-hint">Podpowiedz literę</button></div><p class="kz-msg" id="kz-msg" aria-live="polite"></p></div>');
+    var grid = $('#kz-grid'), lastCell = null;
+    function word(ri) { return [].map.call(grid.querySelectorAll('.kz-c[data-r="' + ri + '"]'), function (i) { return (i.value || ' ').toUpperCase(); }).join(''); }
+    function store() { set.r.forEach(function (_, ri) { st.v[ri] = word(ri); }); try { localStorage.setItem(krzKey(), JSON.stringify(st)); } catch (e) { /* - */ } }
+    function cellsOf(ri) { return [].slice.call(grid.querySelectorAll('.kz-c[data-r="' + ri + '"]')); }
+    function focusRow(ri) { [].forEach.call(el.querySelectorAll('.kz-clues li'), function (li) { li.classList.toggle('is-on', +li.dataset.r === ri); }); }
+    grid.addEventListener('focusin', function (e) { if (e.target.classList.contains('kz-c')) { lastCell = e.target; focusRow(+e.target.dataset.r); e.target.select(); } });
+    grid.addEventListener('input', function (e) {
+      var i = e.target; if (!i.classList.contains('kz-c')) return;
+      var v = (i.value || '').toUpperCase().replace(/[^A-ZĄĆĘŁŃÓŚŹŻ]/g, ''); i.value = v.slice(-1);
+      i.closest('.kz-row').classList.remove('is-bad', 'is-ok');
+      if (i.value) { var cs = cellsOf(+i.dataset.r), n = cs[cs.indexOf(i) + 1]; if (n) n.focus(); }
+      store();
+    });
+    grid.addEventListener('keydown', function (e) {
+      var i = e.target; if (!i.classList.contains('kz-c')) return; var ri = +i.dataset.r, cs = cellsOf(ri), at = cs.indexOf(i);
+      if (e.key === 'Backspace' && !i.value && cs[at - 1]) { e.preventDefault(); cs[at - 1].value = ''; cs[at - 1].focus(); store(); }
+      else if (e.key === 'ArrowLeft' && cs[at - 1]) cs[at - 1].focus();
+      else if (e.key === 'ArrowRight' && cs[at + 1]) cs[at + 1].focus();
+      else if ((e.key === 'ArrowDown' || e.key === 'Enter') && ri < set.r.length - 1) { e.preventDefault(); cellsOf(ri + 1)[0].focus(); }
+      else if (e.key === 'ArrowUp' && ri > 0) cellsOf(ri - 1)[0].focus();
+    });
+    el.querySelector('.kz-clues').addEventListener('click', function (e) { var li = e.target.closest('[data-r]'); if (li) { var c = cellsOf(+li.dataset.r).find(function (x) { return !x.value; }) || cellsOf(+li.dataset.r)[0]; c.focus(); } });
+    function win() {
+      grid.classList.add('is-done'); [].forEach.call(grid.querySelectorAll('.kz-c'), function (i) { i.readOnly = true; });
+      $('#kz-msg').innerHTML = '<b class="gry-new">Rozwiązane!</b> Hasło tygodnia: <b>' + set.h + '</b>. Mokra robota.';
+      if (!st.done) { st.done = 1; store(); var d = load(); d.played = (d.played || 0) + 1; save(d); xp('krzyzowka'); toast('Krzyżówka rozwiązana! 🧩'); }
+    }
+    $('#kz-check').onclick = function () {
+      var bad = 0, empty = 0;
+      set.r.forEach(function (r, ri) { var w = word(ri), row = grid.querySelector('.kz-row[data-r="' + ri + '"]'); if (w.indexOf(' ') >= 0) { empty++; row.classList.remove('is-bad', 'is-ok'); return; } var ok = w === r[0]; row.classList.toggle('is-ok', ok); row.classList.toggle('is-bad', !ok); if (!ok) bad++; });
+      if (!bad && !empty) win(); else $('#kz-msg').textContent = bad ? 'Błędne wyrazy: ' + bad + '. Popraw zaznaczone na czerwono.' : 'Uzupełnij jeszcze ' + empty + (empty === 1 ? ' wyraz.' : ' wyrazy.');
+    };
+    $('#kz-hint').onclick = function () {
+      var f = lastCell, ri = f ? +f.dataset.r : -1;
+      var tryRow = function (r) { var cs = cellsOf(r), w = set.r[r][0]; for (var k = 0; k < cs.length; k++) if (cs[k].value.toUpperCase() !== w[k]) { cs[k].value = w[k]; cs[k].classList.add('is-given'); cs[k].focus(); store(); return true; } return false; };
+      if (ri >= 0 && tryRow(ri)) return; for (var r = 0; r < set.r.length; r++) if (tryRow(r)) return;
+    };
+    if (st.done) win();
+  }
+
+  var RUN = { krzyzowka: krzyzowka, slizgle: slizgle, krople: krople, flappy: flappy, waz: waz, ukladanka: ukladanka, drama: drama, slizgawka: slizgawka };
   window.SliskieGry = {
     mount: function (el, sub, ctx) {
       stopAll();

@@ -28,6 +28,8 @@
     user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/>',
     team: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20c0-2.8-1.6-4.9-4-5.7"/>',
     spot: '<path d="M3 10v4h3l6 4V6L6 10z"/><path d="M16 9a4 4 0 0 1 0 6"/>',
+    cup: '<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5v1a3 3 0 0 0 3 3M16 6h3v1a3 3 0 0 1-3 3M12 13v4M8.5 20h7"/>',
+    fire: '<path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2.3 1.2-3.7 2.3-4.7.3 1.6 1 2.6 2 3.1C11 8.6 11.3 5.6 12 3z"/>',
     game: '<rect x="2.5" y="7" width="19" height="11" rx="5"/><path d="M7.5 10.5v4M5.5 12.5h4"/><circle cx="15.5" cy="11.5" r="1"/><circle cx="17.5" cy="13.5" r="1"/>',
     moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
     pen: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
@@ -137,7 +139,7 @@
     if (s) setTimeout(function () { var i = $('#search-input'); i && i.focus(); }, 60);
   }
   function mark() {
-    var h = location.hash || '#/', k = /^#\/szybkie/.test(h) ? 'quick' : /^#\/ranking/.test(h) ? 'ranking' : /^#\/zapisane/.test(h) ? 'saved' : (/^#\/(konto|redakcja|panel|ustawienia|zglos|spot|gry|plus)/.test(h) ? 'more' : (h === '#/' || /^#\/(kategoria|artykul)?/.test(h) && !/^#\/[a-z]/.test(h.replace(/^#\/(kategoria|artykul).*/, '')) ? 'home' : 'home'));
+    var h = location.hash || '#/', k = /^#\/szybkie/.test(h) ? 'quick' : /^#\/ranking/.test(h) ? 'ranking' : /^#\/zapisane/.test(h) ? 'saved' : (/^#\/(konto|redakcja|panel|ustawienia|zglos|spot|gry|plus|sezon|dramy|drama|podsumowanie)/.test(h) ? 'more' : (h === '#/' || /^#\/(kategoria|artykul)?/.test(h) && !/^#\/[a-z]/.test(h.replace(/^#\/(kategoria|artykul).*/, '')) ? 'home' : 'home'));
     if (/^#\/(kategoria|artykul|tag|wykonawca|autor)/.test(h) || h === '#/' || h === '#' || h === '') k = 'home';
     bar.querySelectorAll('.m-tab').forEach(function (t) { t.classList.toggle('is-on', t.dataset.k === k); }); place();
   }
@@ -151,6 +153,8 @@
     var h = '<div class="m-grip"></div>';
     h += '<h3>Aplikacja</h3><div class="m-grid">' +
       link('#/gry', 'game', 'Śliskie Gry') +
+      link('#/sezon', 'cup', 'Ranking sezonu') +
+      link('#/dramy', 'fire', 'Osie dram') +
       link('#/redakcja', 'team', 'Redakcja') +
       link('#/spot', 'spot', 'Wyślij reklamę') +
       item('user', logged ? 'Moje konto' : 'Zaloguj się', 'data-m="account"') +

@@ -50,9 +50,9 @@
   function randomFor() { if (shy()) return pick(LINES.shy); var c = ctxName(), h = hour(); if ((h >= 23 || h < 5) && Math.random() < .6) return pick(LINES.night); return pick(LINES[c] || LINES.home); }
 
   /* odsłonięcie po pierwszym przeczytanym artykule (przewinięty do końca) */
-  var readT = 0;
+  var readT = 0, readFn = null;
   function watchRead() {
-    clearTimeout(readT);
+    clearTimeout(readT); if (readFn) window.removeEventListener('scroll', readFn); readFn = null;
     if (!/^#\/artykul\//.test(location.hash)) return;
     var t0 = Date.now(), fired = false;
     function chk() {
@@ -63,10 +63,11 @@
       if (r.bottom < window.innerHeight + 40 && Date.now() - t0 > 15000) {
         fired = true; window.removeEventListener('scroll', chk);
         var n = (st().read || 0) + 1; put({ read: n });
-        if (shy()) { put({ revealed: 1 }); reveal(); } else if (!st().off && Math.random() < .5) say(pick(LINES.done), 6000);
+        try { window.dispatchEvent(new CustomEvent('sn:read', { detail: { id: decodeURIComponent(location.hash.split('/')[2] || '') } })); } catch (e) { /* stare przeglądarki */ }
+        if (shy()) { put({ revealed: 1 }); reveal(); try { window.dispatchEvent(new CustomEvent('sn:reveal')); } catch (e) { /* - */ } } else if (el && !st().off && Math.random() < .5) say(pick(LINES.done), 6000);
       }
     }
-    window.addEventListener('scroll', chk, { passive: true });
+    readFn = chk; window.addEventListener('scroll', chk, { passive: true });
     readT = setTimeout(chk, 15500);
   }
   function reveal() {
@@ -77,8 +78,9 @@
 
   var lastCtx = '', timer = 0;
   function onRoute() {
+    watchRead();   // czytanie liczy się zawsze (XP), nawet gdy Knaga jest wyłączona
     if (st().off) return;
-    build(); watchRead();
+    build();
     el.classList.toggle('is-hidden', /^#\/gry\/./.test(location.hash));   // w trakcie gry Knaga nie zasłania planszy
     var c = ctxName();
     setLook(shy() ? 'niesmiala' : (hour() >= 23 || hour() < 5) ? 'szlafrok' : c === 'games' ? 'surfer' : 'ziomek');

@@ -54,7 +54,7 @@
   <link rel="stylesheet" href="app-m.css?v=20261104g">
   <link rel="stylesheet" href="spoty.css?v=20261104g">
   <link rel="stylesheet" href="spot-form.css?v=20261107c">
-  <link rel="stylesheet" href="gry.css?v=20261108a">
+  <link rel="stylesheet" href="gry.css?v=20261108b">
   <script>
     /* Motyw ustawiany przed wyświetleniem strony (bez migania) */
     try { var t = localStorage.getItem('sliska_theme'); if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
@@ -176,6 +176,7 @@
     <section id="view-tip" hidden></section>
     <section id="view-spot" hidden></section>
     <section id="view-games" hidden></section>
+    <section id="view-xp" hidden></section>
 
     <!-- WIDOK: POLITYKA / REGULAMIN -->
     <section id="view-legal" hidden></section>
@@ -206,6 +207,8 @@
         <a href="#" id="install-link" hidden>Zainstaluj aplikację</a>
         <a href="#/o-nas">O nas i kontakt</a>
         <a href="#/zglos">Zgłoś temat</a>
+        <a href="#/sezon">Ranking sezonu</a>
+        <a href="#/dramy">Osie dram</a>
         <a href="#" id="knaga-toggle">Knaga: wyłącz</a>
         <a href="#/prywatnosc">Polityka prywatności</a>
         <a href="#/regulamin">Regulamin</a>
@@ -319,13 +322,14 @@
 
   <script src="taxonomy.js?v=20261104g"></script>
 
-  <script src="app.js?v=20261108a"></script>
+  <script src="app.js?v=20261108b"></script>
   <script src="spoty.js?v=20261108a" defer></script>
   <script src="spot-form.js?v=20261107c"></script>
   <script src="knaga.js?v=20261108a"></script>
-  <script src="gry.js?v=20261108a"></script>
-  <script src="knaga-mowi.js?v=20261108a" defer></script>
-  <script src="app-m.js?v=20261108a" defer></script>
+  <script src="gry.js?v=20261108b"></script>
+  <script src="poziomy.js?v=20261108b"></script>
+  <script src="knaga-mowi.js?v=20261108b" defer></script>
+  <script src="app-m.js?v=20261108b" defer></script>
 <script src="anim.js?v=20261104g" defer></script>
 </body>
 </html>
