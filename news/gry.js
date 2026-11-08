@@ -37,7 +37,7 @@
       var ep = c && c.epoch ? String(c.epoch) : ''; if (!ep) return;
       if (localStorage.getItem('sn-gry-epoch') === ep) return;
       var had = localStorage.getItem('sn-gry-epoch') !== null || localStorage.getItem('sn-gry') !== null;
-      Object.keys(localStorage).forEach(function (k) { if (k !== 'sn-gry-epoch' && /^(sn-gry|sn-slizgle|sn-krzyz|sn-drama|sn-dr-fold)/.test(k)) localStorage.removeItem(k); });
+      Object.keys(localStorage).forEach(function (k) { if (k !== 'sn-gry-epoch' && /^(sn-gry|sn-slizgle|sn-krzyz|sn-drama|sn-dr-fold|sn-nac)/.test(k)) localStorage.removeItem(k); });
       localStorage.setItem('sn-gry-epoch', ep);
       if (had && /#\/gry/.test(location.hash)) location.reload();
     } catch (e) { /* ignoruj */ }
@@ -52,14 +52,16 @@
       how: 'Wpisz wyrazy według podpowiedzi. Litery w złotej kolumnie czytane z góry na dół tworzą hasło tygodnia. Nowa krzyżówka w każdy poniedziałek.' },
     { id: 'krople', name: 'Łap Krople', knaga: 'kapiel', sub: 'Łap krople do wanny, unikaj pozwów.', tag: 'Zręcznościowa', unit: 'pkt', c: ['#075985', '#38bdf8'],
       how: 'Przesuwaj wannę z Knagą: myszką, palcem albo strzałkami. Kropla +1, Mocz +5, serduszko oddaje życie. Pozew zabiera życie. Co 10 złapanych kropli bez pudła – bonus.' },
-    { id: 'flappy', name: 'Knaga Flappy', knaga: 'super', sub: 'Leć nad sceną między mikrofonami.', tag: 'Zręcznościowa', unit: 'pkt', c: ['#2b0f55', '#c0164a'],
+    { id: 'flappy', name: 'Super Knaga', knaga: 'super', sub: 'Leć nad sceną między mikrofonami.', tag: 'Zręcznościowa', unit: 'pkt', c: ['#2b0f55', '#c0164a'],
       how: 'Spacja, kliknięcie albo stuknięcie – Super Knaga macha peleryną i podlatuje. Przelatuj między statywami z mikrofonami. Z każdym punktem robi się ciaśniej.' },
-    { id: 'waz', name: 'Śliski Wąż', knaga: 'ikona', sub: 'Zbieraj mikrofony, nie gryź się w ogon.', tag: 'Klasyk', unit: 'pkt', c: ['#3a0a33', '#ff2d77'],
-      how: 'Strzałki, WASD albo przesunięcie palcem zmienia kierunek. Mikrofon +1, złoty mikrofon +3 (znika po kilku sekundach). Nie uderzaj w ściany ani w siebie.' },
+    { id: 'waz', name: 'Kanga', knaga: 'ikona', sub: 'Knaga rośnie na długość. Zbieraj mikrofony.', tag: 'Klasyk', unit: 'pkt', c: ['#3a0a33', '#ff2d77'],
+      how: 'Strzałki, WASD albo przesunięcie palcem zmienia kierunek. Z każdym mikrofonem Knaga robi się dłuższa (Długość widać w cm). Złoty mikrofon +3 (znika po kilku sekundach). Nie uderzaj w ściany, kolumny ani w samą siebie.' },
     { id: 'ukladanka', name: 'Śliska Układanka', knaga: 'detektyw', sub: 'Ułóż zdjęcie z artykułu.', tag: 'Logiczna', unit: 'ruchów', low: true, c: ['#7a3d00', '#ffae2b'],
       how: 'Przesuwaj kafelki na puste pole, aż ułożysz zdjęcie z artykułu. Rekordem jest najmniejsza liczba ruchów. „Podgląd” pokazuje całe zdjęcie.' },
     { id: 'drama', name: 'Drama Simulator', knaga: 'wsciekla', sub: '10 afer, 7 dni, 30 zakończeń. Przetrwasz?', tag: 'Fabularna', kind: 'story', c: ['#5c0716', '#ff3b3b'],
       how: 'Stwórz postać (ksywka i typ artysty), wybierz jedną z 10 afer i przetrwaj 7 dni. Każda decyzja zmienia Hype, Szacunek, Kasę i Nerwy oraz liczbę obserwujących. Po drugim dniu zatrudnisz prawnika, PR-owca albo terapeutę – odblokują nowe opcje. Uważaj: zero Szacunku albo Kasy, czy 100 Nerwów to natychmiastowy koniec. 30 zakończeń i 13 osiągnięć do zdobycia, gra zapisuje się w trakcie.' },
+    { id: 'naczelny', name: 'Redaktor Naczelny', knaga: 'redaktor', sub: 'Tydzień w redakcji: klik czy prawda?', tag: 'Fabularna', kind: 'sim', unit: 'pkt', c: ['#0c3b66', '#2fa8ff'],
+      how: 'Przez 5 dni dostajesz 10 tematów i za każdym razem wybierasz: opublikować od razu, sprawdzić albo odpuścić. Cztery paski: Klikalność, Wiarygodność, Pozwy i Nerwy. Zero Klikalności lub Wiarygodności, 100 Pozwów albo 100 Nerwów kończą grę. Na koniec dostajesz wynik (maks. 100) i jedno z 12 zakończeń.' },
     { id: 'slizgawka', name: 'Ślizgawka', knaga: 'surfer', sub: 'Tajna gra. Surfuj i skacz.', tag: 'Sekret', unit: 'm', secret: true, c: ['#b33a1a', '#ffb36b'],
       how: 'Spacja albo stuknięcie – skok (drugi raz w powietrzu = podwójny skok). Przeskakuj pozwy, dissy i fejki, zbieraj krople (+25 m).' }
   ];
@@ -125,7 +127,7 @@
       var b = best(g.id);
       return '<a class="gh-tile' + (g.secret ? ' is-secret' : '') + '" href="#/gry/' + g.id + '" style="--g1:' + g.c[0] + ';--g2:' + g.c[1] + '">' +
         '<span class="gh-tile-k">' + K(g.knaga) + '</span><span class="gh-tag">' + g.tag + '</span><b>' + g.name + '</b><small>' + g.sub + '</small>' +
-        '<em>' + (g.kind === 'story' ? ((d.endings || []).length + '/30 zakończeń') : b ? ICO.cup + ' ' + fmt(g.id, b) : 'Zagraj pierwszy raz') + '</em></a>';
+        '<em>' + (g.kind === 'story' ? ((d.endings || []).length + '/30 zakończeń') : g.kind === 'sim' && !b ? ((d.nacEnds || []).length + '/12 zakończeń') : b ? ICO.cup + ' ' + fmt(g.id, b) : 'Zagraj pierwszy raz') + '</em></a>';
     };
     var feat = function (g, title, meta, cta) {
       return '<a class="gh-feat" href="#/gry/' + g.id + '" style="--g1:' + g.c[0] + ';--g2:' + g.c[1] + '"><span class="gh-feat-t"><span class="gh-tag">' + title + '</span><b>' + g.name + '</b><small>' + meta + '</small><span class="gh-cta">' + cta + ' →</span></span><span class="gh-feat-k">' + K(g.knaga) + '</span></a>';
@@ -138,7 +140,7 @@
       feat(G('slizgle'), 'Słowo dnia #' + (dayIndex() + 1), sl && sl.end ? (sl.win ? 'Dziś zgadnięte w ' + sl.rows.length + '/6 ✓' : 'Dziś bez trafienia – jutro nowe słowo') : 'Nowe słowo czeka. 6 prób.', sl && sl.end ? 'Zobacz wynik' : 'Zgaduj') +
       feat(G('krzyzowka'), 'Tydzień #' + weekIndex(), kz ? 'Rozwiązana ✓ – nowa w poniedziałek' : 'Hasło tygodnia czeka na odkrycie.', kz ? 'Zobacz' : 'Rozwiąż') + '</div>' +
       '<h2 class="gh-h">Zręcznościowe</h2><div class="gh-grid">' + ['krople', 'flappy', 'waz'].concat(hidden ? [] : ['slizgawka']).map(function (id) { return tile(G(id)); }).join('') + '</div>' +
-      '<h2 class="gh-h">Na spokojnie</h2><div class="gh-grid">' + ['drama', 'ukladanka'].map(function (id) { return tile(G(id)); }).join('') + '</div>' +
+      '<h2 class="gh-h">Na spokojnie</h2><div class="gh-grid">' + ['drama', 'naczelny', 'ukladanka'].map(function (id) { return tile(G(id)); }).join('') + '</div>' +
       (hidden ? '<p class="gry-hint">Psst… ponoć jest tu jeszcze jedna, ukryta gra. Knaga coś wie.</p>' : '') +
       '<nav class="gh-more" aria-label="Śliska strefa"><a href="#/sezon">' + ICO.cup + '<span><b>Ranking sezonu</b><small>Kto zebrał najwięcej XP w tym miesiącu</small></span></a><a href="#/dramy">' + ICO.fire + '<span><b>Osie czasu dram</b><small>Afery krok po kroku</small></span></a><a href="#/podsumowanie">' + ICO.spark + '<span><b>Twój miesiąc</b><small>Śliskie Podsumowanie</small></span></a></nav></div>';
     var clicks = 0, kb = $('#gry-hero-k', el);
@@ -247,6 +249,64 @@
     draw();
   }
 
+
+  /* ---------- osiągnięcia gier zręcznościowych (Łap Krople, Super Knaga, Kanga) ---------- */
+  var AICO = {
+    drop: '<path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/>', star: '<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.3 6L12 16.5 6.6 19.4l1.3-6L3.4 9.3l6-.7z"/>',
+    bolt: '<path d="M13 3L5 13.5h6L10 21l8-10.5h-6z"/>', shield: '<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/>', heart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.4A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+    flame: '<path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2.3 1.2-3.7 2.3-4.7.3 1.6 1 2.6 2 3.1C11 8.6 11.3 5.6 12 3z"/>', clock: '<circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/>',
+    mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4"/>', rule: '<path d="M3 9h18v6H3zM7 9v3M11 9v2M15 9v3M19 9v2"/>',
+    trophy: '<path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5v1a3 3 0 0 0 3 3M16 6h3v1a3 3 0 0 1-3 3M12 13v4M8.5 20h7"/>', wing: '<path d="M3 15c4 0 6-2 8-6 1 3 3 4 6 4-1 3-4 6-9 6-3 0-5-1-5-4z"/>', check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>', lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>'
+  };
+  var aIcon = function (k, n) { return '<svg viewBox="0 0 24 24" width="' + (n || 18) + '" height="' + (n || 18) + '" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (AICO[k] || AICO.star) + '</svg>'; };
+  // [id, nazwa, opis, ikona, test(statystyki)] – statystyki: s.score, s.t (s) oraz liczniki z api.ev() i maksima z api.mx()
+  var ACHS = {
+    krople: [
+      ['k_drop', 'Pierwszy łyk', 'Złap pierwszą kroplę', 'drop', function (s) { return s.drop >= 1; }],
+      ['k_gold', 'Złoty strzał', 'Złap Mocz (złotą kroplę)', 'star', function (s) { return s.gold >= 1; }],
+      ['k_life', 'Dodatkowe życie', 'Złap serduszko', 'heart', function (s) { return s.life >= 1; }],
+      ['k_c10', 'Kombinator', 'Złap 10 kropli z rzędu', 'bolt', function (s) { return s.combo >= 10; }],
+      ['k_c25', 'Mega combo', 'Złap 25 kropli z rzędu', 'flame', function (s) { return s.combo >= 25; }],
+      ['k_umb', 'Pod parasolem', 'Parasol uratuje Cię przed pozwem', 'shield', function (s) { return s.shieldsave >= 1; }],
+      ['k_set', 'Zestaw bonusów', 'Złap magnes, parasol i saunę w jednej grze', 'star', function (s) { return s.pw_mag >= 1 && s.pw_shield >= 1 && s.pw_slow >= 1; }],
+      ['k_dry', 'Bez pozwu', '40 punktów bez utraty życia', 'check', function (s) { return s.score >= 40 && !(s.lost > 0); }],
+      ['k_100', 'Wanna po brzegi', 'Zdobądź 100 punktów', 'trophy', function (s) { return s.score >= 100; }],
+      ['k_200', 'Potop', 'Zdobądź 200 punktów', 'trophy', function (s) { return s.score >= 200; }]
+    ],
+    flappy: [
+      ['f_1', 'Pierwszy lot', 'Przeleć przez pierwszy statyw', 'wing', function (s) { return s.score >= 1; }],
+      ['f_10', 'Dziesiątka', 'Zdobądź 10 punktów', 'star', function (s) { return s.score >= 10; }],
+      ['f_15', 'Nowa scena', 'Dolec do drugiej sceny (15 pkt)', 'bolt', function (s) { return s.score >= 15; }],
+      ['f_30', 'Super Knaga', 'Zdobądź 30 punktów', 'trophy', function (s) { return s.score >= 30; }],
+      ['f_50', 'Legenda sceny', 'Zdobądź 50 punktów', 'trophy', function (s) { return s.score >= 50; }],
+      ['f_sh', 'Tarcza', 'Złap złotą tarczę', 'shield', function (s) { return s.shield >= 1; }],
+      ['f_save', 'Twardziel', 'Tarcza przyjmie za Ciebie uderzenie', 'check', function (s) { return s.shieldsave >= 1; }],
+      ['f_drop', 'Zbieracz kropli', 'Złap 5 kropli w jednym locie', 'drop', function (s) { return s.drop >= 5; }],
+      ['f_t', 'Maraton', 'Leć 90 sekund bez uderzenia', 'clock', function (s) { return s.t >= 90; }]
+    ],
+    waz: [
+      ['w_mic', 'Pierwszy mikrofon', 'Zjedz pierwszy mikrofon', 'mic', function (s) { return s.mic >= 1; }],
+      ['w_gold', 'Złoty mikrofon', 'Zjedz złoty mikrofon', 'star', function (s) { return s.gold >= 1; }],
+      ['w_slow', 'Zegarek', 'Zbierz zegar zwalniający czas', 'clock', function (s) { return s.slow >= 1; }],
+      ['w_c4', 'Combo ×4', 'Zjedz mikrofony szybko pod rząd (×4)', 'bolt', function (s) { return s.combo >= 4; }],
+      ['w_l10', 'Dłuższa Knaga', 'Dojdź do 20 cm', 'rule', function (s) { return s.len >= 10; }],
+      ['w_l20', 'Naprawdę długa', 'Dojdź do 40 cm', 'rule', function (s) { return s.len >= 20; }],
+      ['w_l35', 'Rekordzistka długości', 'Dojdź do 70 cm', 'trophy', function (s) { return s.len >= 35; }],
+      ['w_obs', 'Pełna scena', 'Przeżyj, gdy na scenie stoi 5 kolumn', 'shield', function (s) { return s.obs >= 5; }],
+      ['w_40', 'Lista featów', 'Zdobądź 40 punktów', 'flame', function (s) { return s.score >= 40; }]
+    ]
+  };
+  function achGot(gid) { var d = load(); return ((d.ach || {})[gid]) || []; }
+  function achItems(gid) {
+    var got = achGot(gid);
+    return ACHS[gid].map(function (a) { var on = got.indexOf(a[0]) >= 0; return '<li class="' + (on ? 'is-on' : '') + '"><span class="ach-i">' + aIcon(on ? a[3] : 'lock', 17) + '</span><div><b>' + a[1] + '</b><small>' + a[2] + '</small></div></li>'; }).join('');
+  }
+  function achBox(gid) {
+    var got = achGot(gid).length;
+    return '<section class="gp-box ach-box"><h3>Osiągnięcia <small id="gry-ach-c">' + got + '/' + ACHS[gid].length + '</small></h3><ul class="gp-ach" id="gry-ach">' + achItems(gid) + '</ul></section>';
+  }
+  function achRefresh(gid) { var u = $('#gry-ach'), c = $('#gry-ach-c'); if (u) u.innerHTML = achItems(gid); if (c) c.textContent = achGot(gid).length + '/' + ACHS[gid].length; }
+
   /* ============== wspólny silnik gier zręcznościowych (canvas) ============== */
   var imgCache = {};
   function knagaImg(slug) {
@@ -258,24 +318,35 @@
   function canvasGame(el, g, opts) {
     shell(el, g, '<div class="gry-stage" style="' + (opts.ratio ? 'aspect-ratio:' + opts.ratio : '') + '"><canvas id="gry-cv" tabindex="0" aria-label="' + g.name + '"></canvas>' +
       '<div class="gry-hud"><span class="hud-p"><small>Wynik</small><b id="gry-score">0</b></span>' + (opts.lives ? '<span class="hud-p"><small>Życia</small><b id="gry-lives"></b></span>' : '') +
-      '<button type="button" class="hud-btn" id="gry-pause" aria-label="Pauza">' + ICO.pause + '</button></div><div class="gry-over" id="gry-over"></div></div>');
+      '<button type="button" class="hud-btn" id="gry-pause" aria-label="Pauza">' + ICO.pause + '</button></div><div class="gry-over" id="gry-over"></div></div>', ACHS[g.id] ? { side: achBox(g.id) } : {});
     var cv = $('#gry-cv'), ctx = cv.getContext('2d'), W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2), raf = 0, last = 0, running = false, paused = false, over = false;
     function size() { var r = cv.parentNode.getBoundingClientRect(); W = r.width; H = r.height; cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px'; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); if (!running && api.ready) { opts.draw(api); } }
     var fx = [];
     var api = {
       ctx: ctx, get W() { return W; }, get H() { return H; }, score: 0, t: 0,
-      setScore: function (v) { api.score = v; $('#gry-score').textContent = v; },
+      stats: {}, newAch: [],
+      ev: function (k, n) { api.stats[k] = (api.stats[k] || 0) + (n || 1); api.check(); },
+      mx: function (k, v) { if (!(api.stats[k] >= v)) { api.stats[k] = v; api.check(); } },
+      check: function () {
+        var list = ACHS[g.id]; if (!list) return; var s = api.stats; s.score = api.score; s.t = api.t;
+        var d = load(), got = (d.ach = d.ach || {}), arr = (got[g.id] = got[g.id] || []), add = [];
+        list.forEach(function (a) { if (arr.indexOf(a[0]) < 0 && a[4](s)) { arr.push(a[0]); add.push(a); } });
+        if (!add.length) return; save(d);
+        add.forEach(function (a) { api.newAch.push(a); toast('🏆 ' + a[1]); }); achRefresh(g.id);
+      },
+      setScore: function (v) { api.score = v; $('#gry-score').textContent = v; api.check(); },
       setLives: function (n) { var l = $('#gry-lives'); if (l) l.textContent = n > 0 ? '💧'.repeat(n) : '—'; },
       burst: function (x, y, col, n) { if (reduce) return; for (var i = 0; i < (n || 10); i++) { var a = Math.random() * 6.28, v = 60 + Math.random() * 160; fx.push({ x: x, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 60, life: .6, c: col, r: 2 + Math.random() * 3 }); } },
       pop: function (x, y, text, col) { fx.push({ x: x, y: y, vx: 0, vy: -50, life: .9, text: text, c: col || '#fff' }); },
       over: function () {
-        if (over) return; over = true; running = false; cancelAnimationFrame(raf);
+        if (over) return; over = true; running = false; cancelAnimationFrame(raf); api.check();
         var sc = api.score, nb = sc > 0 && submit(g.id, sc);
         if (sc > 0) { xp('game'); if (nb) xp('record'); }
         played(g.id);
         var et = opts.endText ? opts.endText(sc) : ['', g.knaga];
         menu('<span class="gm-eye">Koniec gry</span><div class="gm-k">' + K(et[1] || g.knaga, 'gk') + '</div><p class="gm-end">' + et[0] + '</p><div class="gm-score">' + sc + '<small>' + (g.unit || '') + '</small></div>' +
           (nb ? '<span class="gry-new">Nowy rekord!</span>' : '<p class="gm-best">Twój rekord: <b>' + fmt(g.id, best(g.id)) + '</b></p>') +
+          (api.newAch.length ? '<div class="gm-ach"><small>Nowe osiągnięcia</small>' + api.newAch.map(function (a) { return '<span>' + aIcon(a[3], 15) + a[1] + '</span>'; }).join('') + '</div>' : '') +
           (logged() ? (sc > 0 ? '<p class="gm-xp">+' + (nb ? 15 : 5) + ' XP do sezonu</p>' : '') : '<p class="gm-note">Zaloguj się, żeby rekord zapisał się na koncie.</p>'),
         'Jeszcze raz', true);
         if (nb) loadTop(g.id);
@@ -287,7 +358,7 @@
       $('#gry-go').onclick = paused ? resume : start; $('#gry-go').focus({ preventScroll: true });
       var sh = $('#gry-share'); if (sh) sh.onclick = function () { share(g.name + ' na Śliskiej: ' + api.score + ' ' + (g.unit || '') + ' 💦 Pobijesz?\n' + LINK + '/' + g.id); };
     }
-    function start() { $('#gry-over').hidden = true; over = false; paused = false; fx = []; api.t = 0; api.setScore(0); opts.reset(api); running = true; last = performance.now(); raf = requestAnimationFrame(loop); try { cv.focus({ preventScroll: true }); } catch (e) { /* - */ } }
+    function start() { $('#gry-over').hidden = true; over = false; paused = false; fx = []; api.t = 0; api.stats = {}; api.newAch = []; api.setScore(0); opts.reset(api); running = true; last = performance.now(); raf = requestAnimationFrame(loop); try { cv.focus({ preventScroll: true }); } catch (e) { /* - */ } }
     function pause() { if (!running || over) return; running = false; paused = true; cancelAnimationFrame(raf); menu('<span class="gm-eye">Pauza</span><div class="gm-k">' + K('szlafrok', 'gk') + '</div><p class="gm-end">Knaga czeka. Wynik: <b>' + api.score + '</b></p>', 'Wznów'); }
     function resume() { $('#gry-over').hidden = true; paused = false; running = true; last = performance.now(); raf = requestAnimationFrame(loop); }
     function loop(t) {
@@ -379,10 +450,10 @@
           it.y += it.v * dt;
           if (!it.hit && it.y > py - 26 && it.y < py + 14 && Math.abs(it.x - P.x) < 62) {
             it.hit = true;
-            if (it.k === 'bad') { if (pw.shield > 0) { pw.shield = 0; a.burst(it.x, it.y, '#7c5cff', 14); a.pop(it.x, it.y - 20, 'Parasol zadziałał!', '#c4b5fd'); } else { lives--; combo = 0; a.setLives(lives); a.burst(it.x, it.y, '#d6001c', 14); a.pop(it.x, it.y - 20, '−1 życie', '#ff6b6b'); if (lives <= 0) a.over(); } }
-            else if (PW.indexOf(it.k) >= 0) { pw[it.k] = it.k === 'shield' ? 14 : 8; a.pop(it.x, it.y - 22, PN[it.k], '#fff'); a.burst(it.x, it.y, '#ffcf4a', 12); }
-            else if (it.k === 'life') { lives = Math.min(5, lives + 1); a.setLives(lives); a.pop(it.x, it.y - 20, '+1 życie', '#ff8fb0'); a.burst(it.x, it.y, '#ff2d55', 10); }
-            else { var v = it.k === 'gold' ? 5 : 1; combo++; if (combo % 10 === 0) { v += 5; a.pop(P.x, py - 70, 'COMBO +5', '#ffcf4a'); } a.setScore(a.score + v); a.burst(it.x, it.y, it.k === 'gold' ? '#ffcf4a' : '#5cc8ff', 8); a.pop(it.x, it.y - 18, '+' + (it.k === 'gold' ? 5 : 1), it.k === 'gold' ? '#ffcf4a' : '#fff'); }
+            if (it.k === 'bad') { if (pw.shield > 0) { pw.shield = 0; a.ev('shieldsave'); a.burst(it.x, it.y, '#7c5cff', 14); a.pop(it.x, it.y - 20, 'Parasol zadziałał!', '#c4b5fd'); } else { lives--; a.ev('lost'); combo = 0; a.setLives(lives); a.burst(it.x, it.y, '#d6001c', 14); a.pop(it.x, it.y - 20, '−1 życie', '#ff6b6b'); if (lives <= 0) a.over(); } }
+            else if (PW.indexOf(it.k) >= 0) { a.ev('pw_' + it.k); pw[it.k] = it.k === 'shield' ? 14 : 8; a.pop(it.x, it.y - 22, PN[it.k], '#fff'); a.burst(it.x, it.y, '#ffcf4a', 12); }
+            else if (it.k === 'life') { a.ev('life'); lives = Math.min(5, lives + 1); a.setLives(lives); a.pop(it.x, it.y - 20, '+1 życie', '#ff8fb0'); a.burst(it.x, it.y, '#ff2d55', 10); }
+            else { var v = it.k === 'gold' ? 5 : 1; a.ev(it.k === 'gold' ? 'gold' : 'drop'); combo++; a.mx('combo', combo); if (combo % 10 === 0) { v += 5; a.pop(P.x, py - 70, 'COMBO +5', '#ffcf4a'); } a.setScore(a.score + v); a.burst(it.x, it.y, it.k === 'gold' ? '#ffcf4a' : '#5cc8ff', 8); a.pop(it.x, it.y - 18, '+' + (it.k === 'gold' ? 5 : 1), it.k === 'gold' ? '#ffcf4a' : '#fff'); }
           } else if (!it.hit && it.y > a.H && it.k !== 'bad') { it.hit = true; if (it.k !== 'life') combo = 0; }
         });
         items = items.filter(function (it) { return !it.hit && it.y < a.H + 30; });
@@ -415,9 +486,9 @@
     });
   }
 
-  /* ============== KNAGA FLAPPY ============== */
+  /* ============== SUPER KNAGA (dawniej Knaga Flappy; id gry: flappy) ============== */
   function flappy(el) {
-    function crash(a) { if (B.inv > 0) return; if (B.shield) { B.shield = false; B.inv = 1.1; B.vy = -400; a.pop(B.x, B.y - 44, 'Tarcza pękła', '#ffcf4a'); a.burst(B.x, B.y, '#ffcf4a', 18); return; } a.over(); }
+    function crash(a) { if (B.inv > 0) return; if (B.shield) { a.ev('shieldsave'); B.shield = false; B.inv = 1.1; B.vy = -400; a.pop(B.x, B.y - 44, 'Tarcza pękła', '#ffcf4a'); a.burst(B.x, B.y, '#ffcf4a', 18); return; } a.over(); }
     var PAL = [['#120a2a', '#4b1450', '#b3123a'], ['#04122b', '#0b3a6b', '#1fb5c9'], ['#2a0a1a', '#a03a2f', '#ffb34a']];
     var img = knagaImg('super'), B, pipes, trail = [], city = [[], []];
     for (var L = 0; L < 2; L++) { var x = 0; while (x < 2400) { var w = 40 + Math.random() * 70; city[L].push({ x: x, w: w, h: (L ? 70 : 120) + Math.random() * (L ? 90 : 150), seed: Math.random() }); x += w + (L ? 6 : 10); } }
@@ -438,7 +509,7 @@
         pipes.forEach(function (p) {
           p.x -= sp * dt;
           if (p.amp) p.top = Math.max(50, Math.min(a.H - 46 - p.gp - 50, p.base + Math.sin(a.t * 1.7 + p.ph) * p.amp));
-          if ((p.coin || p.sh) && Math.abs(p.x - B.x) < 32 && Math.abs(B.y - (p.top + p.gp / 2)) < 44) { if (p.sh) { B.shield = true; a.pop(B.x, B.y - 44, 'Tarcza!', '#ffcf4a'); } else { a.setScore(a.score + 2); a.pop(B.x, B.y - 44, '+2', '#5cc8ff'); } a.burst(p.x, p.top + p.gp / 2, p.sh ? '#ffcf4a' : '#5cc8ff', 10); p.coin = false; p.sh = false; }
+          if ((p.coin || p.sh) && Math.abs(p.x - B.x) < 32 && Math.abs(B.y - (p.top + p.gp / 2)) < 44) { if (p.sh) { a.ev('shield'); B.shield = true; a.pop(B.x, B.y - 44, 'Tarcza!', '#ffcf4a'); } else { a.ev('drop'); a.setScore(a.score + 2); a.pop(B.x, B.y - 44, '+2', '#5cc8ff'); } a.burst(p.x, p.top + p.gp / 2, p.sh ? '#ffcf4a' : '#5cc8ff', 10); p.coin = false; p.sh = false; }
           if (!p.pass && p.x + 30 < B.x) { p.pass = true; a.setScore(a.score + 1); a.pop(B.x, B.y - 40, '+1', '#ffcf4a'); if (a.score === 10 || a.score === 25 || a.score === 50) a.pop(a.W / 2, 130, a.score === 10 ? 'BRĄZ' : a.score === 25 ? 'SREBRO' : 'ZŁOTO', a.score === 10 ? '#d19a66' : a.score === 25 ? '#dbe2ea' : '#ffcf4a'); }
           if (B.x + 22 > p.x - 26 && B.x - 22 < p.x + 26 && (B.y - 24 < p.top || B.y + 24 > p.top + p.gp)) crash(a);
         });
@@ -482,13 +553,13 @@
     });
   }
 
-  /* ============== ŚLISKI WĄŻ ============== */
+  /* ============== KANGA (dawniej Śliski Wąż; id gry: waz) ============== */
   function waz(el) {
     var head = knagaImg('ikona'), S, dir, nd, food, gold, acc2, N = 17, obst = [], slow = null, slowT = 0, combo = 0, comboT = 0, nextObs = 5;
     canvasGame(el, G('waz'), {
-      ratio: '1 / 1', intro: 'Prowadź węża z głową Knagi po scenie. Zbieraj mikrofony szybko jeden po drugim, a zrobisz combo (do +4). Złoty mikrofon to 3 punkty, zegar zwalnia czas. Uważaj: co 5 punktów na scenie pojawia się nowa kolumna głośnikowa.',
+      ratio: '1 / 1', intro: 'Prowadź Knagę po scenie. Z każdym mikrofonem robi się dłuższa. Zbieraj je szybko jeden po drugim, a zrobisz combo (do +4). Złoty mikrofon to 3 punkty, zegar zwalnia czas. Uważaj: co 5 punktów na scenie pojawia się nowa kolumna głośnikowa.',
       keys: [['↑ ↓ ← →', 'kierunek'], ['WASD', 'też działa'], ['przesuń palcem', 'telefon']],
-      endText: function (s) { return s >= 40 ? ['Wąż długi jak lista featów. Szacun!', 'gwiazdor'] : s >= 15 ? ['Ładnie urósł. Prawie gwiazda sceny.', 'ziomek'] : ['Knaga się zaplątała.', 'wsciekla']; },
+      endText: function (s) { return s >= 40 ? ['Długa jak lista featów. Szacun!', 'gwiazdor'] : s >= 15 ? ['Ładnie urosła. Prawie gwiazda sceny.', 'ziomek'] : ['Knaga się zaplątała.', 'wsciekla']; },
       init: function (a, cv) {
         var map = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0], w: [0, -1], s: [0, 1], a: [-1, 0], d: [1, 0], W: [0, -1], S: [0, 1], A: [-1, 0], D: [1, 0] };
         var kd = function (e) { var m = map[e.key]; if (m && !(m[0] === -dir[0] && m[1] === -dir[1])) { nd = m; e.preventDefault(); } };
@@ -507,10 +578,11 @@
         if (h[0] < 0 || h[1] < 0 || h[0] >= N || h[1] >= N || S.some(function (p) { return p[0] === h[0] && p[1] === h[1]; }) || obst.some(function (o) { return o[0] === h[0] && o[1] === h[1]; })) return a.over();
         S.unshift(h);
         var g2 = geo(a), px = function (p) { return [g2.ox + p[0] * g2.sz + g2.sz / 2, g2.oy + p[1] * g2.sz + g2.sz / 2]; };
-        if (gold && h[0] === gold.p[0] && h[1] === gold.p[1]) { a.setScore(a.score + 3); var q = px(h); a.burst(q[0], q[1], '#ffcf4a', 14); a.pop(q[0], q[1] - 20, '+3', '#ffcf4a'); gold = null; S.push(S[S.length - 1]); S.push(S[S.length - 1]); }
-        else if (h[0] === food[0] && h[1] === food[1]) { combo = comboT > 0 ? combo + 1 : 1; comboT = 2.6; var add = Math.min(4, combo); a.setScore(a.score + add); var q2 = px(h); a.burst(q2[0], q2[1], '#ff2d77', 10); a.pop(q2[0], q2[1] - 20, '+' + add, add > 1 ? '#ffcf4a' : '#fff'); place(); if (!gold && Math.random() < .18) placeGold(); else if (!slow && Math.random() < .14) slow = { p: free(), t: 9 }; if (a.score >= nextObs && obst.length < 9) { nextObs += 5; addObs(); a.pop(a.W / 2, 60, 'Nowa kolumna głośnikowa!', '#ff8fb0'); } }
-        else if (slow && h[0] === slow.p[0] && h[1] === slow.p[1]) { slowT = 6; slow = null; a.setScore(a.score + 1); var q3 = px(h); a.pop(q3[0], q3[1] - 20, 'Zwolnienie!', '#5eead4'); a.burst(q3[0], q3[1], '#14b8a6', 10); S.pop(); }
+        if (gold && h[0] === gold.p[0] && h[1] === gold.p[1]) { a.ev('gold'); a.setScore(a.score + 3); var q = px(h); a.burst(q[0], q[1], '#ffcf4a', 14); a.pop(q[0], q[1] - 20, '+3', '#ffcf4a'); gold = null; S.push(S[S.length - 1]); S.push(S[S.length - 1]); }
+        else if (h[0] === food[0] && h[1] === food[1]) { a.ev('mic'); combo = comboT > 0 ? combo + 1 : 1; a.mx('combo', combo); comboT = 2.6; var add = Math.min(4, combo); a.setScore(a.score + add); var q2 = px(h); a.burst(q2[0], q2[1], '#ff2d77', 10); a.pop(q2[0], q2[1] - 20, '+' + add, add > 1 ? '#ffcf4a' : '#fff'); place(); if (!gold && Math.random() < .18) placeGold(); else if (!slow && Math.random() < .14) slow = { p: free(), t: 9 }; if (a.score >= nextObs && obst.length < 9) { nextObs += 5; addObs(); a.pop(a.W / 2, 60, 'Nowa kolumna głośnikowa!', '#ff8fb0'); } }
+        else if (slow && h[0] === slow.p[0] && h[1] === slow.p[1]) { a.ev('slow'); slowT = 6; slow = null; a.setScore(a.score + 1); var q3 = px(h); a.pop(q3[0], q3[1] - 20, 'Zwolnienie!', '#5eead4'); a.burst(q3[0], q3[1], '#14b8a6', 10); S.pop(); }
         else S.pop();
+        a.mx('len', S.length); a.mx('obs', obst.length);
       },
       draw: function (a) {
         var c = a.ctx, t = a.t, g2 = geo(a), sz = g2.sz, ox = g2.ox, oy = g2.oy;
@@ -524,9 +596,15 @@
         obst.forEach(function (o) { var x = ox + o[0] * sz, y = oy + o[1] * sz; c.fillStyle = '#2b2f3a'; c.strokeStyle = INK; c.lineWidth = 2.5; c.beginPath(); c.roundRect(x + 2, y + 2, sz - 4, sz - 4, 5); c.fill(); c.stroke(); c.fillStyle = '#6b7280'; c.beginPath(); c.arc(x + sz / 2, y + sz * .62, sz * .2, 0, 7); c.fill(); c.beginPath(); c.arc(x + sz / 2, y + sz * .3, sz * .09, 0, 7); c.fill(); });
         if (slow) { c.globalAlpha = slow.t < 2 ? (Math.sin(t * 20) > 0 ? 1 : .35) : 1; badge(c, cx(slow.p), cy(slow.p), 'slow', t); c.globalAlpha = 1; }
         c.lineCap = 'round'; c.lineJoin = 'round';
-        c.beginPath(); S.forEach(function (p, i) { if (!i) c.moveTo(cx(p), cy(p)); else c.lineTo(cx(p), cy(p)); });
-        c.strokeStyle = INK; c.lineWidth = sz * .78 + 5; c.stroke(); c.strokeStyle = '#f5b896'; c.lineWidth = sz * .78; c.stroke(); c.strokeStyle = 'rgba(255,255,255,.35)'; c.lineWidth = sz * .2; c.stroke();
-        drawK(c, head, cx(S[0]), cy(S[0]), sz * 1.9, Math.atan2(dir[1], dir[0]) + Math.PI / 2);
+        var n = S.length;
+        for (var pass = 0; pass < 3; pass++) for (var i = n - 1; i > 0; i--) {
+          var wd = sz * (.5 + .32 * (1 - i / n)); c.beginPath(); c.moveTo(cx(S[i]), cy(S[i])); c.lineTo(cx(S[i - 1]), cy(S[i - 1]));
+          if (pass === 0) { c.strokeStyle = INK; c.lineWidth = wd + 5; } else if (pass === 1) { c.strokeStyle = i % 2 ? '#e0243f' : '#c4102a'; c.lineWidth = wd; } else { c.strokeStyle = 'rgba(255,255,255,.3)'; c.lineWidth = wd * .24; }
+          c.stroke();
+        }
+        c.fillStyle = '#ff9fb2'; c.strokeStyle = INK; c.lineWidth = 3; c.beginPath(); c.arc(cx(S[n - 1]), cy(S[n - 1]), sz * .3, 0, 7); c.fill(); c.stroke();
+        drawK(c, head, cx(S[0]), cy(S[0]), sz * 2.05, Math.atan2(dir[1], dir[0]) + Math.PI / 2);
+        c.font = '900 14px Figtree, Arial'; c.textAlign = 'right'; c.fillStyle = 'rgba(255,255,255,.75)'; c.fillText('DŁUGOŚĆ: ' + (n * 2) + ' CM', ox + sz * N - 6, oy + sz * N - 8);
         if (comboT > 0 && combo > 1) { c.font = '900 15px Figtree, Arial'; c.textAlign = 'center'; c.fillStyle = '#ffcf4a'; c.fillText('COMBO ×' + Math.min(4, combo), a.W / 2, oy - 14 > 14 ? oy - 14 : 16); }
         if (slowT > 0) pills(c, [['Zwolnienie', slowT, '#14b8a6', 6]], 12, 62);
       }
@@ -666,6 +744,12 @@
     DramaSim.mount(el, { G: G, K: K, esc: esc, shell: shell, submit: submit, xp: xp, played: played, share: share, load: load, save: save, toast: toast, LINK: LINK + '/drama' });
   }
 
+  /* ============== REDAKTOR NACZELNY (news/naczelny.js) ============== */
+  function naczelny(el) {
+    if (!window.NaczelnySim) { shell(el, G('naczelny'), '<p class="gp-empty">Nie udało się wczytać gry. Odśwież stronę.</p>'); return; }
+    NaczelnySim.mount(el, { G: G, K: K, esc: esc, shell: shell, submit: submit, xp: xp, played: played, share: share, load: load, save: save, toast: toast, LINK: LINK + '/naczelny' });
+  }
+
   /* ============== KRZYŻÓWKA TYGODNIA (krzyżówka z hasłem) ============== */
   // [wyraz, podpowiedź, pozycja litery hasła w wyrazie] – używane, gdy właściciel nie ułożył krzyżówki na dany tydzień
   var KRZ = [
@@ -682,14 +766,40 @@
       if (!arts.length && typeof state !== 'undefined') arts = state.articles || [];
       var own = !!(c && c.krzyz && c.krzyz.week === weekIndex() && c.krzyz.h);
       var set = own ? c.krzyz : (window.KrzGen && KrzGen.generate(arts, weekIndex())) || KRZ[((weekIndex() % KRZ.length) + KRZ.length) % KRZ.length];
+      if (own || arts.length) lsSet('sn-krzyz-set-' + weekIndex(), set);   // zapamiętany zestaw trafia potem do archiwum
       krzRun(set, own ? 'Ułożona przez redakcję' : set.gen ? 'Z artykułów tygodnia' : 'Krzyżówka z hasłem');
     });
   }
-  function krzRun(set, own) {
+  /* archiwum: poprzednie tygodnie (najstarszy startowy zestaw: tydzień −3) */
+  var wname = function (w) { return w < 0 ? 'Zestaw startowy ' + (-w) : 'Tydzień #' + w; };
+  var wid = function (w) { return w < 0 ? 'n' + (-w) : String(w); };
+  var weekRange = function (w) { var a = new Date(2026, 9, 26 + w * 7), b = new Date(2026, 9, 26 + w * 7 + 6), f = function (x) { return x.toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' }); }; return f(a) + ' – ' + f(b); };
+  function krzSetFor(w, arts) {
+    var c = lsGet('sn-krzyz-set-' + w); if (c && c.r && c.h) return c;
+    var set = (window.KrzGen && KrzGen.generate(arts, w)) || KRZ[((w % KRZ.length) + KRZ.length) % KRZ.length];
+    if (arts.length) lsSet('sn-krzyz-set-' + w, set); return set;
+  }
+  function krzArchive(el, ctx) {
+    var g = G('krzyzowka'), arts = (ctx && ctx.articles) || []; if (!arts.length && typeof state !== 'undefined') arts = state.articles || [];
+    var cur = weekIndex(), from = Math.max(-3, cur - 12), cards = '';
+    for (var w = cur - 1; w >= from; w--) {
+      var set = krzSetFor(w, arts), done = !!lsGet('sn-krzyz-done-' + w), st = lsGet('sn-krzyz-' + w + '-' + set.h), part = !done && st && st.v && Object.keys(st.v).some(function (k) { return /\S/.test(st.v[k] || ''); });
+      cards += '<a class="kza' + (done ? ' is-done' : '') + '" href="#/gry/krzyzowka-arch-' + wid(w) + '"><span class="kza-n">' + (w < 0 ? '★' : '#' + w) + '</span><span><b>' + wname(w) + '</b><small>' + weekRange(w) + ' · ' + set.r.length + ' wyrazów</small></span><em>' + (done ? aIcon('check', 14) + ' Rozwiązana' : part ? 'W trakcie' : 'Nowa') + '</em></a>';
+    }
+    shell(el, g, '<div class="kz-paper kza-wrap"><div class="kz-head"><div><span class="gm-eye">Archiwum</span><p>Krzyżówki z poprzednich tygodni. Rozwiązania z archiwum nie dają XP i nie liczą się do rekordu, ale możesz grać bez końca.</p></div><a class="btn btn-sm" href="#/gry/krzyzowka">Bieżąca krzyżówka</a></div><div class="kza-list">' + (cards || '<p class="gp-empty">Pierwsze krzyżówki trafią tu po najbliższym poniedziałku.</p>') + '</div></div>', { tag: 'Archiwum', noTop: true });
+  }
+  function krzArchPlay(el, w, ctx) {
+    var g = G('krzyzowka'), arts = (ctx && ctx.articles) || []; if (!arts.length && typeof state !== 'undefined') arts = state.articles || [];
+    if (w >= weekIndex() || w < -3) { location.hash = '#/gry/krzyzowka-arch'; return; }
+    shell(el, g, '<div class="kz"></div>', { tag: 'Archiwum · ' + (w < 0 ? 'zestaw startowy ' + (-w) : 'tydzień #' + w), noTop: true });
+    krzRun(krzSetFor(w, arts), 'Archiwum, ' + weekRange(w), w, true);
+  }
+  function krzRun(set, own, week, arch) {
+    var W = week == null ? weekIndex() : week;
     var L = Math.max.apply(null, set.r.map(function (r) { return r[2]; })), R = Math.max.apply(null, set.r.map(function (r) { return r[0].length - r[2]; }));
-    var key = 'sn-krzyz-' + weekIndex() + '-' + set.h, st = lsGet(key) || {}; st.v = st.v || {};
+    var key = 'sn-krzyz-' + W + '-' + set.h, st = lsGet(key) || {}; st.v = st.v || {};
     var nxt = new Date(); nxt.setDate(nxt.getDate() + ((8 - nxt.getDay()) % 7 || 7));
-    $('.kz').innerHTML = '<div class="kz-paper"><div class="kz-head"><div><span class="gm-eye">' + (own ? 'Ułożona przez redakcję' : 'Krzyżówka z hasłem') + '</span><p>Litery w <b>złotej kolumnie</b> tworzą hasło tygodnia (' + set.h.length + ' liter). Nowa: ' + nxt.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' }) + '.</p></div></div>' +
+    $('.kz').innerHTML = '<div class="kz-paper"><div class="kz-head"><div><span class="gm-eye">' + (arch ? own : own ? 'Ułożona przez redakcję' : 'Krzyżówka z hasłem') + '</span><p>Litery w <b>złotej kolumnie</b> tworzą hasło tygodnia (' + set.h.length + ' liter). ' + (arch ? 'Archiwum: bez XP i rekordu.' : 'Nowa: ' + nxt.toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' }) + '.') + '</p></div><a class="btn btn-sm" href="#/gry/krzyzowka-arch">' + (arch ? '← Archiwum' : 'Archiwum') + '</a></div>' +
       '<div class="kz-wrap"><div class="kz-grid" id="kz-grid" style="--cols:' + (L + R) + '">' + set.r.map(function (r, ri) {
         var cells = ''; for (var c = 0; c < L + R; c++) {
           var k = c - (L - r[2]);
@@ -725,9 +835,13 @@
     document.querySelector('.kz-clues').addEventListener('click', function (e) { var li = e.target.closest('[data-r]'); if (li) { var c = cellsOf(+li.dataset.r).find(function (x) { return !x.value; }) || cellsOf(+li.dataset.r)[0]; c.focus(); } });
     function win() {
       grid.classList.add('is-done'); [].forEach.call(grid.querySelectorAll('.kz-c'), function (i) { i.readOnly = true; }); $('#kz-pass').classList.add('is-done'); pass();
-      $('#kz-msg').innerHTML = '<div class="sz-end is-win">' + K('imprezowa', 'gk') + '<div><b>Rozwiązane!</b><span>Hasło tygodnia: ' + set.h + '. Mokra robota.</span></div><button type="button" class="btn btn-primary btn-sm" id="kz-share">' + ICO.share + ' Udostępnij</button></div>';
+      $('#kz-msg').innerHTML = '<div class="sz-end is-win">' + K('imprezowa', 'gk') + '<div><b>Rozwiązane!</b><span>Hasło tygodnia: ' + set.h + '. Mokra robota.' + (arch ? ' <a href="#/gry/krzyzowka-arch">Wróć do archiwum</a>' : '') + '</span></div><button type="button" class="btn btn-primary btn-sm" id="kz-share">' + ICO.share + ' Udostępnij</button></div>';
       $('#kz-share').onclick = function () { share('Rozwiązałem Krzyżówkę Tygodnia na Śliskiej 🧩 Dasz radę?\n' + LINK + '/krzyzowka'); };
-      if (!st.done) { st.done = 1; lsSet(key, st); lsSet('sn-krzyz-done-' + weekIndex(), 1); var d = load(); d.solved = (d.solved || 0) + 1; save(d); submit('krzyzowka', d.solved); xp('krzyzowka'); played('krzyzowka'); toast('Krzyżówka rozwiązana! 🧩'); }
+      if (!st.done) {
+        st.done = 1; lsSet(key, st); lsSet('sn-krzyz-done-' + W, 1); var d = load();
+        if (arch) { d.archSolved = (d.archSolved || 0) + 1; save(d); toast('Krzyżówka z archiwum rozwiązana! 🧩'); }
+        else { d.solved = (d.solved || 0) + 1; save(d); submit('krzyzowka', d.solved); xp('krzyzowka'); played('krzyzowka'); toast('Krzyżówka rozwiązana! 🧩'); }
+      }
     }
     $('#kz-check').onclick = function () {
       var bad = 0, empty = 0;
@@ -752,12 +866,14 @@
   window.addEventListener('hashchange', function () { setTimeout(zone, 0); });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', zone); else zone();
 
-  var RUN = { krzyzowka: krzyzowka, slizgle: slizgle, krople: krople, flappy: flappy, waz: waz, ukladanka: ukladanka, drama: drama, slizgawka: slizgawka };
+  var RUN = { krzyzowka: krzyzowka, slizgle: slizgle, krople: krople, flappy: flappy, waz: waz, ukladanka: ukladanka, drama: drama, naczelny: naczelny, slizgawka: slizgawka };
   window.SliskieGry = {
     mount: function (el, sub, ctx) {
       stopAll();
       if (sub === 'slizgawka' && !unlocked()) sub = '';
-      if (sub && RUN[sub]) RUN[sub](el, ctx || {}); else hub(el);
+      var am = /^krzyzowka-arch(?:-(n?\d+))?$/.exec(sub || '');
+      if (am) { if (am[1] == null) krzArchive(el, ctx || {}); else krzArchPlay(el, am[1].charAt(0) === 'n' ? -Number(am[1].slice(1)) : Number(am[1]), ctx || {}); }
+      else if (sub && RUN[sub]) RUN[sub](el, ctx || {}); else hub(el);
       window.scrollTo(0, 0);
     },
     stop: stopAll,

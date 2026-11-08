@@ -105,7 +105,7 @@ td input[type=number]{width:96px;height:32px}
   var API = (/^(news|dev)\.sliska\.pl$/.test(location.hostname) ? 'https://api.sliska.pl' : '/news/api');
   var $ = function (s, r) { return (r || document).querySelector(s); }, $$ = function (s, r) { return [].slice.call((r || document).querySelectorAll(s)); };
   var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
-  var GN = { slizgle: 'Ślizgle', krzyzowka: 'Krzyżówka', krople: 'Łap Krople', flappy: 'Knaga Flappy', waz: 'Śliski Wąż', slizgawka: 'Ślizgawka', ukladanka: 'Układanka', drama: 'Drama Simulator' };
+  var GN = { slizgle: 'Ślizgle', krzyzowka: 'Krzyżówka', krople: 'Łap Krople', flappy: 'Super Knaga', waz: 'Kanga', slizgawka: 'Ślizgawka', ukladanka: 'Układanka', drama: 'Drama Simulator', naczelny: 'Redaktor Naczelny' };
   var LV = ['Suchar', 'Lekko Wilgotny', 'Spocony', 'Mokry od Plotek', 'Ociekający', 'Napalony na Dramy', 'Śliski Typ', 'Król Przypału', 'Chodząca Afera', 'Mokra Elita', 'Mokry Sen Redakcji', 'Legenda Śliskiej'];
   var ERR = { forbidden: 'Ta strona jest tylko dla Właściciela Portalu.', krzyz: 'Krzyżówka niepoprawna: każdy wyraz musi zawierać swoją literę hasła i mieć pytanie.', bad: 'Nieprawidłowe dane.' };
   var D = null, arts = [];
@@ -117,7 +117,7 @@ td input[type=number]{width:96px;height:32px}
       return fetch(API + path, o);
     }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { if (!r.ok) throw new Error(ERR[d.error] || ('Błąd ' + r.status + (d.error ? ' (' + d.error + ')' : ''))); return d; }); });
   }
-  function fmtBest(g, v) { return g === 'slizgle' ? (7 - v) + '/6' : g === 'drama' ? v + '/20' : g === 'krzyzowka' ? v + '×' : g === 'ukladanka' ? v + ' ruchów' : v + (g === 'slizgawka' ? ' m' : ' pkt'); }
+  function fmtBest(g, v) { return g === 'slizgle' ? (7 - v) + '/6' : g === 'drama' ? v + '/30' : g === 'krzyzowka' ? v + '×' : g === 'ukladanka' ? v + ' ruchów' : v + (g === 'slizgawka' ? ' m' : ' pkt'); }
   function dayDate(d) { var x = new Date(Date.UTC(2026, 10, 1) + d * 864e5); return x.toLocaleDateString('pl-PL', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' }); }
   function weekRange(w) { var s = w * 7 - 6; return dayDate(Math.max(0, s)) + ' – ' + dayDate(s + 6); }
   function say(el, t, ok) { el.textContent = t; el.className = 'msg ' + (ok ? 'o' : 'e'); }
