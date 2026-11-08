@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="pl"><head><script>try{if(self===top){location.replace('/?open='+encodeURIComponent(location.pathname+location.search+location.hash))}}catch(e){}</script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow">
+<title>DEV · Gry i Knaga – Śliska News</title>
+<link rel="icon" href="/news/icons-dev/favicon.svg" type="image/svg+xml">
+<script>try{var t=localStorage.getItem('sliska_theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<script src="/news/dev-art.js"></script>
+<script src="/news/dev-gate.js"></script>
+<style>
+:root{--accent:#d6001c;--text:#1a1a1a;--muted:#667085;--bg:#f4f5f7;--card:#fff;--line:#e4e7ec;--soft:#eef0f3;--ok:#16a34a;--gold:#ffcf4a}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--text:#ececec;--muted:#a3a3a3;--bg:#121212;--card:#1c1c1c;--line:#2e2e2e;--soft:#262626}}
+:root[data-theme=dark]{--text:#ececec;--muted:#a3a3a3;--bg:#121212;--card:#1c1c1c;--line:#2e2e2e;--soft:#262626}
+*{box-sizing:border-box}button,input,select,textarea{font-family:inherit}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Figtree,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:0 0 calc(24px + env(safe-area-inset-bottom))}
+.w{max-width:1180px;margin:0 auto;padding:22px 28px}
+.tabs{display:flex;gap:6px;margin:0 0 16px;overflow-x:auto;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:none;border:1px solid var(--line);background:var(--card);color:var(--muted);font-weight:700;font-size:.88rem;padding:8px 16px;border-radius:99px;cursor:pointer}
+.tabs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin:0 0 16px}
+h3{margin:0 0 4px;font:800 1.05rem Figtree,sans-serif}.sub{margin:0 0 14px;color:var(--muted);font-size:.86rem}
+.btn{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 18px;border-radius:99px;border:0;background:var(--accent);color:#fff;font-weight:800;font-size:.9rem;cursor:pointer;white-space:nowrap}
+.btn:disabled{opacity:.5;cursor:default}.btn.g{background:var(--soft);color:var(--text);font-weight:700}.btn.d{background:transparent;color:#d6001c;border:1px solid var(--line)}.btn.s{height:32px;padding:0 12px;font-size:.8rem}
+input[type=text],input[type=number],input[type=search],textarea,select{width:100%;height:40px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:.92rem}
+textarea{height:auto;min-height:84px;padding:10px 12px;resize:vertical}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px}
+.msg{min-height:1.3em;margin:10px 0 0;font-size:.88rem}.msg.e{color:#d6001c}.msg.o{color:var(--ok)}
+.empty{padding:20px 10px;text-align:center;color:var(--muted)}
+.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 16px}
+.sum div{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 16px}
+.sum b{display:block;font-size:1.6rem;line-height:1.1;font-variant-numeric:tabular-nums}.sum span{color:var(--muted);font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}.g2>.box{margin:0}
+.bars{display:grid;gap:6px}.bars div{display:grid;grid-template-columns:140px 1fr 60px;align-items:center;gap:8px;font-size:.86rem}
+.bars i{display:block;height:12px;border-radius:99px;background:linear-gradient(90deg,var(--accent),#ff7a8f)}.bars em{font-style:normal;font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
+.chart{display:flex;align-items:flex-end;gap:3px;height:140px;padding-top:10px}.chart span{flex:1;min-width:4px;border-radius:4px 4px 0 0;background:var(--accent);position:relative}.chart span:hover::after{content:attr(data-t);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);white-space:nowrap;background:#111;color:#fff;font-size:.72rem;padding:2px 6px;border-radius:6px}
+.axis{display:flex;justify-content:space-between;color:var(--muted);font-size:.72rem;margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:.86rem}th{text-align:left;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;padding:8px 6px;border-bottom:1px solid var(--line)}td{padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+td input[type=number]{width:96px;height:32px}
+.lv{display:inline-block;padding:1px 8px;border-radius:99px;background:var(--soft);font-weight:800;font-size:.74rem}
+.recs{display:flex;flex-wrap:wrap;gap:4px}.recs span{display:inline-flex;align-items:center;gap:4px;padding:2px 4px 2px 8px;border-radius:99px;background:var(--soft);font-size:.74rem}.recs button{border:0;background:none;color:#d6001c;cursor:pointer;font-weight:900}
+.tw{overflow-x:auto}
+.rg{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}.rg .box{margin:0;padding:12px 14px}.rg ol{margin:6px 0 0;padding-left:20px;font-size:.84rem}
+.words{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.word{display:inline-flex;align-items:center;gap:6px;padding:6px 6px 6px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);font-weight:800}
+.word small{color:var(--muted);font-weight:600}.word.past{opacity:.5}.word.today{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,var(--card))}.word button{border:0;background:var(--soft);border-radius:8px;width:24px;height:24px;cursor:pointer;color:#d6001c;font-weight:900}
+.kz-rows{display:grid;gap:8px;margin:12px 0}.kz-r{display:grid;grid-template-columns:30px 160px 1fr auto;gap:8px;align-items:center}.kz-r b{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:var(--gold);color:#2a1620;font-weight:900}
+.kz-r.bad input:first-of-type{outline:2px solid #d6001c}
+.prev{display:grid;gap:3px;justify-content:center;margin:12px 0}.prev div{display:flex;gap:3px}.prev span{width:26px;height:26px;display:grid;place-items:center;border:1px solid var(--line);border-radius:6px;font-weight:800;font-size:.8rem;background:var(--bg)}.prev span.h{background:var(--gold);border-color:#e0a100;color:#2a1620}.prev span.x{border:0;background:none}
+.sug{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 0 38px}.sug button{border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:99px;padding:4px 10px;font-size:.78rem;cursor:pointer}.sug button b{color:var(--accent)}
+.cat{margin:0 0 12px}.cat summary{cursor:pointer;font-weight:800;padding:6px 0}.cat summary small{color:var(--muted);font-weight:600}
+.ln{display:grid;grid-template-columns:52px 150px 1fr 34px;gap:8px;align-items:center;margin:6px 0}.ln .pv{width:52px;height:52px;border-radius:12px;background:#ffe9de}.ln .pv svg{width:100%;height:100%}
+.ln button{height:34px;border:0;border-radius:10px;background:var(--soft);color:#d6001c;font-weight:900;cursor:pointer}
+.bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 12px}.bar .grow{flex:1}
+.stick{position:sticky;bottom:0;padding:12px 0;background:linear-gradient(transparent,var(--bg) 30%);display:flex;gap:8px;align-items:center}
+@media(max-width:760px){.w{padding:14px}.g2{grid-template-columns:1fr}.kz-r{grid-template-columns:30px 1fr;}.kz-r input:nth-of-type(2),.kz-r .btn{grid-column:2}.ln{grid-template-columns:44px 1fr 34px}.ln .pv{width:44px;height:44px}.ln select{grid-column:2}.ln button{grid-column:3;grid-row:1}.ln input{grid-column:1/-1}.bars div{grid-template-columns:100px 1fr 50px}.sug{margin-left:0}}
+</style></head><body>
+<div class="w">
+  <div class="tabs" role="tablist">
+    <button type="button" class="on" data-tab="stats">Statystyki</button>
+    <button type="button" data-tab="users">Gracze i XP</button>
+    <button type="button" data-tab="slizgle">Ślizgle</button>
+    <button type="button" data-tab="krzyz">Krzyżówka</button>
+    <button type="button" data-tab="knaga">Teksty Knagi</button>
+  </div>
+  <p class="msg e" id="err" hidden></p>
+
+  <section id="p-stats"><div id="stats"><p class="empty">Ładowanie…</p></div></section>
+
+  <section id="p-users" hidden>
+    <div class="box"><h3>Gracze i punkty XP</h3><p class="sub">Poziom wynika z sumy XP. Możesz poprawić XP (np. po oszustwie), punkty w bieżącym sezonie i usunąć rekord w grze (× przy rekordzie).</p>
+      <div class="bar"><input type="search" id="uq" placeholder="Szukaj po nazwie użytkownika…" style="max-width:360px"><button type="button" class="btn g s" id="ugo">Szukaj</button></div>
+      <div class="tw" id="users"><p class="empty">Ładowanie…</p></div></div>
+  </section>
+
+  <section id="p-slizgle" hidden>
+    <div class="box"><h3>Słowa w Ślizgle</h3>
+      <p class="sub">Wpisz swoje słowa po przecinku – pojawią się po kolei, jedno dziennie, zaczynając od <b>jutra</b> (albo od dnia po ostatnim zaplanowanym). Słowo musi mieć 4–7 liter (polskie litery są w porządku). Gdy kolejka się skończy, gra wraca do wbudowanej listy kontrowersyjnych słów.</p>
+      <textarea id="sw-in" placeholder="np. AFERA, ZDRADA, ROMANS, PRZYPAŁ"></textarea>
+      <div class="bar" style="margin-top:10px"><button type="button" class="btn" id="sw-add">Dodaj do kolejki</button><span class="msg" id="sw-msg" style="margin:0"></span></div>
+      <h3 style="margin-top:14px">Zaplanowane</h3><div class="words" id="sw-list"></div>
+    </div>
+  </section>
+
+  <section id="p-krzyz" hidden>
+    <div class="box"><h3>Krzyżówka Tygodnia</h3>
+      <p class="sub">Wybierz tydzień, wpisz hasło i dla każdej jego litery wyraz z podpowiedzią. Litera hasła musi występować w wyrazie (zaznaczy się sama). „Propozycje z artykułów” podpowiadają wyrazy i pytania na podstawie ostatnich tekstów – kliknij propozycję, żeby ją wstawić i ewentualnie popraw pytanie. Tydzień bez Twojej krzyżówki dostaje wbudowaną.</p>
+      <div class="bar"><select id="kz-week" style="max-width:320px"></select><span class="grow"></span><span id="kz-state" class="lv"></span></div>
+      <div class="bar"><input type="text" id="kz-h" maxlength="12" placeholder="HASŁO (3–12 liter), np. SKANDAL" style="max-width:320px;text-transform:uppercase"><button type="button" class="btn g s" id="kz-auto">Wypełnij propozycjami</button></div>
+      <div class="kz-rows" id="kz-rows"></div>
+      <div class="prev" id="kz-prev"></div>
+      <div class="stick"><button type="button" class="btn" id="kz-save">Zapisz krzyżówkę</button><button type="button" class="btn d s" id="kz-del">Usuń (wróci wbudowana)</button><span class="msg" id="kz-msg" style="margin:0"></span></div>
+    </div>
+  </section>
+
+  <section id="p-knaga" hidden>
+    <div class="box"><h3>Teksty Knagi</h3><p class="sub">Co mówi Knaga w rogu strony – osobno dla każdego miejsca. Wybierz strój (ikonka obok) i wpisz tekst. Puste pole zostanie pominięte. „Przywróć domyślne” wraca do tekstów wbudowanych.</p>
+      <div id="kn"></div>
+      <div class="stick"><button type="button" class="btn" id="kn-save">Zapisz teksty</button><button type="button" class="btn d s" id="kn-reset">Przywróć domyślne</button><span class="msg" id="kn-msg" style="margin:0"></span></div>
+    </div>
+  </section>
+</div>
+<script src="/news/knaga.js"></script>
+<script src="/news/knaga-teksty.js"></script>
+<script>
+(function () {
+  'use strict';
+  var API = (/^(news|dev)\.sliska\.pl$/.test(location.hostname) ? 'https://api.sliska.pl' : '/news/api');
+  var $ = function (s, r) { return (r || document).querySelector(s); }, $$ = function (s, r) { return [].slice.call((r || document).querySelectorAll(s)); };
+  var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var GN = { slizgle: 'Ślizgle', krzyzowka: 'Krzyżówka', krople: 'Łap Krople', flappy: 'Knaga Flappy', waz: 'Śliski Wąż', slizgawka: 'Ślizgawka', ukladanka: 'Układanka', drama: 'Drama Simulator' };
+  var LV = ['Sucharz', 'Wilgotny', 'Mokry', 'Ociekający', 'Śliski', 'Ślizgacz', 'Mokra Elita', 'Legenda Śliskiej'];
+  var ERR = { forbidden: 'Ta strona jest tylko dla Właściciela Portalu.', krzyz: 'Krzyżówka niepoprawna: każdy wyraz musi zawierać swoją literę hasła i mieć pytanie.', bad: 'Nieprawidłowe dane.' };
+  var D = null, arts = [];
+  function token() { return window.devToken ? window.devToken() : Promise.reject(new Error('Brak logowania.')); }
+  function api(path, body) {
+    return token().then(function (t) {
+      var o = { headers: { authorization: 'Bearer ' + t }, cache: 'no-store' };
+      if (body) { o.method = 'POST'; o.headers['content-type'] = 'application/json'; o.body = JSON.stringify(body); }
+      return fetch(API + path, o);
+    }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { if (!r.ok) throw new Error(ERR[d.error] || ('Błąd ' + r.status + (d.error ? ' (' + d.error + ')' : ''))); return d; }); });
+  }
+  function fmtBest(g, v) { return g === 'slizgle' ? (7 - v) + '/6' : g === 'drama' ? v + '/8' : g === 'krzyzowka' ? v + '×' : g === 'ukladanka' ? v + ' ruchów' : v + (g === 'slizgawka' ? ' m' : ' pkt'); }
+  function dayDate(d) { var x = new Date(Date.UTC(2026, 10, 1) + d * 864e5); return x.toLocaleDateString('pl-PL', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' }); }
+  function weekRange(w) { var s = w * 7 - 6; return dayDate(Math.max(0, s)) + ' – ' + dayDate(s + 6); }
+  function say(el, t, ok) { el.textContent = t; el.className = 'msg ' + (ok ? 'o' : 'e'); }
+
+  /* ---------- zakładki ---------- */
+  $('.tabs').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-tab]'); if (!b) return;
+    $$('.tabs button').forEach(function (x) { x.classList.toggle('on', x === b); });
+    ['stats', 'users', 'slizgle', 'krzyz', 'knaga'].forEach(function (k) { $('#p-' + k).hidden = k !== b.dataset.tab; });
+    if (b.dataset.tab === 'users' && !$('#users table')) loadUsers();
+  });
+
+  function load() {
+    return api('/gry/admin').then(function (d) { D = d; $('#err').hidden = true; stats(); slizgle(); krzWeeks(); knaga(); })
+      .catch(function (e) { $('#err').hidden = false; $('#err').textContent = e.message; $('#stats').innerHTML = ''; });
+  }
+
+  /* ---------- statystyki ---------- */
+  function stats() {
+    var s = D.season || {}, tot = D.totals || {}, maxT = Math.max.apply(null, Object.keys(GN).map(function (g) { return tot[g] || 0; }).concat([1]));
+    var days = {}; (D.plays || []).forEach(function (p) { days[p.day] = (days[p.day] || 0) + p.plays; });
+    var list = []; for (var i = 29; i >= 0; i--) { var k = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Warsaw' }).format(new Date(Date.now() - i * 864e5)); list.push([k, days[k] || 0]); }
+    var maxD = Math.max.apply(null, list.map(function (x) { return x[1]; }).concat([1])), maxL = Math.max.apply(null, (D.levels || []).concat([1]));
+    $('#stats').innerHTML = '<div class="sum"><div><b>' + (s.players || 0) + '</b><span>Graczy w sezonie</span></div><div><b>' + (s.pts || 0) + '</b><span>XP w sezonie</span></div><div><b>' + (s.reads || 0) + '</b><span>Przeczytanych do końca</span></div><div><b>' + (s.games || 0) + '</b><span>Gier (zalogowani)</span></div><div><b>' + (s.comments || 0) + '</b><span>Komentarzy z XP</span></div><div><b>' + (D.xpUsers || 0) + '</b><span>Kont z XP</span></div></div>' +
+      '<div class="box"><h3>Rozgrywki – ostatnie 30 dni</h3><p class="sub">Wszystkie rozegrane gry (także niezalogowanych). Najedź na słupek, żeby zobaczyć dzień.</p><div class="chart">' + list.map(function (x) { return '<span style="height:' + Math.max(2, x[1] / maxD * 100) + '%" data-t="' + x[0].slice(5) + ': ' + x[1] + '"></span>'; }).join('') + '</div><div class="axis"><span>' + list[0][0].slice(5) + '</span><span>dziś</span></div></div>' +
+      '<div class="g2"><div class="box"><h3>Rozgrywki według gier (od początku)</h3><div class="bars">' + Object.keys(GN).map(function (g) { return '<div><span>' + GN[g] + '</span><i style="width:' + Math.max(1, (tot[g] || 0) / maxT * 100) + '%"></i><em>' + (tot[g] || 0) + '</em></div>'; }).join('') + '</div></div>' +
+      '<div class="box"><h3>Poziomy czytelników</h3><div class="bars">' + LV.map(function (n, i) { var v = (D.levels || [])[i] || 0; return '<div><span>' + (i + 1) + '. ' + n + '</span><i style="width:' + Math.max(1, v / maxL * 100) + '%"></i><em>' + v + '</em></div>'; }).join('') + '</div></div></div>' +
+      '<div class="box" style="margin-top:16px"><h3>Rekordy w grach</h3><p class="sub">Top 5 w każdej grze. Rekord usuniesz w zakładce „Gracze i XP”.</p><div class="rg">' + Object.keys(GN).map(function (g) { var r = (D.records || {})[g] || []; return '<div class="box"><b>' + GN[g] + '</b>' + (r.length ? '<ol>' + r.map(function (x) { return '<li>' + esc(x.name) + ' – <b>' + fmtBest(g, x.best) + '</b></li>'; }).join('') + '</ol>' : '<p class="sub" style="margin:4px 0 0">Brak rekordów</p>') + '</div>'; }).join('') + '</div></div>' +
+      '<div class="g2"><div class="box"><h3>Sezony</h3><div class="tw"><table><tr><th>Miesiąc</th><th>Graczy</th><th>XP</th></tr>' + (D.months || []).map(function (m) { return '<tr><td>' + m.month + '</td><td>' + m.players + '</td><td>' + (m.pts || 0) + '</td></tr>'; }).join('') + '</table></div></div>' +
+      '<div class="box"><h3>Zerowanie sezonu</h3><p class="sub">Kasuje punkty wszystkich graczy w bieżącym miesiącu (' + D.month + '). Poziomy i rekordy zostają. Tego nie da się cofnąć.</p><button type="button" class="btn d" id="reset">Wyzeruj bieżący sezon…</button><p class="msg" id="reset-msg"></p></div></div>';
+    $('#reset').onclick = function () {
+      var c = prompt('Na pewno? Wpisz ZERUJ, żeby wyzerować sezon ' + D.month + '.'); if (c !== 'ZERUJ') return;
+      api('/gry/admin/season-reset', { confirm: 'ZERUJ' }).then(function () { say($('#reset-msg'), 'Sezon wyzerowany.', 1); load(); }).catch(function (e) { say($('#reset-msg'), e.message); });
+    };
+  }
+
+  /* ---------- gracze ---------- */
+  function loadUsers() {
+    $('#users').innerHTML = '<p class="empty">Ładowanie…</p>';
+    api('/gry/admin/users?q=' + encodeURIComponent($('#uq').value.trim())).then(function (d) {
+      if (!d.users.length) { $('#users').innerHTML = '<p class="empty">Brak graczy.</p>'; return; }
+      $('#users').innerHTML = '<table><tr><th>Użytkownik</th><th>Poziom</th><th>XP razem</th><th>Sezon</th><th>Czyt. / gry / kom.</th><th>Rekordy</th><th></th></tr>' + d.users.map(function (u) {
+        return '<tr data-u="' + esc(u.pub) + '"><td><b>' + esc(u.name) + '</b></td><td><span class="lv">' + u.lv + ' · ' + LV[u.lv - 1] + '</span></td><td><input type="number" min="0" data-f="total" value="' + u.total + '"></td><td><input type="number" min="0" data-f="pts" value="' + u.pts + '"></td><td>' + u.reads + ' / ' + u.games + ' / ' + u.comments + '</td>' +
+          '<td><div class="recs">' + Object.keys(u.best || {}).map(function (g) { return '<span>' + (GN[g] || g) + ': <b>' + fmtBest(g, u.best[g]) + '</b><button type="button" data-del="' + g + '" title="Usuń rekord">×</button></span>'; }).join('') + '</div></td><td><button type="button" class="btn g s" data-save>Zapisz</button></td></tr>';
+      }).join('') + '</table>';
+    }).catch(function (e) { $('#users').innerHTML = '<p class="empty">' + esc(e.message) + '</p>'; });
+  }
+  $('#ugo').onclick = loadUsers; $('#uq').addEventListener('keydown', function (e) { if (e.key === 'Enter') loadUsers(); });
+  $('#users').addEventListener('click', function (e) {
+    var tr = e.target.closest('tr[data-u]'); if (!tr) return;
+    var del = e.target.closest('[data-del]');
+    if (del) { if (!confirm('Usunąć rekord w grze ' + GN[del.dataset.del] + '?')) return; api('/gry/admin/record', { u: tr.dataset.u, game: del.dataset.del }).then(function () { del.parentNode.remove(); }).catch(function (x) { alert(x.message); }); return; }
+    var sv = e.target.closest('[data-save]');
+    if (sv) { sv.disabled = true; api('/gry/admin/xp', { u: tr.dataset.u, total: +$('[data-f="total"]', tr).value, pts: +$('[data-f="pts"]', tr).value }).then(function (d) { sv.textContent = 'Zapisano ✓'; $('.lv', tr).textContent = d.lv + ' · ' + LV[d.lv - 1]; setTimeout(function () { sv.textContent = 'Zapisz'; sv.disabled = false; }, 1500); }).catch(function (x) { alert(x.message); sv.disabled = false; }); }
+  });
+
+  /* ---------- Ślizgle ---------- */
+  function slPlan() { var s = (D.cfg && D.cfg.slizgle) || {}; return { start: s.start || 0, words: (s.words || []).slice() }; }
+  function slizgle() {
+    var p = slPlan(), today = D.day;
+    $('#sw-list').innerHTML = p.words.length ? p.words.map(function (w, i) { var d = p.start + i, cls = d < today ? 'past' : d === today ? 'today' : ''; return '<span class="word ' + cls + '">' + esc(w) + ' <small>' + (d === today ? 'dziś' : dayDate(d)) + '</small>' + (d > today ? '<button type="button" data-i="' + i + '" title="Usuń">×</button>' : '') + '</span>'; }).join('') : '<p class="sub">Brak – gra używa wbudowanej listy.</p>';
+  }
+  function slSave(p, msg) { return api('/gry/admin/cfg', { slizgle: p }).then(function (d) { D.cfg = d.cfg; slizgle(); say($('#sw-msg'), msg, 1); }).catch(function (e) { say($('#sw-msg'), e.message); }); }
+  $('#sw-add').onclick = function () {
+    var raw = $('#sw-in').value.split(/[,;\n]+/).map(function (w) { return w.trim().toUpperCase(); }).filter(Boolean);
+    var bad = raw.filter(function (w) { return !/^[A-ZĄĆĘŁŃÓŚŹŻ]{4,7}$/.test(w); });
+    if (bad.length) { say($('#sw-msg'), 'Popraw: ' + bad.join(', ') + ' (4–7 liter, bez spacji i cyfr).'); return; }
+    if (!raw.length) return;
+    var p = slPlan(), today = D.day, end = p.start + p.words.length;
+    if (end <= today + 1) { var keep = p.words.filter(function (_, i) { return p.start + i >= today; }); var st = keep.length ? today : today + 1; p = { start: st, words: keep.concat(raw) }; }
+    else p.words = p.words.concat(raw);
+    slSave(p, 'Dodano ' + raw.length + ' ' + (raw.length === 1 ? 'słowo' : 'słów') + '.').then(function () { $('#sw-in').value = ''; });
+  };
+  $('#sw-list').addEventListener('click', function (e) { var b = e.target.closest('[data-i]'); if (!b) return; var p = slPlan(); p.words.splice(+b.dataset.i, 1); slSave(p, 'Usunięto – kolejne słowa przesunęły się o dzień.'); });
+
+  /* ---------- Krzyżówka ---------- */
+  var cur = { h: '', r: [] };
+  function krzWeeks() {
+    var w0 = D.week, sel = $('#kz-week'), keep = sel.value;
+    sel.innerHTML = [0, 1, 2, 3, 4].map(function (i) { var w = w0 + i, has = D.cfg && D.cfg.krzyz && D.cfg.krzyz[w]; return '<option value="' + w + '">' + (i === 0 ? 'Ten tydzień' : i === 1 ? 'Następny tydzień' : 'Za ' + i + ' tyg.') + ' (' + weekRange(w) + ')' + (has ? ' ✓' : '') + '</option>'; }).join('');
+    if (keep) sel.value = keep; krzLoad();
+  }
+  function krzLoad() {
+    var w = +$('#kz-week').value, s = D.cfg && D.cfg.krzyz && D.cfg.krzyz[w];
+    cur = s ? { h: s.h, r: s.r.map(function (x) { return [x[0], x[1], x[2]]; }) } : { h: '', r: [] };
+    $('#kz-h').value = cur.h; $('#kz-state').textContent = s ? 'Twoja krzyżówka' : 'Wbudowana (brak Twojej)'; krzDraw();
+  }
+  function krzSync() { var h = $('#kz-h').value.toUpperCase().replace(/[^A-ZĄĆĘŁŃÓŚŹŻ]/g, ''); cur.h = h; var r = []; for (var i = 0; i < h.length; i++) r.push(cur.r[i] || ['', '', -1]); cur.r = r; }
+  function krzDraw() {
+    krzSync();
+    $('#kz-rows').innerHTML = cur.h.split('').map(function (L, i) {
+      var r = cur.r[i], ok = !r[0] || r[0].indexOf(L) >= 0;
+      return '<div><div class="kz-r' + (ok ? '' : ' bad') + '" data-i="' + i + '"><b>' + L + '</b><input type="text" data-k="w" maxlength="14" placeholder="WYRAZ z literą ' + L + '" value="' + esc(r[0]) + '" style="text-transform:uppercase"><input type="text" data-k="c" maxlength="140" placeholder="Pytanie / podpowiedź" value="' + esc(r[1]) + '"><button type="button" class="btn g s" data-sug="' + i + '">Propozycje</button></div><div class="sug" id="sug-' + i + '"></div></div>';
+    }).join('') || '<p class="sub">Wpisz hasło, żeby pojawiły się wiersze.</p>';
+    krzPrev();
+  }
+  function krzPrev() {
+    var rows = cur.r.map(function (r, i) { var w = (r[0] || '').toUpperCase(), L = cur.h[i], p = r[2] >= 0 && w[r[2]] === L ? r[2] : w.indexOf(L); return { w: w, p: p }; }).filter(function (x) { return x.w && x.p >= 0; });
+    if (!rows.length) { $('#kz-prev').innerHTML = ''; return; }
+    var Lm = Math.max.apply(null, rows.map(function (x) { return x.p; })), Rm = Math.max.apply(null, rows.map(function (x) { return x.w.length - x.p; }));
+    $('#kz-prev').innerHTML = rows.map(function (x) { var s = ''; for (var c = 0; c < Lm + Rm; c++) { var k = c - (Lm - x.p); s += k < 0 || k >= x.w.length ? '<span class="x"></span>' : '<span' + (k === x.p ? ' class="h"' : '') + '>' + x.w[k] + '</span>'; } return '<div>' + s + '</div>'; }).join('');
+  }
+  $('#kz-week').onchange = krzLoad;
+  $('#kz-h').addEventListener('input', krzDraw);
+  $('#kz-rows').addEventListener('input', function (e) {
+    var row = e.target.closest('.kz-r'); if (!row) return; var i = +row.dataset.i;
+    if (e.target.dataset.k === 'w') { cur.r[i][0] = e.target.value.toUpperCase().replace(/[^A-ZĄĆĘŁŃÓŚŹŻ]/g, ''); cur.r[i][2] = -1; row.classList.toggle('bad', !!cur.r[i][0] && cur.r[i][0].indexOf(cur.h[i]) < 0); krzPrev(); }
+    else cur.r[i][1] = e.target.value;
+  });
+  /* propozycje wyrazów i pytań z ostatnich artykułów (wykonawcy, tagi, słowa z tytułów) */
+  var STOP = /^(KTÓRY|KTÓRA|KTÓRE|PRZEZ|TYLKO|BĘDZIE|JESZCZE|BARDZO|WSZYSTKO|DLACZEGO|PODCZAS|NOWY|NOWA|NOWE|JEST|BYŁO|ZOSTAŁ|ZNOWU|MOŻE|PO|ORAZ|TAKŻE|NAWET|SWOJE|SWOJĄ|CZYLI|ALBO|TERAZ|DZIŚ|KIEDY|JAKIE|PONAD)$/;
+  function pool() {
+    var out = [], seen = {};
+    function add(w, clue, kind) { w = String(w || '').toUpperCase().replace(/[^A-ZĄĆĘŁŃÓŚŹŻ]/g, ''); if (w.length < 3 || w.length > 12 || seen[w] || STOP.test(w)) return; seen[w] = 1; out.push({ w: w, c: clue, kind: kind }); }
+    arts.slice(0, 60).forEach(function (a) {
+      var t = '„' + a.title + '”';
+      if (a.review && a.review.artist && !/\s/.test(a.review.artist.trim())) add(a.review.artist, 'Wykonawca z recenzji ' + t, 'wykonawca');
+      if (a.review && a.review.work && !/\s/.test(a.review.work.trim())) add(a.review.work, 'Tytuł zrecenzowanego dzieła (' + (a.review.artist || 'artykuł') + ')', 'tytuł');
+      (a.tags || []).forEach(function (g) { if (!/\s/.test(String(g).trim())) add(g, 'Bohater / temat artykułu ' + t, 'tag'); });
+      String(a.title || '').split(/[\s,.:;!?„”"()–-]+/).forEach(function (w) { if (w.length >= 5 && /^[A-ZĄĆĘŁŃÓŚŹŻ]/.test(w)) add(w, 'Brakujące słowo z tytułu: ' + a.title.replace(w, '…'), 'z tytułu'); });
+    });
+    return out;
+  }
+  function sugFor(L, n) { var p = pool().filter(function (x) { return x.w.indexOf(L) >= 0 && cur.r.every(function (r) { return r[0] !== x.w; }); }); p.sort(function () { return Math.random() - .5; }); return p.slice(0, n || 6); }
+  $('#kz-rows').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-sug]'); if (b) { var i = +b.dataset.sug, s = sugFor(cur.h[i]); $('#sug-' + i).innerHTML = s.length ? s.map(function (x, k) { return '<button type="button" data-pick="' + i + '" data-w="' + esc(x.w) + '" data-c="' + esc(x.c) + '"><b>' + esc(x.w) + '</b> · ' + x.kind + '</button>'; }).join('') : '<span class="sub">Brak propozycji z artykułów na literę ' + cur.h[i] + ' – wpisz własny wyraz.</span>'; return; }
+    var pk = e.target.closest('[data-pick]'); if (pk) { var j = +pk.dataset.pick; cur.r[j] = [pk.dataset.w, pk.dataset.c, -1]; krzDraw(); }
+  });
+  $('#kz-auto').onclick = function () { krzSync(); if (!cur.h) { say($('#kz-msg'), 'Najpierw wpisz hasło.'); return; } var miss = 0; cur.h.split('').forEach(function (L, i) { if (cur.r[i][0]) return; var s = sugFor(L, 1)[0]; if (s) cur.r[i] = [s.w, s.c, -1]; else miss++; }); krzDraw(); say($('#kz-msg'), miss ? 'Brak propozycji dla ' + miss + ' liter – uzupełnij ręcznie.' : 'Wypełniono. Sprawdź i popraw pytania.', !miss); };
+  $('#kz-save').onclick = function () {
+    krzSync(); var w = +$('#kz-week').value;
+    if (cur.h.length < 3) { say($('#kz-msg'), 'Hasło musi mieć co najmniej 3 litery.'); return; }
+    var bad = cur.r.filter(function (r, i) { return !r[0] || r[0].indexOf(cur.h[i]) < 0 || !String(r[1]).trim(); }).length;
+    if (bad) { say($('#kz-msg'), 'Uzupełnij wszystkie wiersze: wyraz z literą hasła i pytanie (' + bad + ' do poprawy).'); return; }
+    api('/gry/admin/cfg', { krzyz: { week: w, set: { h: cur.h, r: cur.r } } }).then(function (d) { D.cfg = d.cfg; say($('#kz-msg'), 'Zapisano krzyżówkę na tydzień ' + weekRange(w) + '.', 1); krzWeeks(); }).catch(function (e) { say($('#kz-msg'), e.message); });
+  };
+  $('#kz-del').onclick = function () { var w = +$('#kz-week').value; if (!confirm('Usunąć Twoją krzyżówkę z tego tygodnia?')) return; api('/gry/admin/cfg', { krzyz: { week: w, set: null } }).then(function (d) { D.cfg = d.cfg; say($('#kz-msg'), 'Usunięto.', 1); krzWeeks(); }).catch(function (e) { say($('#kz-msg'), e.message); }); };
+
+  /* ---------- teksty Knagi ---------- */
+  var KN = {};
+  function knaga() {
+    var own = D.cfg && D.cfg.knaga; KN = {};
+    (window.KNAGA_CATS || []).forEach(function (c) { KN[c[0]] = (own && own[c[0]] && own[c[0]].length ? own[c[0]] : (window.KNAGA_LINES[c[0]] || [])).map(function (l) { return [l[0], l[1]]; }); });
+    knDraw();
+  }
+  var slugs = (window.Knaga && Knaga.list || []).map(function (k) { return [k.slug, k.name]; });
+  function knDraw() {
+    $('#kn').innerHTML = (window.KNAGA_CATS || []).map(function (c, ci) {
+      var ls = KN[c[0]] || [];
+      return '<details class="cat"' + (ci < 3 ? ' open' : '') + ' data-c="' + c[0] + '"><summary>' + c[1] + ' <small>(' + ls.length + ')</small></summary>' + ls.map(function (l, i) {
+        return '<div class="ln" data-i="' + i + '"><span class="pv">' + (window.Knaga ? Knaga.svg(l[0]) : '') + '</span><select data-k="s">' + slugs.map(function (s) { return '<option value="' + s[0] + '"' + (s[0] === l[0] ? ' selected' : '') + '>' + esc(s[1]) + '</option>'; }).join('') + '</select><input type="text" data-k="t" maxlength="220" value="' + esc(l[1]) + '"><button type="button" data-rm title="Usuń">×</button></div>';
+      }).join('') + '<button type="button" class="btn g s" data-add style="margin-top:6px">＋ Dodaj tekst</button></details>';
+    }).join('');
+  }
+  $('#kn').addEventListener('input', function (e) { var ln = e.target.closest('.ln'), cat = e.target.closest('[data-c]'); if (!ln) return; var l = KN[cat.dataset.c][+ln.dataset.i]; if (e.target.dataset.k === 't') l[1] = e.target.value; });
+  $('#kn').addEventListener('change', function (e) { var ln = e.target.closest('.ln'), cat = e.target.closest('[data-c]'); if (!ln || e.target.dataset.k !== 's') return; KN[cat.dataset.c][+ln.dataset.i][0] = e.target.value; $('.pv', ln).innerHTML = Knaga.svg(e.target.value); });
+  $('#kn').addEventListener('click', function (e) {
+    var cat = e.target.closest('[data-c]'); if (!cat) return; var k = cat.dataset.c;
+    if (e.target.closest('[data-rm]')) { KN[k].splice(+e.target.closest('.ln').dataset.i, 1); knDraw(); $('[data-c="' + k + '"]').open = true; }
+    if (e.target.closest('[data-add]')) { KN[k].push([(KN[k][0] || ['ziomek'])[0], '']); knDraw(); var d = $('[data-c="' + k + '"]'); d.open = true; var ins = $$('input', d); ins[ins.length - 1].focus(); }
+  });
+  $('#kn-save').onclick = function () {
+    var out = {}; Object.keys(KN).forEach(function (k) { out[k] = KN[k].filter(function (l) { return String(l[1]).trim(); }); });
+    api('/gry/admin/cfg', { knaga: out }).then(function (d) { D.cfg = d.cfg; say($('#kn-msg'), 'Zapisano. Nowe teksty pojawią się na stronie w ciągu minuty.', 1); }).catch(function (e) { say($('#kn-msg'), e.message); });
+  };
+  $('#kn-reset').onclick = function () { if (!confirm('Przywrócić domyślne teksty Knagi? Twoje zmiany znikną.')) return; api('/gry/admin/cfg', { knaga: null }).then(function (d) { D.cfg = d.cfg; knaga(); say($('#kn-msg'), 'Przywrócono domyślne.', 1); }).catch(function (e) { say($('#kn-msg'), e.message); }); };
+
+  function start() {
+    fetch(API + '/articles?limit=120', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (d) { arts = (d.articles || []).filter(function (a) { return a.status !== 'draft'; }); }).catch(function () {});
+    load();
+  }
+  var started = false;
+  function go() { if (started) return; started = true; start(); }
+  window.addEventListener('devgate', go);
+  if (window.devRole !== undefined) go();
+  window.addEventListener('message', function (e) { if (e.origin === location.origin && e.data && e.data.type === 'sliska-shown' && started) load(); });
+})();
+</script>
+</body></html>

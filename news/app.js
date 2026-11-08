@@ -3713,6 +3713,7 @@ async function renderUserProfile(pub) {
         ${d.staff || ['editor', 'owner', 'chief'].includes(d.role) ? `<a class="up-more" href="#/redaktor/${encodeURIComponent(d.name)}">Zobacz artykuły autora →</a>` : ''}</div>
     </section>
     ${lv && window.SnXP && !d.banned ? SnXP.card({ lv, total: Number(d.xp) || 0 }, false) : ''}
+    ${!d.banned && d.best && Object.keys(d.best).length && window.SliskieGry ? `<section class="panel up-recs"><h2>Rekordy w Śliskich Grach</h2><div>${SliskieGry.games.filter(g => d.best[g.id]).map(g => `<a href="#/gry/${g.id}" style="--g1:${g.c[0]};--g2:${g.c[1]}"><small>${g.name}</small><b>${SliskieGry.fmt(g.id, d.best[g.id])}</b></a>`).join('')}</div></section>` : ''}
     ${d.banned ? '<p class="cmt-note">To konto zostało zablokowane.</p>' : `<h2 class="up-h">Komentarze</h2>${items ? `<ul class="up-list">${items}</ul>` : '<p class="muted">Ten użytkownik nie ma jeszcze komentarzy.</p>'}`}`;
 }
 
@@ -4540,12 +4541,12 @@ function initRail() {
   t.addEventListener('click', () => { const c = document.body.classList.toggle('rail-c'); try { localStorage.setItem('sliska_rail', c ? 'c' : 'e'); } catch { /* ignoruj */ } label(); });
   top.appendChild(t); label();
   /* kategorie i „Masz temat?” przenosimy na pasek (tylko szeroki ekran) */
-  const nav = $('.main-nav'), cats = $('#category-nav') && $('#category-nav').closest('.side-card'), tip = $('#side-left .tip-card'), aside = $('#side-left');
+  const nav = $('.main-nav'), cats = $('#category-nav') && $('#category-nav').closest('.side-card'), tip = $('#side-left .tip-card'), zone = $('#side-left .zone-card'), aside = $('#side-left');
   if (nav && cats && tip && aside) {
     const sc = document.createElement('div'); sc.className = 'rail-scroll';
     nav.parentNode.insertBefore(sc, nav); sc.appendChild(nav);
     const mq = matchMedia('(min-width:1100px)');
-    const place = () => { if (mq.matches) { sc.append(cats, tip); } else { aside.append(cats, tip); } };
+    const place = () => { const z = zone ? [zone] : []; if (mq.matches) { sc.append(...z, cats, tip); } else { aside.append(...z, cats, tip); } };
     place(); (mq.addEventListener ? mq.addEventListener('change', place) : mq.addListener(place));
   }
   const pb = document.createElement('button'); pb.type = 'button'; pb.id = 'rail-profile'; pb.className = 'rail-profile avatar'; pb.title = 'Profil'; pb.setAttribute('aria-label', 'Profil i skróty');

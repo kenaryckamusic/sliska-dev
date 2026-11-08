@@ -21,6 +21,7 @@
     uzytkownicy: { p: '/uzytkownicy', t: 'Użytkownicy', crumb: 'Społeczność', sub: 'Konta czytelników i redakcji, rangi i blokady.', tool: 'studio', h: '#/panel/users', need: 'owner' },
     reklamy:     { p: '/reklamy', t: 'Reklamy', crumb: 'Promocja i kontakt', sub: 'Baza reklam na stronie i zgłoszenia od reklamodawców.', tool: 'reklamy', src: '/reklamy/', need: 'owner' },
     poczta:      { p: '/poczta', t: 'Poczta', crumb: 'Promocja i kontakt', sub: 'Skrzynka redakcja@sliska.pl.', tool: 'poczta', src: '/poczta/', need: 'owner' },
+    gry:         { p: '/gry', t: 'Gry i Knaga', crumb: 'Społeczność', sub: 'Statystyki, poziomy i rekordy graczy, słowa w Ślizgle, Krzyżówka Tygodnia i teksty Knagi.', tool: 'gry', src: '/gry/', need: 'owner' },
     narzedzia:   { p: '/narzedzia', t: 'Narzędzia', crumb: 'System', sub: 'Kopia zapasowa, podglądy linków i mniejsze zdjęcia.', tool: 'studio', h: '#/panel/tools', need: 'owner' },
     wersje:      { p: '/wersje', t: 'Wersje strony', crumb: 'System', sub: 'Historia zmian i archiwalne wersje Śliska News.', tool: 'wersje', src: '/wersje/', need: 'vers' },
     ustawienia:  { p: '/ustawienia', t: 'Ustawienia', crumb: 'System', sub: 'Profil redaktora, domyślne wartości edytora i powiadomienia.', tool: 'studio', h: '#/ustawienia' },
@@ -67,6 +68,7 @@
       if (/^\/reklamy\//.test(o)) return '/reklamy';
       if (/^\/poczta\//.test(o)) return '/poczta';
       if (/^\/wersje\//.test(o)) return '/wersje';
+      if (/^\/gry(\/|$)/.test(o)) return '/gry';
     }
     if (tool === 'new') return '/edytor';
     if (tool === 'ads') return '/reklamy';

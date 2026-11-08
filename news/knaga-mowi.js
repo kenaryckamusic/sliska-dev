@@ -8,19 +8,11 @@
   function put(o) { try { var s = st(); for (var k in o) s[k] = o[k]; localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) { /* ignoruj */ } }
   var el, bub, cur = '', hideT = 0, said = {}, reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* teksty: [strój, tekst] */
-  var LINES = {
-    shy: [['niesmiala', 'Cześć… jestem Knaga. Przeczytaj jakiś artykuł do końca, to się pokażę. 🙈'], ['niesmiala', 'Nie patrz tak… najpierw coś przeczytaj.'], ['niesmiala', 'Jeszcze się wstydzę. Jeden artykuł i jestem cała Twoja.']],
-    reveal: [['imprezowa', 'TADAM! Przeczytane, więc się odsłaniam. Teraz będę Ci tu czasem mokro komentować. 💦']],
-    home: [['ziomek', 'Siema! Co dziś czytamy?'], ['sliska', 'Ale dziś mokro na scenie…'], ['detektyw', 'Coś mi tu śmierdzi plotką. Przewiń niżej.'], ['gwiazdor', 'Zero wtop od wczoraj. Na razie.'], ['kibic', 'Śliska gola! Nowe artykuły wpadły.']],
-    article: [['redaktor', 'Mocny tekst. Dawaj do końca!'], ['zakochana', 'O, ten news mi się podoba.'], ['diabelek', 'Pod tym będzie się działo w komentarzach…'], ['wsciekla', 'NO JAK ON MÓGŁ?!'], ['uwodziciel', 'Czytasz mnie jak otwartą księgę…']],
-    done: [['imprezowa', 'Przeczytane do końca! Szacun.'], ['super', 'Kolejny przeczytany. Super czytelnik!'], ['zakochana', 'Do końca? Ale z Ciebie Ślizgacz. 💖']],
-    games: [['surfer', 'Zagrajmy! Rekordy czekają.'], ['imprezowa', 'Psst… stuknij mnie kilka razy w nagłówku Gier.'], ['super', 'Pobij swój rekord, dasz radę!']],
-    night: [['szlafrok', 'Jeszcze nie śpisz? Ja też nie…'], ['kapiel', 'Nocna kąpiel w newsach. Mokro.'], ['sauna', 'Gorąco tu o tej porze, czy to te plotki?']],
-    tip: [['detektyw', 'Masz temat? Dawaj, Knaga zachowa dyskrecję.']],
-    spot: [['gwiazdor', 'Reklama za darmo? U nas tak. Dawaj grafikę!']]
-  };
-  var pick = function (arr) { var free = arr.filter(function (l) { return !said[l[1]]; }); var l = (free.length ? free : arr)[Math.floor(Math.random() * (free.length ? free : arr).length)]; said[l[1]] = 1; return l; };
+  /* teksty: [strój, tekst] – domyślne z knaga-teksty.js, właściciel może je podmienić w panelu (Worker /gry/cfg) */
+  var LINES = window.KNAGA_LINES || { shy: [['niesmiala', 'Cześć, jestem Knaga.']], home: [['ziomek', 'Siema!']] };
+  function applyCfg(c) { if (c && c.knaga) Object.keys(c.knaga).forEach(function (k) { if (c.knaga[k] && c.knaga[k].length) LINES[k] = c.knaga[k]; }); }
+  if (window.SnCfg) window.SnCfg.then(applyCfg).catch(function () {});
+  var pick = function (arr) { arr = arr && arr.length ? arr : LINES.home; var free = arr.filter(function (l) { return !said[l[1]]; }); var l = (free.length ? free : arr)[Math.floor(Math.random() * (free.length ? free : arr).length)]; said[l[1]] = 1; return l; };
   var hour = function () { return new Date().getHours(); };
 
   function build() {
@@ -46,8 +38,15 @@
   }
   function hideBub() { if (!bub) return; bub.hidden = true; el.classList.remove('has-bub'); }
   function shy() { return !st().revealed; }
-  function ctxName() { var h = location.hash || '#/'; return /^#\/artykul\//.test(h) ? 'article' : /^#\/gry/.test(h) ? 'games' : /^#\/zglos/.test(h) ? 'tip' : /^#\/spot/.test(h) ? 'spot' : 'home'; }
-  function randomFor() { if (shy()) return pick(LINES.shy); var c = ctxName(), h = hour(); if ((h >= 23 || h < 5) && Math.random() < .6) return pick(LINES.night); return pick(LINES[c] || LINES.home); }
+  function ctxName() { var h = location.hash || '#/'; return /^#\/artykul\//.test(h) ? 'article' : /^#\/gry/.test(h) ? 'games' : /^#\/zglos/.test(h) ? 'tip' : /^#\/spot/.test(h) ? 'spot' : /^#\/(dramy|drama\/|kategoria\/Dramy)/.test(h) ? 'drama' : /^#\/(sezon|podsumowanie)/.test(h) ? 'level' : 'home'; }
+  function inComments() { var c = document.getElementById('comments'); if (!c || c.hidden) return false; var r = c.getBoundingClientRect(); return r.top < innerHeight * .7 && r.bottom > 0; }
+  function randomFor() {
+    if (shy()) return pick(LINES.shy); var c = ctxName(), h = hour();
+    if ((h >= 23 || h < 5) && Math.random() < .5) return pick(LINES.night);
+    if (h >= 5 && h < 10 && Math.random() < .4) return pick(LINES.morning);
+    if (c === 'article' && inComments()) return pick(LINES.comments);
+    return pick(LINES[c] || LINES.home);
+  }
 
   /* odsłonięcie po pierwszym przeczytanym artykule (przewinięty do końca) */
   var readT = 0, readFn = null;
@@ -73,7 +72,7 @@
   function reveal() {
     if (!el) return;
     el.classList.add('is-reveal');
-    setTimeout(function () { say(LINES.reveal[0], 9000); setTimeout(function () { el && el.classList.remove('is-reveal'); }, 1200); }, reduce ? 0 : 450);
+    setTimeout(function () { say(pick(LINES.reveal), 9000); setTimeout(function () { el && el.classList.remove('is-reveal'); }, 1200); }, reduce ? 0 : 450);
   }
 
   var lastCtx = '', timer = 0;
@@ -90,6 +89,11 @@
       timer = setTimeout(function () { if (Math.random() < (first ? 1 : .35)) say(randomFor(), 7000); }, first ? 2500 : 9000);
     }
   }
+  var cmtSaid = {}, cmtT = 0;
+  window.addEventListener('scroll', function () {
+    if (cmtT || !el || st().off || shy()) return;
+    cmtT = setTimeout(function () { cmtT = 0; var h = location.hash; if (ctxName() === 'article' && !cmtSaid[h] && inComments()) { cmtSaid[h] = 1; if (Math.random() < .6) say(pick(LINES.comments), 6500); } }, 400);
+  }, { passive: true });
   window.KnagaMowi = {
     on: function () { put({ off: 0 }); onRoute(); },
     off: function () { put({ off: 1 }); if (el) { el.remove(); el = null; } },
