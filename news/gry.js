@@ -31,6 +31,17 @@
 
   /* ---------- konfiguracja właściciela (Ślizgle, krzyżówka, teksty Knagi) ---------- */
   window.SnCfg = window.SnCfg || fetch(API + '/gry/cfg', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; });
+  /* właściciel mógł wyzerować wszystko w grach: wtedy kasujemy też zakończenia, rekordy i postępy zapisane w tej przeglądarce */
+  window.SnCfg.then(function (c) {
+    try {
+      var ep = c && c.epoch ? String(c.epoch) : ''; if (!ep) return;
+      if (localStorage.getItem('sn-gry-epoch') === ep) return;
+      var had = localStorage.getItem('sn-gry-epoch') !== null || localStorage.getItem('sn-gry') !== null;
+      Object.keys(localStorage).forEach(function (k) { if (k !== 'sn-gry-epoch' && /^(sn-gry|sn-slizgle|sn-krzyz|sn-drama|sn-dr-fold)/.test(k)) localStorage.removeItem(k); });
+      localStorage.setItem('sn-gry-epoch', ep);
+      if (had && /#\/gry/.test(location.hash)) location.reload();
+    } catch (e) { /* ignoruj */ }
+  });
   function cfg() { return Promise.race([window.SnCfg, new Promise(function (res) { setTimeout(function () { res({}); }, 2500); })]); }
 
   /* ---------- lista gier ---------- */
