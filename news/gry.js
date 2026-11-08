@@ -62,6 +62,7 @@
       how: 'Jesteś reporterem Śliskiej. Zagraj pojedynczą sprawę albo cały sezon (3, 6 lub 9 spraw pod rząd). Każdy dzień to dylemat o tym, co publikujesz, wątek z redakcją (Szef, Ola, Wrona, Marta, sponsor) i losowe wydarzenia. Paski: Klikalność, Wiarygodność, Pozwy, Nerwy oraz relacje z ekipą decydują o jednym z 9 zakończeń każdej dramy (81 w całej grze) i o zakończeniu kariery. Po każdym wyborze dostajesz prawdziwy fakt ze źródłem. Ranking liczy odkryte zakończenia (max 30).' },
     { id: 'naczelny', name: 'Redaktor Naczelny', knaga: 'redaktor', sub: 'Tydzień w redakcji: klik czy prawda?', tag: 'Fabularna', kind: 'sim', unit: 'pkt', c: ['#0c3b66', '#2fa8ff'],
       how: 'Przez 5 dni dostajesz 10 tematów i za każdym razem wybierasz: opublikować od razu, sprawdzić albo odpuścić. Cztery paski: Klikalność, Wiarygodność, Pozwy i Nerwy. Zero Klikalności lub Wiarygodności, 100 Pozwów albo 100 Nerwów kończą grę. Na koniec dostajesz wynik (maks. 100) i jedno z 12 zakończeń.' },
+    { id: 'gabin', name: 'GABIN', knaga: 'wsciekla', sub: 'Odc. 1: Zły numer. Thriller w czacie.', tag: 'Tylko dla właściciela', kind: 'story', c: ['#0b1f1e', '#0f766e'], how: 'Czat-thriller. Odpowiadaj mieszkańcom Gabina i szukaj zaginionej Zenobii.' },
     { id: 'slizgawka', name: 'Ślizgawka', knaga: 'surfer', sub: 'Tajna gra. Surfuj i skacz.', tag: 'Sekret', unit: 'm', secret: true, c: ['#b33a1a', '#ffb36b'],
       how: 'Spacja albo stuknięcie – skok (drugi raz w powietrzu = podwójny skok). Przeskakuj pozwy, dissy i fejki, zbieraj krople (+25 m).' }
   ];
@@ -140,7 +141,7 @@
       feat(G('slizgle'), 'Słowo dnia #' + (dayIndex() + 1), sl && sl.end ? (sl.win ? 'Dziś zgadnięte w ' + sl.rows.length + '/6 ✓' : 'Dziś bez trafienia – jutro nowe słowo') : 'Nowe słowo czeka. 6 prób.', sl && sl.end ? 'Zobacz wynik' : 'Zgaduj') +
       feat(G('krzyzowka'), 'Tydzień #' + weekIndex(), kz ? 'Rozwiązana ✓ – nowa w poniedziałek' : 'Hasło tygodnia czeka na odkrycie.', kz ? 'Zobacz' : 'Rozwiąż') + '</div>' +
       '<h2 class="gh-h">Zręcznościowe</h2><div class="gh-grid">' + ['krople', 'flappy', 'waz'].concat(hidden ? [] : ['slizgawka']).map(function (id) { return tile(G(id)); }).join('') + '</div>' +
-      '<h2 class="gh-h">Na spokojnie</h2><div class="gh-grid">' + ['drama', 'naczelny', 'ukladanka'].map(function (id) { return tile(G(id)); }).join('') + '</div>' +
+      '<h2 class="gh-h">Na spokojnie</h2><div class="gh-grid">' + ['drama', 'naczelny', 'ukladanka'].concat(window.GabinGame && GabinGame.owner() ? ['gabin'] : []).map(function (id) { return tile(G(id)); }).join('') + '</div>' +
       (hidden ? '<p class="gry-hint">Psst… ponoć jest tu jeszcze jedna, ukryta gra. Knaga coś wie.</p>' : '') +
       '<nav class="gh-more" aria-label="Śliska strefa"><a href="#/sezon">' + ICO.cup + '<span><b>Ranking sezonu</b><small>Kto zebrał najwięcej XP w tym miesiącu</small></span></a><a href="#/dramy">' + ICO.fire + '<span><b>Osie czasu dram</b><small>Afery krok po kroku</small></span></a><a href="#/podsumowanie">' + ICO.spark + '<span><b>Twój miesiąc</b><small>Śliskie Podsumowanie</small></span></a></nav></div>';
     var clicks = 0, kb = $('#gry-hero-k', el);
@@ -866,7 +867,7 @@
   window.addEventListener('hashchange', function () { setTimeout(zone, 0); });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', zone); else zone();
 
-  var RUN = { krzyzowka: krzyzowka, slizgle: slizgle, krople: krople, flappy: flappy, waz: waz, ukladanka: ukladanka, drama: drama, naczelny: naczelny, slizgawka: slizgawka };
+  var RUN = { krzyzowka: krzyzowka, slizgle: slizgle, krople: krople, flappy: flappy, waz: waz, ukladanka: ukladanka, drama: drama, naczelny: naczelny, slizgawka: slizgawka, gabin: function (el) { if (window.GabinGame) GabinGame.mount(el); else hub(el); } };
   window.SliskieGry = {
     mount: function (el, sub, ctx) {
       stopAll();
