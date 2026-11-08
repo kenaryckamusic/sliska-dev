@@ -18,6 +18,49 @@
   };
   var ic = function (n, s) { return '<svg viewBox="0 0 24 24" width="' + (s || 16) + '" height="' + (s || 16) + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + IC[n] + '</svg>'; };
 
+  /* ---------- ikonki aform i zakończeń: Knaga w stroju + odznaka (emblemat) na gradiencie ---------- */
+  var EM = {
+    mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/>',
+    camera: '<path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+    copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
+    bus: '<rect x="4" y="4" width="16" height="13" rx="3"/><path d="M4 11h16M8 20v-3M16 20v-3"/>',
+    swords: '<path d="M4 20 20 4M15 4h5v5"/><path d="M20 20 4 4M9 4H4v5"/>',
+    live: '<circle cx="12" cy="12" r="2.2"/><path d="M7.5 7.5a6.4 6.4 0 0 0 0 9M16.5 7.5a6.4 6.4 0 0 1 0 9M4.5 4.5a10.6 10.6 0 0 0 0 15M19.5 4.5a10.6 10.6 0 0 1 0 15"/>',
+    star: '<path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z"/>',
+    trophy: '<path d="M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 14v4M8 21h8M9 18h6"/>',
+    crown: '<path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/>',
+    coin: '<circle cx="12" cy="12" r="8.5"/><path d="M14.5 9.2c-.6-.9-1.5-1.2-2.5-1.2-1.4 0-2.5.8-2.5 1.8 0 2.4 5 1.2 5 3.6 0 1-1.1 1.8-2.5 1.8-1.1 0-2-.4-2.6-1.3M12 6.5V8M12 16v1.5"/>',
+    lotus: '<path d="M12 4c2.5 3 3 6 0 9-3-3-2.5-6 0-9zM4 10c4 0 7 2 8 6-4 0-7-2-8-6zM20 10c-4 0-7 2-8 6 4 0 7-2 8-6zM8 20h8"/>',
+    medal: '<circle cx="12" cy="15" r="5"/><path d="M9 3l3 6 3-6M12 12.5v5"/>',
+    laugh: '<circle cx="12" cy="12" r="9"/><path d="M8 10h.01M16 10h.01M7.5 14c1 3 8 3 9 0z"/>',
+    zzz: '<path d="M5 6h6l-6 7h6M13 12h5l-5 6h5"/>',
+    down: '<path d="M17 14V4h3v10zM17 14l-3.5 6.5c-1.3 0-2.3-1.2-2-2.4L12 15H6.5a2 2 0 0 1-2-2.4l1.2-6A2 2 0 0 1 7.7 5H17"/>',
+    meh: '<circle cx="12" cy="12" r="9"/><path d="M8 10h.01M16 10h.01M8.5 15.5h7"/>',
+    ban: '<circle cx="12" cy="12" r="9"/><path d="M5.7 5.7l12.6 12.6"/>',
+    coinoff: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7v10M9.5 9.5h4a1.8 1.8 0 0 1 0 3.5h-3a1.8 1.8 0 0 0 0 3.5h4M4 4l16 16"/>',
+    bolt: '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+    heart: '<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>',
+    ring: '<circle cx="12" cy="15" r="5.5"/><path d="M9 6l3-3 3 3-3 3z"/>',
+    gavel: '<path d="M13 4l5 5-3 3-5-5zM10 8l-6 6 3 3 6-6M4 21h10"/>',
+    palm: '<path d="M12 21V11M12 11c-3-4-7-3-8-1 3-1 5 0 8 1zM12 11c3-4 7-3 8-1-3-1-5 0-8 1zM12 11c0-4 2-6 5-6-2 1-3 3-5 6zM12 11c0-4-2-6-5-6 2 1 3 3 5 6zM7 21h10"/>',
+    glove: '<path d="M7 11V7a3 3 0 0 1 6 0v1h3a3 3 0 0 1 3 3v3a6 6 0 0 1-6 6h-1a5 5 0 0 1-5-5zM8 20h8"/>',
+    tv: '<rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M8 21h8M9 3l3 3 3-3"/>',
+    diamond: '<path d="M6 4h12l3 5-9 11L3 9zM3 9h18M9 4l-1.5 5L12 20l4.5-11L15 4"/>'
+  };
+  // [strój Knagi, kolor 1, kolor 2, odznaka]
+  var TILE = {
+    wyciek: ['wsciekla', '#ff9a62', '#c8102e', 'mic'], romans: ['uwodziciel', '#e0559f', '#4a0d3b', 'camera'], gala: ['gwiazdor', '#ffd34d', '#7c3aed', 'copy'],
+    trasa: ['sliska', '#5b8cff', '#1b1e5a', 'bus'], beef: ['diabelek', '#b3243a', '#2a0a14', 'swords'], live: ['kapiel', '#6fd6ff', '#0e7fb3', 'live'],
+    ikona: ['ikona', '#ff8aa0', '#b4002a', 'star'], legenda: ['super', '#7aa2ff', '#4b1d9c', 'trophy'], krol: ['diabelek', '#ffcf4a', '#7a1d6b', 'crown'],
+    biznes: ['kowboj', '#8be08b', '#0f6b3d', 'coin'], zen: ['sauna', '#ffd9a8', '#c9783a', 'lotus'], weteran: ['zakochana', '#ffc4d6', '#c13c6a', 'medal'],
+    mem: ['kapiel', '#ffe27a', '#f08a1c', 'laugh'], cisza: ['szlafrok', '#c9c3f5', '#5a4fa8', 'zzz'], wtopa: ['ratownik', '#ff9d8a', '#8c1d1d', 'down'],
+    przecietniak: ['ziomek', '#e2e5ee', '#8b93a8', 'meh'], cancel: ['wsciekla', '#6b6f7a', '#1c1e26', 'ban'], bankrut: ['mikolaj', '#9aa3b2', '#3a4150', 'coinoff'],
+    zalamanie: ['niesmiala', '#a9b4ff', '#2a2f78', 'bolt'], duet: ['imprezowa', '#ffd36b', '#e0407a', 'heart'], slub: ['uwodziciel', '#ffe0ea', '#d4467a', 'ring'],
+    sad: ['detektyw', '#cdbb9a', '#5a4528', 'gavel'], ucieczka: ['surfer', '#7ee0d0', '#0b7f9c', 'palm'], oktagon: ['kibic', '#ff8a5c', '#7a1414', 'glove'],
+    reality: ['sliska', '#ff9ac2', '#5a1a8c', 'tv'], milioner: ['gwiazdor', '#ffe27a', '#1f7a4a', 'diamond']
+  };
+  var ico = function (id, n) { return '<svg viewBox="0 0 24 24" width="' + (n || 20) + '" height="' + (n || 20) + '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + EM[id] + '</svg>'; };
+
   /* ---------- typy artystów ---------- */
   var ROLES = [
     { id: 'raper', name: 'Raper', k: 'gwiazdor', st: { h: 50, s: 45, k: 40, n: 30 }, fol: 120000, d: 'Szacunek ulicy, mało kasy, dużo wersów.' },
@@ -346,13 +389,22 @@
   function mount(el, H) {
     var g = H.G('drama'), $ = function (s) { return el.querySelector(s); }, esc = H.esc, K = H.K;
     var run = null, R = Math.random;
-    H.shell(el, g, '<div class="dr" id="dr"></div>', { side: '<section class="gp-box"><h3>Zakończenia <small id="dr-ec"></small></h3><div class="dr-ends" id="dr-ends"></div></section><section class="gp-box"><h3>Osiągnięcia <small id="dr-ac"></small></h3><ul class="dr-ach" id="dr-ach"></ul></section>' });
+    /* ikonka: Knaga w stroju + odznaka na gradiencie (id afery albo zakończenia) */
+    function tile(id, kind) { var t = TILE[id] || ['ziomek', '#ffc4a8', '#e0407a', 'star']; return '<span class="dr-ico is-' + (kind || 'sc') + '" style="--a:' + t[1] + ';--b:' + t[2] + '">' + K(t[0], 'gk') + '<i class="dr-em">' + ico(t[3], 20) + '</i></span>'; }
+    /* personalizacja Knagi gracza: własny strój albo „auto” (zmienia się z nastrojem postaci) */
+    function myK(r, kn, st) {
+      if (kn && kn !== 'auto') return kn;
+      if (!st) return r.k;
+      return st.n >= 75 ? 'wsciekla' : st.s <= 20 ? 'niesmiala' : st.h >= 85 ? 'imprezowa' : st.k >= 85 ? 'kowboj' : st.n <= 15 ? 'sauna' : r.k;
+    }
+    H.shell(el, g, '<div class="dr" id="dr"></div>', { side: '<section class="gp-box"><h3>Zakończenia <small id="dr-ec"></small></h3><div class="dr-ends" id="dr-ends"></div></section><details class="gp-box dr-fold" id="dr-fold"><summary><h3>Osiągnięcia <small id="dr-ac"></small></h3><span class="dr-chev" aria-hidden="true"></span></summary><ul class="dr-ach" id="dr-ach"></ul></details>' });
     var d0 = H.load();
+    (function () { var f = $('#dr-fold'); if (!f) return; try { f.open = localStorage.getItem('sn-dr-fold') === '1'; } catch (e) { /* - */ } f.addEventListener('toggle', function () { try { localStorage.setItem('sn-dr-fold', f.open ? '1' : '0'); } catch (e) { /* - */ } }); })();
     function data() { var d = H.load(); d.endings = d.endings || []; d.dramaAch = d.dramaAch || []; d.dramaDone = d.dramaDone || []; d.dramaNick = d.dramaNick || ''; return d; }
     function endsBox() {
       var d = data(), got = d.endings;
       $('#dr-ec').textContent = got.length + '/' + ENDS.length;
-      $('#dr-ends').innerHTML = ENDS.map(function (e) { var on = got.indexOf(e[1]) >= 0; return '<span class="dr-end' + (on ? ' is-on' : '') + (SPECIAL.indexOf(e[0]) >= 0 ? ' is-sp' : '') + '" title="' + (on ? esc(e[1]) : 'Jeszcze nie odkryte') + '">' + (on ? K(e[2], 'gk') : '<i>?</i>') + '<b>' + (on ? e[1] : '???') + '</b></span>'; }).join('');
+      $('#dr-ends').innerHTML = ENDS.map(function (e) { var on = got.indexOf(e[1]) >= 0; return '<span class="dr-end' + (on ? ' is-on' : '') + (SPECIAL.indexOf(e[0]) >= 0 ? ' is-sp' : '') + '" title="' + (on ? esc(e[1]) : 'Jeszcze nie odkryte') + '">' + (on ? tile(e[0], 'end') : '<i>?</i>') + '<b>' + (on ? e[1] : '???') + '</b></span>'; }).join('');
       $('#dr-ac').textContent = d.dramaAch.length + '/' + ACH.length;
       $('#dr-ach').innerHTML = ACH.map(function (a) { var on = d.dramaAch.indexOf(a[0]) >= 0; return '<li class="' + (on ? 'is-on' : '') + '"><span>' + ic(on ? 'check' : 'lock', 14) + '</span><div><b>' + a[1] + '</b><small>' + a[2] + '</small></div></li>'; }).join('');
     }
@@ -367,13 +419,14 @@
     function pick() {
       var d = data(), saved = loadRun(), role = d.dramaRole || 'raper';
       $('#dr').innerHTML = '<div class="dr-pick">' +
-        (saved ? '<button type="button" class="dr-cont" data-act="cont"><span class="dr-cont-k">' + K(SC(saved.sc).k, 'gk') + '</span><span><small>Masz niedokończoną aferę</small><b>' + esc(SC(saved.sc).name) + ' · dzień ' + Math.min(7, saved.beat + 1) + '/7</b><em>' + esc(saved.nick) + ' – ' + esc(ROLE(saved.role).name) + '</em></span><i>' + ic('play', 18) + ' Kontynuuj</i></button>' : '') +
+        (saved ? '<button type="button" class="dr-cont" data-act="cont"><span class="dr-cont-k">' + tile(saved.sc, 'sc') + '</span><span><small>Masz niedokończoną aferę</small><b>' + esc(SC(saved.sc).name) + ' · dzień ' + Math.min(7, saved.beat + 1) + '/7</b><em>' + esc(saved.nick) + ' – ' + esc(ROLE(saved.role).name) + '</em></span><i>' + ic('play', 18) + ' Kontynuuj</i></button>' : '') +
         '<h2>Twoja postać</h2><div class="dr-who"><label class="dr-nick"><span>Ksywka</span><input type="text" id="dr-nick" maxlength="16" placeholder="np. Mokry Mati" value="' + esc(d.dramaNick) + '" autocomplete="off"></label></div>' +
         '<div class="dr-roles" role="radiogroup" aria-label="Typ artysty">' + ROLES.map(function (r) {
-          return '<button type="button" class="dr-role' + (r.id === role ? ' is-on' : '') + '" data-role="' + r.id + '" role="radio" aria-checked="' + (r.id === role) + '"><span class="dr-role-k">' + K(r.k, 'gk') + '</span><b>' + r.name + '</b><small>' + r.d + '</small><span class="dr-role-st">' + STATS.map(function (s) { return '<i title="' + s[1] + '">' + ic(s[2], 12) + r.st[s[0]] + '</i>'; }).join('') + '</span></button>';
+          return '<button type="button" class="dr-role' + (r.id === role ? ' is-on' : '') + '" data-role="' + r.id + '" role="radio" aria-checked="' + (r.id === role) + '"><span class="dr-role-k">' + K(myK(r, d.dramaK), 'gk') + '</span><b>' + r.name + '</b><small>' + r.d + '</small><span class="dr-role-st">' + STATS.map(function (s) { return '<i title="' + s[1] + '">' + ic(s[2], 12) + r.st[s[0]] + '</i>'; }).join('') + '</span></button>';
         }).join('') + '</div>' +
+        '<h2>Twoja Knaga</h2><p class="dr-lead">Wybierz strój albo zostaw „Auto” – wtedy Knaga zmienia się z nastrojem postaci (wściekła przy wysokich Nerwach, nieśmiała przy niskim Szacunku, imprezowa przy wysokim Hype).</p><div class="dr-wear" id="dr-wear" role="radiogroup" aria-label="Strój Knagi"><button type="button" class="dr-wr' + ((d.dramaK || 'auto') === 'auto' ? ' is-on' : '') + '" data-kn="auto" role="radio" aria-checked="' + ((d.dramaK || 'auto') === 'auto') + '"><span class="dr-wr-a">Auto</span><small>nastrój</small></button>' + (window.Knaga ? Knaga.list.map(function (k) { var on = d.dramaK === k.slug; return '<button type="button" class="dr-wr' + (on ? ' is-on' : '') + '" data-kn="' + k.slug + '" role="radio" aria-checked="' + on + '" title="' + esc(k.name) + '">' + K(k.slug, 'gk') + '<small>' + esc(k.name) + '</small></button>'; }).join('') : '') + '</div>' +
         '<h2>Wybierz aferę</h2><p class="dr-lead">7 dni, decyzje, losowe wydarzenia i 4 paski. Jeśli Szacunek albo Kasa spadną do zera, a Nerwy dojdą do 100 – koniec gry.</p><div class="dr-sc">' +
-        SCEN.map(function (s, i) { var done = d.dramaDone.indexOf(s.id) >= 0; return '<button type="button" class="dr-scb" data-sc="' + s.id + '"><span class="dr-scb-k">' + K(s.k, 'gk') + '</span><span><b>' + (i + 1) + '. ' + s.name + (done ? ' <em>' + ic('check', 12) + ' ukończona</em>' : '') + '</b><small>' + s.sub + '</small></span></button>'; }).join('') + '</div></div>';
+        SCEN.map(function (s, i) { var done = d.dramaDone.indexOf(s.id) >= 0; return '<button type="button" class="dr-scb" data-sc="' + s.id + '"><span class="dr-scb-k">' + tile(s.id, 'sc') + '</span><span><b>' + (i + 1) + '. ' + s.name + (done ? ' <em>' + ic('check', 12) + ' ukończona</em>' : '') + '</b><small>' + s.sub + '</small></span></button>'; }).join('') + '</div></div>';
     }
 
     /* ----- gra ----- */
@@ -381,12 +434,12 @@
       var d = data(), roleId = (el.querySelector('.dr-role.is-on') || {}).dataset ? el.querySelector('.dr-role.is-on').dataset.role : 'raper', r = ROLE(roleId);
       var nick = ($('#dr-nick').value || '').trim().slice(0, 16) || 'Mokry Mati';
       d.dramaNick = nick; d.dramaRole = roleId; H.save(d);
-      run = { sc: scId, role: roleId, nick: nick, st: JSON.parse(JSON.stringify(r.st)), fol: r.fol, beat: 0, items: [], flags: [], ev: 0, shop: false, used: [], log: [], inter: null };
+      run = { sc: scId, role: roleId, kn: d.dramaK || 'auto', nick: nick, st: JSON.parse(JSON.stringify(r.st)), fol: r.fol, beat: 0, items: [], flags: [], ev: 0, shop: false, used: [], log: [], inter: null };
       phone(); day(); saveRun();
     }
     function phone() {
       var s = SC(run.sc), r = ROLE(run.role);
-      $('#dr').innerHTML = '<div class="dr-phone"><div class="dr-top"><span class="dr-me"><span class="dr-me-k">' + K(r.k, 'gk') + '</span><span><b>' + esc(run.nick) + '</b><small>' + r.name + ' · <span id="dr-fol"></span> obserwujących</small></span></span><span class="dr-day" id="dr-step"></span></div>' +
+      $('#dr').innerHTML = '<div class="dr-phone"><div class="dr-top"><span class="dr-me"><span class="dr-me-k" id="dr-mek">' + K(myK(r, run.kn, run.st), 'gk') + '</span><span><b>' + esc(run.nick) + '</b><small>' + r.name + ' · <span id="dr-fol"></span> obserwujących</small></span></span><span class="dr-day" id="dr-step"></span></div>' +
         '<div id="dr-meters"></div><div class="dr-crew" id="dr-crew"></div><div class="dr-feed" id="dr-feed" aria-live="polite">' + run.log.join('') + '</div><div class="dr-ch" id="dr-ch"></div></div>' +
         '<div class="dr-bar"><span>' + esc(s.name) + '</span><button type="button" class="btn btn-sm" data-act="quit">Przerwij aferę</button></div>';
       var f = $('#dr-feed'); f.scrollTop = f.scrollHeight;
@@ -394,6 +447,7 @@
     function meters(delta) {
       $('#dr-meters').innerHTML = '<div class="dr-m">' + STATS.map(function (s) { var v = run.st[s[0]], dl = delta && delta[s[0]]; return '<div class="dr-mt is-' + s[0] + (s[0] === 'n' ? (v >= 75 ? ' is-warn' : '') : (v <= 20 ? ' is-warn' : '')) + '"><span>' + ic(s[2], 12) + s[1] + '<em>' + v + (dl ? '<sup class="' + ((dl > 0) === (s[0] !== 'n') ? 'up' : 'dn') + '">' + (dl > 0 ? '+' : '') + dl + '</sup>' : '') + '</em></span><i><b style="width:' + v + '%"></b></i></div>'; }).join('') + '</div>';
       $('#dr-fol').textContent = fmtFol(run.fol);
+      var mk = $('#dr-mek'); if (mk) { var want = myK(ROLE(run.role), run.kn, run.st); if (mk.dataset.k !== want) { mk.dataset.k = want; mk.innerHTML = K(want, 'gk'); } }
       $('#dr-crew').innerHTML = run.items.length ? 'Ekipa: ' + run.items.map(function (it) { var c = CREW.filter(function (x) { return x[0] === it; })[0]; return '<span>' + c[1] + '</span>'; }).join('') : '';
     }
     function bubble(cls, html, keep) { var f = $('#dr-feed'), b = '<div class="dr-b ' + cls + '">' + html + '</div>'; f.insertAdjacentHTML('beforeend', b); if (keep !== false) run.log.push(b); if (run.log.length > 60) run.log = run.log.slice(-60); f.scrollTop = f.scrollHeight; }
@@ -488,7 +542,7 @@
       $('#dr-ch').innerHTML = ''; $('#dr-step').textContent = 'Koniec';
       var qb = el.querySelector('[data-act="quit"]'); if (qb) qb.style.display = 'none';
       var ac = ach.map(function (k) { var a = ACH.filter(function (x) { return x[0] === k; })[0]; return '<span>' + ic('check', 12) + a[1] + '</span>'; }).join('');
-      bubble('is-end', '<div class="dr-ek">' + K(e[2], 'gk') + '</div><span class="gm-eye">Zakończenie' + (fresh ? ' · nowe!' : '') + (SPECIAL.indexOf(e[0]) >= 0 ? ' · specjalne' : '') + '</span><h2>' + e[1] + '</h2><p>' + esc(T(e[4])) + '</p>' +
+      bubble('is-end', '<div class="dr-ek">' + tile(e[0], 'end') + '</div><span class="gm-eye">Zakończenie' + (fresh ? ' · nowe!' : '') + (SPECIAL.indexOf(e[0]) >= 0 ? ' · specjalne' : '') + '</span><h2>' + e[1] + '</h2><p>' + esc(T(e[4])) + '</p>' +
         '<div class="dr-fin">' + STATS.map(function (s) { return '<span>' + ic(s[2], 13) + s[1] + ' <b>' + st[s[0]] + '</b></span>'; }).join('') + '<span>' + ic('user', 13) + 'Obserwujący <b>' + fmtFol(run.fol) + '</b></span></div>' +
         (ac ? '<div class="dr-newach"><small>Nowe osiągnięcia</small>' + ac + '</div>' : '') +
         '<p class="dr-sum">Odkryte zakończenia: <b>' + d.endings.length + '/' + ENDS.length + '</b></p><div class="gm-acts"><button type="button" class="btn btn-primary" data-act="again">Nowa afera</button><button type="button" class="btn" data-act="share">Udostępnij</button></div>', false);
@@ -498,7 +552,8 @@
     }
 
     el.addEventListener('click', function (ev) {
-      var b = ev.target.closest('[data-role]'); if (b) { [].forEach.call(el.querySelectorAll('.dr-role'), function (x) { x.classList.toggle('is-on', x === b); x.setAttribute('aria-checked', x === b); }); return; }
+      var b = ev.target.closest('[data-kn]'); if (b) { var dd = data(); dd.dramaK = b.dataset.kn; H.save(dd); [].forEach.call(el.querySelectorAll('.dr-wr'), function (x) { x.classList.toggle('is-on', x === b); x.setAttribute('aria-checked', x === b); }); [].forEach.call(el.querySelectorAll('.dr-role'), function (x) { var r2 = ROLE(x.dataset.role), k = x.querySelector('.dr-role-k'); if (k) k.innerHTML = K(myK(r2, dd.dramaK), 'gk'); }); return; }
+      b = ev.target.closest('[data-role]'); if (b) { [].forEach.call(el.querySelectorAll('.dr-role'), function (x) { x.classList.toggle('is-on', x === b); x.setAttribute('aria-checked', x === b); }); return; }
       b = ev.target.closest('[data-sc]'); if (b) return begin(b.dataset.sc);
       b = ev.target.closest('[data-crew]'); if (b && !b.disabled) return hire(b.dataset.crew);
       b = ev.target.closest('[data-c]'); if (b) return choose(+b.dataset.c);
