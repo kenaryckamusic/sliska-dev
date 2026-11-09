@@ -3768,6 +3768,7 @@ function renderAccount() {
       </div>
       <div class="acc-col">
       ${Accounts.html()}
+      ${ownerPushHtml(me)}
       ${staffAdsHtml(me)}
             <section class="panel st-card">
         <div class="st-head"><h2 class="st-h">Logowanie i bezpieczeństwo</h2><p class="st-sub">Adres e-mail, hasło i aktywne sesje.</p></div>
@@ -3779,9 +3780,38 @@ function renderAccount() {
       </section>
       </div>
     </div>`}`;
+  ownerPushSync();
   if (tab === 'komentarze') renderModComments($('#acc-mod'), false);
   else if (window.SnXP) SnXP.loadMe().then(d => { const b = $('#acc-xp'); if (b && d) b.innerHTML = SnXP.card(d, true); });
 }
+
+/** Powiadomienia push na telefon – tylko Właściciel (nowy temat, reklama, zgłoszenie, poczta). */
+function ownerPushHtml(me) {
+  if (!me || me.role !== 'owner') return '';
+  return `<section class="panel st-card"><div class="st-head"><h2 class="st-h">Powiadomienia na telefon</h2><p class="st-sub">Tylko dla Właściciela: nowy temat, reklama, zgłoszenie, wiadomość na redakcja@.</p></div>
+    <label class="st-switch"><span><b>Powiadamiaj to urządzenie</b><small id="acc-push-owner-s">Sprawdzam…</small></span><input type="checkbox" id="acc-push-owner" disabled></label></section>`;
+}
+async function ownerPushSync() {
+  const c = document.getElementById('acc-push-owner'), s = document.getElementById('acc-push-owner-s');
+  if (!c) return;
+  if (!Push.supported()) {
+    s.textContent = Push.isIos() && !Push.standalone() ? 'iPhone: Udostępnij → „Do ekranu początkowego”, otwórz stronę z ikony i wróć tutaj.' : 'Ta przeglądarka nie obsługuje powiadomień.';
+    return;
+  }
+  const on = Notification.permission === 'granted' && !!(await Push.sub());
+  c.checked = on; c.disabled = false;
+  s.textContent = on ? 'Włączone na tym urządzeniu.' : 'Wyłączone na tym urządzeniu.';
+  if (on) Push.link();
+}
+document.addEventListener('change', async e => {
+  if (!e.target || e.target.id !== 'acc-push-owner') return;
+  const c = e.target; c.disabled = true;
+  try {
+    if (c.checked) { await Push.enable(); await Push.link(); toast('Gotowe! Powiadomienia właściciela włączone.'); }
+    else { await Push.disable(); toast('Powiadomienia wyłączone.'); }
+  } catch (err) { toast(err.message || 'Nie udało się zmienić powiadomień.', 'error'); }
+  ownerPushSync();
+});
 
 /** Przełącznik „bez reklam na tym urządzeniu” – jedyna funkcja redakcji dostępna także na stronie publicznej (dla kont z rangą). */
 const STAFF_ROLES = ['editor', 'chief', 'owner'];
