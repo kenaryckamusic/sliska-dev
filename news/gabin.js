@@ -262,7 +262,7 @@
     var av = function (c, cls) { var m = CH[c]; return '<span class="gb-av ' + (cls || '') + '" style="--a:' + m.c[0] + ';--b:' + m.c[1] + '">' + m.i + '</span>'; };
 
     function gate() {
-      el.innerHTML = '<div class="gb gb-gate"><div class="gb-gate-in"><small>GABIN · odcinek 1</small><h1>Zły numer</h1>' +
+      el.innerHTML = '<div class="gb gb-gate"><div class="gb-gate-in"><small>Gabin · odcinek 1</small><h1>Zły numer</h1>' +
         '<p>Thriller w czacie. Rozmawiasz z mieszkańcami małego miasteczka, szukasz zaginionej dziewczyny i decydujesz, komu zaufać. Odpowiedzi mają znaczenie.</p>' +
         '<p class="gb-warn">Uwaga: treści dla dorosłych (przemoc, napięcie erotyczne, wulgaryzmy). Wszystkie postacie są wymyślone.</p>' +
         '<label class="gb-f"><span>Twoje imię w grze</span><input id="gb-nick" maxlength="14" placeholder="np. Kuba" value="' + esc(st.nick || '') + '" autocomplete="off"></label>' +
@@ -278,7 +278,7 @@
     }
 
     function shell() {
-      el.innerHTML = '<div class="gb"><div class="gb-phone"><header class="gb-top"><a class="gb-x" href="#/gry" aria-label="Wyjdź">‹</a><b>GABIN</b><span class="gb-clock" id="gb-clock"></span><button type="button" class="gb-sp" id="gb-sp" title="Przyspiesz oczekiwanie">⏩</button></header>' +
+      el.innerHTML = '<div class="gb"><div class="gb-phone"><header class="gb-top"><a class="gb-x" href="#/gry" aria-label="Wyjdź">‹</a><b>Gabin</b><span class="gb-clock" id="gb-clock"></span><button type="button" class="gb-sp" id="gb-sp" title="Przyspiesz oczekiwanie">⏩</button></header>' +
         '<div class="gb-toast" id="gb-toast"></div><main class="gb-main" id="gb-main"></main>' +
         '<nav class="gb-tabs"><button type="button" data-t="chats" class="is-on">Czaty<i id="gb-bd"></i></button><button type="button" data-t="notes">Notatnik<i id="gb-nb"></i></button></nav></div></div>';
       $('#gb-sp').onclick = function () { speed = speed === 1 ? 0.15 : 1; $('#gb-sp').classList.toggle('is-on', speed !== 1); };
