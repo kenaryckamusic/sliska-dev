@@ -880,3 +880,57 @@ kbd { padding: 2px 7px; border: 1px solid var(--border); border-bottom-width: 3p
 .dr-dl i.is-good{color:#5be38f}.dr-dl i.is-bad{color:#ff7a8a}
 .dv-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 2px;font-size:.85rem;border-bottom:1px solid rgba(128,128,128,.15);text-align:left}
 .dv-row b{opacity:.6;font-size:.78rem}.dv-row.is-on b{opacity:1;color:#c4102a}
+
+/* =====================================================================
+   POLISH – wspólny, dopracowany wygląd gier (telefon: nagłówek niższy, plansza i klawiatura mieszczą się na ekranie)
+   ===================================================================== */
+.gp .btn { border-radius: 14px; font-weight: 800; letter-spacing: .005em; transition: transform .12s ease, box-shadow .15s ease, filter .15s ease; }
+.gp .btn:active { transform: translateY(1px) scale(.985); }
+.gp .btn-primary { border: 0; color: #fff; background: linear-gradient(135deg, var(--g1), var(--g2)); box-shadow: 0 8px 20px color-mix(in srgb, var(--g1) 34%, transparent), inset 0 1px 0 rgba(255, 255, 255, .22); }
+.gp .btn-primary:hover { filter: brightness(1.06); }
+.gp-box { border-radius: 22px; box-shadow: 0 6px 22px rgba(20, 8, 30, .05); }
+.gp-box h3 { letter-spacing: -.01em; }
+.gh-tile { transition: transform .18s ease, box-shadow .18s ease; }
+.gh-tile:hover { transform: translateY(-3px); box-shadow: 0 16px 34px color-mix(in srgb, var(--g1) 40%, transparent); }
+.gh-tile:active { transform: scale(.98); }
+.gp :focus-visible, .gh-tile:focus-visible { outline: 3px solid color-mix(in srgb, var(--g2) 65%, #fff); outline-offset: 2px; }
+
+@media (max-width: 640px) {
+  .gp-head { flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 2px 0 10px; padding: 10px 12px 12px; border-radius: 22px; }
+  .gp-head::before { width: 150px; height: 150px; right: -50px; top: -70px; border-width: 26px; }
+  .gp-back { width: 36px; height: 36px; border-radius: 12px; }
+  .gp-k { width: 54px; height: 54px; margin: -6px 0; }
+  .gp-t { gap: 2px; }
+  .gp-t h1 { font-size: 1.32rem; }
+  .gp-tag { font-size: .62rem; padding: 3px 9px; }
+  .gp-chips { order: 5; width: 100%; gap: 8px; }
+  .gp-chip { flex: 1; min-width: 0; display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 6px 12px; border-radius: 13px; }
+  .gp-chip small { font-size: .6rem; letter-spacing: .04em; }
+  .gp-chip b { font-size: 1rem; }
+
+  /* Ślizgle */
+  .sz { padding: 10px 8px 12px; border-radius: 22px; }
+  .sz-tabs { margin-bottom: 8px; padding: 4px; }
+  .sz-tabs button { padding: 6px 14px; }
+  .sz-board { gap: 6px; margin: 2px auto 8px; }
+  .sz-row { gap: 6px; grid-template-columns: repeat(var(--n), min(clamp(40px, calc((100svh - 470px) / 6), 58px), calc((100vw - 48px) / var(--n) - 6px))); }
+  .sz-c { border-radius: 11px; border-bottom-width: 4px; }
+  .sz-kb { gap: 6px; }
+  .sz-kr { gap: 5px; }
+  .sz-key { height: 46px; max-width: 42px; border-radius: 10px; font-size: .95rem; }
+  .sz-key.is-wide { max-width: 64px; }
+
+  /* Krzyżówka */
+  .kz-paper { padding: 14px 10px 16px; border-radius: 22px; }
+  .kz-head p { font-size: .88rem; }
+  .kz-act { position: sticky; bottom: 76px; z-index: 5; padding: 8px; margin: 10px -2px 0; border-radius: 16px; background: color-mix(in srgb, var(--surface) 90%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: 0 8px 24px rgba(20, 8, 30, .14); }
+
+  /* gry zręcznościowe */
+  .gry-stage, .gry-stage[style*="aspect-ratio"] { border-radius: 22px; }
+  .gm { padding: 20px 18px 18px; border-radius: 24px; }
+}
+@media (max-width: 640px) {
+  .sz { gap: 0; }
+  .sz-msg { min-height: 1.2em; margin: 4px 0 6px; font-size: .86rem; }
+  .sz-hint { margin-top: 6px; }
+}

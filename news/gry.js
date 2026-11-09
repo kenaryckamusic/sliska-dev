@@ -259,8 +259,48 @@ var SliskaSim = (function () {
     }).catch(function () { var box = $('#gp-top'); if (box) box.innerHTML = '<li class="gp-empty">Ranking chwilowo niedostępny.</li>'; });
   }
   function toast(t) { var n = document.createElement('div'); n.className = 'gry-toast'; n.textContent = t; document.body.appendChild(n); setTimeout(function () { n.classList.add('out'); }, 2200); setTimeout(function () { n.remove(); }, 2700); }
-  function share(text) { if (navigator.share) navigator.share({ text: text }).catch(function () {}); else if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () { toast('Skopiowano – wklej, gdzie chcesz'); }); }
-  var LINK = 'news.sliska.pl/gry';
+  /* Udostępnianie: tekst + obrazek-karta (jak w „Wrapped”) przez systemowe okno udostępniania – bez zapisywania w galerii. */
+  function shareCard(o) {
+    return (document.fonts && document.fonts.load ? Promise.race([document.fonts.load('800 80px Figtree'), new Promise(function (r) { setTimeout(r, 800); })]) : Promise.resolve()).catch(function () {}).then(function () {
+      var W = 1080, H = 1350, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+      var x = cv.getContext('2d'), F = 'Figtree, "Segoe UI", system-ui, -apple-system, sans-serif', c = o.c || ['#2b0f55', '#c0164a'];
+      var g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, c[0]); g.addColorStop(1, c[1]); x.fillStyle = g; x.fillRect(0, 0, W, H);
+      var r1 = x.createRadialGradient(W * 0.8, H * 0.12, 20, W * 0.8, H * 0.12, 760); r1.addColorStop(0, 'rgba(255,255,255,.22)'); r1.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = r1; x.fillRect(0, 0, W, H);
+      var r2 = x.createRadialGradient(W * 0.1, H * 0.95, 20, W * 0.1, H * 0.95, 700); r2.addColorStop(0, 'rgba(0,0,0,.35)'); r2.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = r2; x.fillRect(0, 0, W, H);
+      x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+      var rr = function (px, py, w, h, r) { x.beginPath(); x.moveTo(px + r, py); x.arcTo(px + w, py, px + w, py + h, r); x.arcTo(px + w, py + h, px, py + h, r); x.arcTo(px, py + h, px, py, r); x.arcTo(px, py, px + w, py, r); x.closePath(); };
+      x.font = '800 62px ' + F; x.textAlign = 'left'; var w1 = x.measureText('śliska').width, w2 = x.measureText('news').width, bx = (W - w1 - w2) / 2; x.fillStyle = '#fff'; x.fillText('śliska', bx, 128); x.fillStyle = '#ff4d6d'; x.fillText('news', bx + w1, 128); x.textAlign = 'center';
+      x.fillStyle = 'rgba(255,255,255,.75)'; x.font = '800 36px ' + F; x.fillText(String(o.eyebrow || '').toUpperCase().split('').join(' '), W / 2, 330);
+      x.fillStyle = '#fff'; var fs = 88; do { x.font = '800 ' + fs + 'px ' + F; fs -= 4; } while (x.measureText(o.title || '').width > 940 && fs > 36); x.fillText(o.title || '', W / 2, 430);
+      var y = 520;
+      if (o.rows && o.rows.length) {
+        var n = Math.max.apply(null, o.rows.map(function (r) { return r.length; })), cell = Math.min(120, Math.floor(760 / n) - 14), gap = 14, tw = n * cell + (n - 1) * gap, ox = (W - tw) / 2;
+        o.rows.forEach(function (row, ri) { row.forEach(function (col, ci) { var px = ox + ci * (cell + gap), py = y + ri * (cell + gap); rr(px, py, cell, cell, 18); x.fillStyle = col === 'ok' ? '#22c55e' : col === 'in' ? '#f5b82e' : 'rgba(255,255,255,.22)'; x.fill(); }); });
+        y += o.rows.length * (cell + gap) + 30;
+      } else if (o.big != null) {
+        x.fillStyle = '#fff'; x.font = '800 ' + (String(o.big).length > 4 ? 230 : 330) + 'px ' + F; x.shadowColor = 'rgba(0,0,0,.35)'; x.shadowBlur = 40; x.fillText(String(o.big), W / 2, y + 330); x.shadowBlur = 0;
+        if (o.unit) { x.fillStyle = 'rgba(255,255,255,.85)'; x.font = '700 54px ' + F; x.fillText(o.unit, W / 2, y + 420); }
+        y += 470;
+      }
+      (o.lines || []).forEach(function (l, i) { x.fillStyle = 'rgba(255,255,255,.88)'; x.font = '600 44px ' + F; x.fillText(l, W / 2, y + 60 + i * 60); });
+      var by = H - 190; rr(W / 2 - 330, by, 660, 96, 48); x.fillStyle = 'rgba(255,255,255,.16)'; x.fill(); x.strokeStyle = 'rgba(255,255,255,.38)'; x.lineWidth = 3; x.stroke();
+      x.fillStyle = '#fff'; x.font = '800 40px ' + F; x.fillText('news.sliska.pl/gry', W / 2, by + 62);
+      x.fillStyle = 'rgba(255,255,255,.7)'; x.font = '600 30px ' + F; x.fillText('Dasz radę lepiej?', W / 2, H - 60);
+      return new Promise(function (res) { cv.toBlob(function (b) { res(b); }, 'image/png'); });
+    });
+  }
+  function share(text, card) {
+    var copy = function () { if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () { toast('Skopiowano – wklej, gdzie chcesz'); }); else if (navigator.share) navigator.share({ text: text }).catch(function () {}); };
+    if (!card) { if (navigator.share) navigator.share({ text: text }).catch(function () {}); else copy(); return; }
+    shareCard(card).then(function (blob) {
+      if (!blob) throw 0;
+      var f = window.File ? new File([blob], 'sliska-gry.png', { type: 'image/png' }) : null;
+      if (f && navigator.canShare && navigator.canShare({ files: [f] }) && navigator.share) return navigator.share({ files: [f], text: text }).catch(function (e) { if (!e || e.name !== 'AbortError') copy(); });
+      var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'sliska-gry.png'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+      copy();
+    }).catch(function () { if (navigator.share) navigator.share({ text: text }).catch(function () {}); else copy(); });
+  }
+  var LINK = 'https://news.sliska.pl/gry';
 
   /* ================= HUB ================= */
   function hub(el) {
@@ -337,6 +377,8 @@ var SliskaSim = (function () {
     var train = !!trainWord, L = len, flipRow = -1, busy = false, cur = '';
     var st = train ? null : slizgleState();
     if (!st || st.len !== L) st = { len: L, rows: [], pat: [], end: false, win: false, hint: false, tok: '', ans: '' };
+    var doneFlag = train ? null : lsGet('sn-slizgle-done-' + dayIndex());
+    if (doneFlag && !st.end) { st.end = true; st.win = !!doneFlag.win; st.ans = doneFlag.ans || st.ans; }
     var stats = lsGet('sn-slizgle-stats') || { played: 0, wins: 0, streak: 0, max: 0, dist: [0, 0, 0, 0, 0, 0], last: -9 };
     $('.sz').innerHTML = '<div class="sz-tabs" role="tablist"><button type="button" role="tab" data-m="day" class="' + (train ? '' : 'is-on') + '" aria-selected="' + !train + '">Słowo dnia</button><button type="button" role="tab" data-m="train" class="' + (train ? 'is-on' : '') + '" aria-selected="' + train + '">Trening</button></div><div class="sz-board" id="sz-board" style="--n:' + L + '"></div><p class="sz-msg" id="sz-msg" aria-live="polite"></p><div class="sz-kb" id="sz-kb"></div><button type="button" class="btn btn-ghost btn-sm sz-hint" id="sz-hint">💡 Podpowiedź</button>';
     var msg = function (t) { $('#sz-msg').textContent = t; };
@@ -373,7 +415,7 @@ var SliskaSim = (function () {
       }
       var shareTxt = 'Ślizgle #' + (dayIndex() + 1) + ' ' + (st.win ? st.rows.length : 'X') + '/6' + (st.hint ? ' 💡' : '') + '\n' + st.rows.map(function (_, i) { return pattern(i).map(function (s) { return s === 'ok' ? '🟩' : s === 'in' ? '🟨' : '⬛'; }).join(''); }).join('\n') + '\n' + LINK + '/slizgle';
       $('#sz-msg').innerHTML = '<div class="sz-end' + (st.win ? ' is-win' : '') + '">' + face + '<div><b>' + (st.win ? ['Geniusz!', 'Mokro!', 'Świetnie!', 'Nieźle!', 'Uff!', 'Na styk!'][st.rows.length - 1] : 'Tym razem sucho') + '</b><span>' + (st.win ? 'Zgadłeś w ' + st.rows.length + '/6.' : 'Słowo dnia: ' + answer + '.') + ' Nowe słowo o północy.</span></div><button type="button" class="btn btn-primary btn-sm" id="sz-share">Udostępnij wynik</button></div>';
-      $('#sz-share').onclick = function () { share(shareTxt); };
+      $('#sz-share').onclick = function () { share(shareTxt, { c: G('slizgle').c, eyebrow: 'Ślizgle #' + (dayIndex() + 1), title: st.win ? 'Zgadnięte w ' + st.rows.length + '/6' : 'Tym razem sucho', rows: st.rows.map(function (_, i) { return pattern(i); }), lines: st.hint ? ['z podpowiedzią 💡'] : [] }); };
     }
     /* koniec rundy: statystyki lokalne; rekord i XP przyznał już serwer w odpowiedzi na ostatnią próbę */
     function endRound(win, reply) {
@@ -382,7 +424,7 @@ var SliskaSim = (function () {
       var di = dayIndex();
       stats.played++;
       if (win) { stats.wins++; stats.dist[st.rows.length - 1]++; stats.streak = stats.last === di - 1 ? stats.streak + 1 : 1; stats.max = Math.max(stats.max, stats.streak); } else stats.streak = 0;
-      stats.last = win ? di : -9; lsSet('sn-slizgle-stats', stats);
+      stats.last = win ? di : -9; lsSet('sn-slizgle-stats', stats); lsSet('sn-slizgle-done-' + di, { win: win, ans: win ? st.rows[st.rows.length - 1] : st.ans });
       if (win) submit('slizgle', 7 - st.rows.length, false, true); else { var d = load(); d.played = (d.played || 0) + 1; save(d); }
       if (reply && reply.xp && reply.xp.got && window.SnXP) SnXP.gained(reply.xp);
       played('slizgle'); setTimeout(zone, 0);
@@ -400,7 +442,7 @@ var SliskaSim = (function () {
       if (train) { var win = cur === trainWord; accept(cur, null, win, win || st.rows.length >= 5); return; }
       if (busy) return; busy = true; var word = cur;
       slizgleCall({ guess: word, st: st.tok }).then(function (d) { accept(word, d, d.win, d.over); })
-        .catch(function (e) { msg(e.status === 404 || e.message === 'gone' ? 'Serwer jest w trakcie aktualizacji. Spróbuj za chwilę.' : e.message === 'rate' ? 'Za dużo prób. Poczekaj chwilę.' : 'Nie udało się sprawdzić słowa. Spróbuj ponownie.'); shake(); })
+        .catch(function (e) { if (e.message === 'played') { st.end = true; st.win = false; draw(); msg('Dzisiejsze Ślizgle masz już za sobą – wróć jutro po nowe słowo.'); return; } msg(e.status === 404 || e.message === 'gone' ? 'Serwer jest w trakcie aktualizacji. Spróbuj za chwilę.' : e.message === 'rate' ? 'Za dużo prób. Poczekaj chwilę.' : 'Nie udało się sprawdzić słowa. Spróbuj ponownie.'); shake(); })
         .then(function () { busy = false; });
     }
     function press(k) {
@@ -542,7 +584,7 @@ var SliskaSim = (function () {
       var o = $('#gry-over'); o.hidden = false;
       o.innerHTML = '<div class="gm">' + html + '<div class="gm-acts"><button type="button" class="btn btn-primary" id="gry-go">' + btn + '</button>' + (withShare ? '<button type="button" class="btn" id="gry-share">' + ICO.share + ' Udostępnij</button>' : '') + '</div></div>';
       $('#gry-go').onclick = paused ? resume : start; $('#gry-go').focus({ preventScroll: true });
-      var sh = $('#gry-share'); if (sh) sh.onclick = function () { share(g.name + ' na Śliskiej: ' + api.score + ' ' + (g.unit || '') + ' 💦 Pobijesz?\n' + LINK + '/' + g.id); };
+      var sh = $('#gry-share'); if (sh) sh.onclick = function () { share(g.name + ' na Śliskiej: ' + api.score + ' ' + (g.unit || '') + ' 💦 Pobijesz?\n' + LINK + '/' + g.id, { c: g.c, eyebrow: 'Śliskie Gry', title: g.name, big: api.score, unit: g.unit || 'pkt', lines: [] }); };
     }
     function start() {
       if (!opts.replay) return begin();
@@ -1043,7 +1085,7 @@ var SliskaSim = (function () {
     function win() {
       grid.classList.add('is-done'); [].forEach.call(grid.querySelectorAll('.kz-c'), function (i) { i.readOnly = true; }); $('#kz-pass').classList.add('is-done'); pass();
       $('#kz-msg').innerHTML = '<div class="sz-end is-win">' + K('imprezowa', 'gk') + '<div><b>Rozwiązane!</b><span>Hasło tygodnia: ' + set.h + '. Mokra robota.' + (arch ? ' <a href="#/gry/krzyzowka-arch">Wróć do archiwum</a>' : '') + '</span></div><button type="button" class="btn btn-primary btn-sm" id="kz-share">' + ICO.share + ' Udostępnij</button></div>';
-      $('#kz-share').onclick = function () { share('Rozwiązałem Krzyżówkę Tygodnia na Śliskiej 🧩 Dasz radę?\n' + LINK + '/krzyzowka'); };
+      $('#kz-share').onclick = function () { share('Rozwiązałem Krzyżówkę Tygodnia na Śliskiej 🧩 Dasz radę?\n' + LINK + '/krzyzowka', { c: G('krzyzowka').c, eyebrow: arch ? 'Krzyżówka · archiwum' : 'Krzyżówka Tygodnia #' + W, title: 'Rozwiązana', big: '✓', unit: set.r.length + ' wyrazów + hasło', lines: [] }); };
       if (!st.done) {
         st.done = 1; lsSet(key, st); lsSet('sn-krzyz-done-' + W, 1); var d = load();
         if (arch) { d.archSolved = (d.archSolved || 0) + 1; save(d); toast('Krzyżówka z archiwum rozwiązana! 🧩'); }
@@ -1061,7 +1103,10 @@ var SliskaSim = (function () {
       if (ri >= 0 && tryRow(ri)) return; for (var r = 0; r < set.r.length; r++) if (tryRow(r)) return;
     };
     pass();
-    if (st.done) win();
+    if (st.done || lsGet('sn-krzyz-done-' + W)) {            // ta krzyżówka jest już rozwiązana: pokaż rozwiązanie i zablokuj
+      st.done = 1; set.r.forEach(function (r, ri) { cellsOf(ri).forEach(function (c, k) { c.value = r[0][k]; }); });
+      win(); [].forEach.call(document.querySelectorAll('#kz-check, #kz-hint'), function (b) { b.disabled = true; });
+    }
   }
 
   /* sekcja „Śliska strefa” w lewym pasku: podświetlenie bieżącej strony i plakietka „Nowe słowo”, dopóki dzisiejsze Ślizgle nie są rozwiązane */
