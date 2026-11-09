@@ -577,6 +577,9 @@ var SliskaSim = (function () {
   function achRefresh(gid) { var u = $('#gry-ach'), c = $('#gry-ach-c'); if (u) u.innerHTML = achItems(gid); if (c) c.textContent = achGot(gid).length + '/' + ACHS[gid].length; }
 
   /* ============== wspólny silnik gier zręcznościowych (canvas) ============== */
+  var STARS = { krople: [25, 70, 130], flappy: [6, 18, 35], waz: [8, 22, 45], slizgawka: [150, 500, 1000] };
+  var STAR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.4l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.2 6.1 20.4l1.2-6.5L2.5 9.3l6.6-.9z" stroke-linejoin="round" stroke-width="1.4"/></svg>';
+  function starsHtml(gid, sc) { var th = STARS[gid]; if (!th) return ''; var n = th.filter(function (v) { return sc >= v; }).length; return '<div class="gm-stars" aria-label="' + n + ' z 3 gwiazdek">' + [0, 1, 2].map(function (i) { return '<span class="' + (i < n ? 'on' : '') + '" style="--d:' + (.25 + i * .22) + 's">' + STAR_SVG + '</span>'; }).join('') + '</div>'; }
   var imgCache = {};
   function knagaImg(slug) {
     if (imgCache[slug]) return imgCache[slug];
@@ -613,7 +616,7 @@ var SliskaSim = (function () {
         var sc = api.score; if (api.tl) { api.tl.push([Math.round(api.t * 1000), sc]); TLS[g.id] = opts.replay ? undefined : api.tl; } var nb = sc > 0 && submit(g.id, sc, false, !!opts.replay && !RUNS[g.id]);
         played(g.id);
         var et = opts.endText ? opts.endText(sc) : ['', g.knaga];
-        menu('<span class="gm-eye">Koniec gry</span><div class="gm-k">' + K(et[1] || g.knaga, 'gk') + '</div><p class="gm-end">' + et[0] + '</p><div class="gm-score">' + sc + '<small>' + (g.unit || '') + '</small></div>' +
+        menu('<span class="gm-eye">Koniec gry</span><div class="gm-k">' + K(et[1] || g.knaga, 'gk') + '</div><p class="gm-end">' + et[0] + '</p>' + starsHtml(g.id, sc) + '<div class="gm-score">' + sc + '<small>' + (g.unit || '') + '</small></div>' +
           (nb ? '<span class="gry-new">Nowy rekord!</span>' : '<p class="gm-best">Twój rekord: <b>' + fmt(g.id, best(g.id)) + '</b></p>') +
           (api.newAch.length ? '<div class="gm-ach"><small>Nowe osiągnięcia</small>' + api.newAch.map(function (a) { return '<span>' + aIcon(a[3], 15) + a[1] + '</span>'; }).join('') + '</div>' : '') +
           (logged() ? (sc > 0 ? '<p class="gm-xp">+' + (nb ? 15 : 5) + ' XP do sezonu</p>' : '') : '<p class="gm-note">Zaloguj się, żeby rekord zapisał się na koncie.</p>'),
@@ -759,7 +762,7 @@ var SliskaSim = (function () {
         var wg = c.createLinearGradient(0, 0, 0, H); wg.addColorStop(0, '#f2fbff'); wg.addColorStop(.6, '#d9f0fb'); wg.addColorStop(1, '#b9e0f3'); c.fillStyle = wg; c.fillRect(0, 0, W, H);
         c.strokeStyle = 'rgba(120,180,210,.35)'; c.lineWidth = 1.5; for (var x = 0; x < W; x += 46) { c.beginPath(); c.moveTo(x + .5, 0); c.lineTo(x + .5, H); c.stroke(); } for (var y = 0; y < H; y += 46) { c.beginPath(); c.moveTo(0, y + .5); c.lineTo(W, y + .5); c.stroke(); }
         c.fillStyle = 'rgba(255,255,255,.5)'; for (x = 0; x < W; x += 46) for (y = 0; y < H; y += 46) if (((x / 46 + y / 46) | 0) % 3 === 0) c.fillRect(x + 3, y + 3, 14, 3);
-        c.save(); c.globalCompositeOperation = 'lighter'; [[.18, .3], [.5, .22]].forEach(function (s2, i) { var lg2 = c.createLinearGradient(W * s2[0], 0, W * (s2[0] + s2[1]), H); lg2.addColorStop(0, 'rgba(255,248,210,' + (.12 + Math.sin(t * .6 + i) * .03) + ')'); lg2.addColorStop(1, 'rgba(255,248,210,0)'); c.fillStyle = lg2; c.beginPath(); c.moveTo(W * s2[0] - 30, 0); c.lineTo(W * s2[0] + 40, 0); c.lineTo(W * (s2[0] + s2[1]) + 120, H); c.lineTo(W * (s2[0] + s2[1]) - 80, H); c.closePath(); c.fill(); }); c.restore();
+        c.save(); c.globalCompositeOperation = 'lighter'; [[.18, .3], [.5, .22]].forEach(function (s2, i) { var lg2 = c.createLinearGradient(W * s2[0], 0, W * (s2[0] + s2[1]), H); lg2.addColorStop(0, 'rgba(255,248,210,' + (.06 + Math.sin(t * .6 + i) * .02) + ')'); lg2.addColorStop(1, 'rgba(255,248,210,0)'); c.fillStyle = lg2; c.beginPath(); c.moveTo(W * s2[0] - 30, 0); c.lineTo(W * s2[0] + 40, 0); c.lineTo(W * (s2[0] + s2[1]) + 120, H); c.lineTo(W * (s2[0] + s2[1]) - 80, H); c.closePath(); c.fill(); }); c.restore();
         var fg = c.createLinearGradient(0, H - 34, 0, H); fg.addColorStop(0, '#a9daf0'); fg.addColorStop(1, '#6fb2d4'); c.fillStyle = fg; c.fillRect(0, H - 34, W, 34); c.fillStyle = 'rgba(40,110,150,.35)'; for (x = 0; x < W; x += 34) c.fillRect(x, H - 34, 2, 34); c.fillStyle = 'rgba(255,255,255,.55)'; c.fillRect(0, H - 34, W, 2);
         for (var sw = 0; sw < 5; sw++) { var sx2 = (sw * .23 + .06) * W + Math.sin(t * .8 + sw * 2) * 18, sy2 = ((1 - ((t * .05 + sw * .2) % 1)) * .8 + .1) * H; c.fillStyle = 'rgba(255,255,255,.14)'; c.beginPath(); c.ellipse(sx2, sy2, 38, 14, 0, 0, 7); c.fill(); }
         bub.forEach(function (b) { var by = ((b.y - t * b.v) % 1 + 1) % 1; c.strokeStyle = 'rgba(255,255,255,.9)'; c.lineWidth = 1.5; c.beginPath(); c.arc(b.x * W, by * H, b.r, 0, 7); c.stroke(); c.fillStyle = 'rgba(255,255,255,.35)'; c.fill(); });
@@ -863,7 +866,6 @@ var SliskaSim = (function () {
         trail.forEach(function (q) { c.fillStyle = 'rgba(255,61,110,' + q.l + ')'; c.beginPath(); c.arc(q.x, q.y, 6 * q.l + 2, 0, 7); c.fill(); });
         if (B && (B.inv <= 0 || Math.floor(B.inv * 12) % 2)) c.save(); c.shadowColor = 'rgba(255,61,110,.7)'; c.shadowBlur = 22; drawK(c, img, B.x, B.y, 84, Math.max(-.5, Math.min(.7, B.vy / 600))); c.restore();
         if (B && B.shield) { c.strokeStyle = 'rgba(255,207,74,.9)'; c.lineWidth = 3.5; c.beginPath(); c.arc(B.x, B.y, 50, 0, 7); c.stroke(); c.fillStyle = 'rgba(255,207,74,.12)'; c.fill(); }
-        c.font = '900 56px Figtree, Arial'; c.textAlign = 'center'; c.lineWidth = 8; c.strokeStyle = 'rgba(20,8,30,.55)'; c.strokeText(a.score, W / 2, 86); c.fillStyle = '#fff'; c.fillText(a.score, W / 2, 86);
       }
     });
   }
