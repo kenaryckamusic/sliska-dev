@@ -29,7 +29,7 @@
 *, *::before, *::after { box-sizing: border-box; }
 html, body { height: 100%; overscroll-behavior: none; }
 /* telefon / aplikacja z ekranu początkowego: strona nie „odjeżdża” przy przeciąganiu (szare pole pod dolnym paskiem) */
-@media (max-width: 1023px) { html, body { position: fixed; inset: 0; width: 100%; height: auto; overflow: hidden; } .shell { height: 100%; } }
+@media (max-width: 1023px) { html, body { position: static; width: 100%; height: 100%; overflow: hidden; overscroll-behavior: none; } .shell { height: 100%; } }
 /* iPhone (aplikacja z ekranu początkowego): pełny ekran bez luki pod dolnym paskiem i bez rozmycia przy statusie */
 body::after { content: ""; position: fixed; left: 0; right: 0; top: 0; height: env(safe-area-inset-top, 0px); z-index: 80; background: var(--side); pointer-events: none; }
 body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 var(--font); -webkit-font-smoothing: antialiased; overflow: hidden; }
@@ -262,9 +262,3 @@ button { cursor: pointer; }
 body.is-dim .shell-dim { opacity: 1; pointer-events: auto; }
 body.is-dim .stage { z-index: 56; }
 
-/* iOS: gdy widok aplikacji jest krótszy niż ekran (luka pod dolnym paskiem), dolny pasek przesuwamy na sam dół ekranu */
-@media (max-width: 1023px) {
-  html.has-gap .tabbar { bottom: calc(var(--gap) * -1); height: calc(var(--tab-h) + env(safe-area-inset-bottom, 0px)); }
-  html.has-gap .frame, html.has-gap .loader { height: calc(100% - var(--tab-h) - env(safe-area-inset-bottom, 0px) + var(--gap)); }
-  html.has-gap .page { padding-bottom: calc(var(--tab-h) + 24px + var(--gap) + env(safe-area-inset-bottom, 0px)); }
-}

@@ -7,7 +7,7 @@
   var GATE = /^dev\./.test(location.hostname) || /[?&]gate=1\b/.test(location.search);
 
   /* ---------- Świeża wersja i pełna wysokość w aplikacji z ekranu początkowego ---------- */
-  var BUILD = '20261109m';
+  var BUILD = '20261109n';
   function checkFresh() {
     try {
       fetch('/?_=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
@@ -21,7 +21,7 @@
   function fitHeight() {
     var de = document.documentElement, sh = window.screen && screen.height, ih = window.innerHeight;
     var standalone = window.navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
-    var gap = standalone && sh && ih && sh - ih > 20 && sh - ih < 140 ? sh - ih : 0;   // iOS: widok krótszy niż ekran
+    var gap = 0;   // iOS: widok krótszy niż ekran
     de.style.setProperty('--gap', gap + 'px'); de.classList.toggle('has-gap', !!gap);
     de.setAttribute('data-vp', [ih, sh, window.visualViewport ? Math.round(visualViewport.height) : 0].join('/'));
   }
@@ -356,7 +356,17 @@
   /* ---------- Push na telefon (działa też przy zamkniętej aplikacji) ---------- */
   var PAPI = /^(news|dev)\.sliska\.pl$/.test(location.hostname) ? 'https://api.sliska.pl/news/api' : '/news/api';
   function pushOK() { return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && location.protocol === 'https:'; }
-  function pushReg() { return navigator.serviceWorker.register('/news/sw.js', { scope: '/news/' }).then(function () { return navigator.serviceWorker.ready; }).then(function () { return navigator.serviceWorker.getRegistration('/news/'); }); }
+  function pushReg() {
+    return navigator.serviceWorker.register('/news/sw.js', { scope: '/news/' }).then(function (reg) {
+      if (reg.active) return reg;
+      var w = reg.installing || reg.waiting;
+      return new Promise(function (ok, no) {
+        if (!w) { no(new Error('Nie udało się uruchomić usługi powiadomień.')); return; }
+        var t = setTimeout(function () { no(new Error('Usługa powiadomień nie wystartowała. Spróbuj jeszcze raz.')); }, 15000);
+        w.addEventListener('statechange', function () { if (w.state === 'activated') { clearTimeout(t); ok(reg); } else if (w.state === 'redundant') { clearTimeout(t); no(new Error('Usługa powiadomień została odrzucona.')); } });
+      });
+    });
+  }
   function pushState() { if (!pushOK() || Notification.permission !== 'granted') return Promise.resolve(false); return navigator.serviceWorker.getRegistration('/news/').then(function (r) { return r ? r.pushManager.getSubscription() : null; }).then(function (sb) { return !!sb; }).catch(function () { return false; }); }
   function b64key(b) { var pad = '='.repeat((4 - b.length % 4) % 4), raw = atob((b + pad).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(raw, function (c) { return c.charCodeAt(0); }); }
   function pushPost(path, ep) { return token().then(function (t) { return fetch(PAPI + '/push/' + path, { method: 'POST', headers: { 'content-type': 'application/json', authorization: 'Bearer ' + t }, body: JSON.stringify({ endpoint: ep }) }); }); }
@@ -375,7 +385,8 @@
       return sb.unsubscribe().catch(function () {}).then(function () { return pushPost('unsubscribe', ep).catch(function () {}); });
     });
   }
-  function toast(msg) {
+  function toast(msg) { N.msg = msg; if (N.pop) drawPop(); }
+  function toastOld(msg) {
     var t = document.createElement('div'); t.className = 'toast'; t.innerHTML = '<i></i><div><b></b></div>'; t.querySelector('b').textContent = msg;
     var h = $('#toasts'); if (!h) return; h.appendChild(t); setTimeout(function () { t.remove(); }, 6000);
   }
@@ -386,7 +397,7 @@
       '<div class="npop-l">' + (N.items.length ? N.items.map(function (x) {
         return '<a class="ni' + (x.at > s && !x.done ? ' new' : '') + '" href="' + x.href + '" data-nav><i>' + icon(x) + '</i><div><b>' + esc(x.title) + '</b><span>' + esc(x.text) + '</span><small>' + ago(new Date(x.at).toISOString()) + '</small></div></a>';
       }).join('') : '<p class="empty">Na razie nic nowego.</p>') + '</div>' +
-      '<div class="npop-f"><small style="opacity:.6">build ' + BUILD + ' · ' + document.documentElement.getAttribute('data-vp') + '</small><br>Nowe tematy, zgłoszone błędy, reklamy i poczta.' + (!pushOK() ? '<br>Na iPhonie: otwórz stronę z ikony na ekranie początkowym, żeby włączyć powiadomienia.' : perm === 'denied' ? '<br>Powiadomienia są zablokowane w ustawieniach telefonu dla tej aplikacji.' : '<button class="btn btn-sm" type="button" data-n-perm>' + (N.pushOn ? 'Wyłącz powiadomienia na tym telefonie' : 'Włącz powiadomienia na tym telefonie') + '</button>') + '</div>';
+      '<div class="npop-f"><small style="opacity:.6">build ' + BUILD + ' · ' + document.documentElement.getAttribute('data-vp') + '</small><br>' + (N.msg ? '<b style="color:var(--accent)">' + esc(N.msg) + '</b><br>' : '') + 'Nowe tematy, zgłoszone błędy, reklamy i poczta.' + (!pushOK() ? '<br>Na iPhonie: otwórz stronę z ikony na ekranie początkowym, żeby włączyć powiadomienia.' : perm === 'denied' ? '<br>Powiadomienia są zablokowane w ustawieniach telefonu dla tej aplikacji.' : '<button class="btn btn-sm" type="button" data-n-perm>' + (N.pushOn ? 'Wyłącz powiadomienia na tym telefonie' : 'Włącz powiadomienia na tym telefonie') + '</button>') + '</div>';
     if (pushOK() && N.pushOn === undefined) { N.pushOn = null; pushState().then(function (v) { N.pushOn = v; if (N.pop) drawPop(); }); }
   }
   function closeNotes() { if (N.pop) { N.pop.remove(); N.pop = null; } }
@@ -400,7 +411,7 @@
     N.pop.addEventListener('click', function (e) {
       if (e.target.closest('[data-n-all]')) { setSeen(Date.now()); paintBell(); drawPop(); return; }
       if (e.target.closest('[data-n-perm]')) {
-        var pb = e.target.closest('[data-n-perm]'); pb.disabled = true;
+        var pb = e.target.closest('[data-n-perm]'); pb.disabled = true; N.msg = 'Włączam… (może potrwać kilka sekund)';
         (N.pushOn ? pushOff() : pushOn()).then(function () { return pushState(); }).then(function (v) { N.pushOn = v; try { toast(v ? 'Gotowe! Dostaniesz powiadomienia na ten telefon.' : 'Powiadomienia wyłączone.'); } catch (x) { /* ignoruj */ } })
           .catch(function (er) { try { toast((er && er.message) || 'Nie udało się zmienić powiadomień.'); } catch (x) { /* ignoruj */ } }).then(function () { if (N.pop) drawPop(); });
         return;
