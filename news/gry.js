@@ -53,7 +53,7 @@
       how: 'Przesuwaj wannę z Knagą: myszką, palcem albo strzałkami. Kropla +1, Mocz +5, serduszko oddaje życie. Pozew zabiera życie. Co 10 złapanych kropli bez pudła – bonus.' },
     { id: 'flappy', name: 'Super Knaga', knaga: 'super', sub: 'Leć nad sceną między mikrofonami.', tag: 'Zręcznościowa', unit: 'pkt', c: ['#2b0f55', '#c0164a'],
       how: 'Spacja, kliknięcie albo stuknięcie – Super Knaga macha peleryną i podlatuje. Przelatuj między statywami z mikrofonami. Z każdym punktem robi się ciaśniej.' },
-    { id: 'waz', name: 'Kanga', knaga: 'ikona', sub: 'Knaga rośnie na długość. Zbieraj mikrofony.', tag: 'Klasyk', unit: 'pkt', c: ['#3a0a33', '#ff2d77'],
+    { id: 'waz', name: 'Śliski Wąż', knaga: 'ikona', sub: 'Knaga rośnie na długość. Zbieraj mikrofony.', tag: 'Klasyk', unit: 'pkt', c: ['#3a0a33', '#ff2d77'],
       how: 'Strzałki, WASD albo przesunięcie palcem zmienia kierunek. Z każdym mikrofonem Knaga robi się dłuższa (Długość widać w cm). Złoty mikrofon +3 (znika po kilku sekundach). Nie uderzaj w ściany, kolumny ani w samą siebie.' },
     { id: 'ukladanka', name: 'Śliska Układanka', knaga: 'detektyw', sub: 'Ułóż zdjęcie z artykułu.', tag: 'Logiczna', unit: 'ruchów', low: true, c: ['#7a3d00', '#ffae2b'],
       how: 'Przesuwaj kafelki na puste pole, aż ułożysz zdjęcie z artykułu. Rekordem jest najmniejsza liczba ruchów. „Podgląd” pokazuje całe zdjęcie.' },
@@ -85,7 +85,7 @@
   var TK = {}, TLS = {}, RPS = {}, RUNS = {}, lastFin = {};
   var REPLAY = { flappy: 1, waz: 1 };         // gry odtwarzane na serwerze z zapisu ruchów (ziarno losowania dostaje się razem z biletem)
   /* ---- wspólna symulacja gier (ten sam kod liczy wynik na serwerze) ---- */
-/* Wspólna, deterministyczna symulacja Super Knagi (flappy) i Kangi (waz).
+/* Wspólna, deterministyczna symulacja Super Knagi (flappy) i Węża (waz).
    Ten sam kod działa w przeglądarce (rozgrywka) i w Workerze (sprawdzanie wyniku z zapisu ruchów). Zmiana tu = zmiana w obu miejscach. */
 var SliskaSim = (function () {
   var DT = 1 / 60;
@@ -141,7 +141,7 @@ var SliskaSim = (function () {
     return s;
   }
 
-  /* ---------- Kanga (wąż) ---------- */
+  /* ---------- Śliski Wąż ---------- */
   var DIRS = [[0, -1], [0, 1], [-1, 0], [1, 0]];
   function waz(seed) {
     var R = rng(seed), N = 17;
@@ -508,7 +508,7 @@ var SliskaSim = (function () {
   }
 
 
-  /* ---------- osiągnięcia gier zręcznościowych (Łap Krople, Super Knaga, Kanga) ---------- */
+  /* ---------- osiągnięcia gier zręcznościowych (Łap Krople, Super Knaga, Śliski Wąż) ---------- */
   var AICO = {
     drop: '<path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/>', star: '<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.3 6L12 16.5 6.6 19.4l1.3-6L3.4 9.3l6-.7z"/>',
     bolt: '<path d="M13 3L5 13.5h6L10 21l8-10.5h-6z"/>', shield: '<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/>', heart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.4A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
@@ -825,12 +825,12 @@ var SliskaSim = (function () {
         c.fillStyle = 'rgba(255,255,255,.7)'; for (var i = 0; i < 40; i++) { var sx = ((i * 131 - t * 8) % W + W) % W; c.fillRect(sx, (i * 57) % (H * .5), i % 5 ? 1.5 : 2.5, i % 5 ? 1.5 : 2.5); }
         c.fillStyle = 'rgba(255,255,255,.06)'; for (i = 0; i < 4; i++) { var cxx = ((i * .33 * W - t * (10 + i * 4)) % (W + 240) + W + 240) % (W + 240) - 120, cyy = H * (.14 + i * .09); c.beginPath(); c.ellipse(cxx, cyy, 90, 16, 0, 0, 7); c.ellipse(cxx + 40, cyy - 8, 56, 14, 0, 0, 7); c.fill(); }
         c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = 'rgba(255,230,160,.10)'; [[.2, -.25], [.8, .25]].forEach(function (s) { c.beginPath(); c.moveTo(W * s[0], H); c.lineTo(W * (s[0] + s[1]) - 60, 0); c.lineTo(W * (s[0] + s[1]) + 60, 0); c.closePath(); c.fill(); }); c.restore();
-        [[0, .15, '#2a1240', 'rgba(255,207,74,.35)'], [1, .4, '#1a0b26', 'rgba(255,207,74,.55)']].forEach(function (Lr) {
+        [[0, .15, '#22102f', 'rgba(255,214,160,.10)'], [1, .4, '#160a21', 'rgba(255,214,160,.20)']].forEach(function (Lr) {
           var off = (t * 160 * Lr[1]) % 2400;
           city[Lr[0]].forEach(function (b) {
             var bx = b.x - off; if (bx < -b.w) bx += 2400; if (bx > W) return;
             var by = H - 46 - b.h; c.fillStyle = Lr[2]; c.fillRect(bx, by, b.w, b.h);
-            c.fillStyle = Lr[3]; for (var wy = by + 10; wy < H - 56; wy += 16) for (var wx = bx + 8; wx < bx + b.w - 8; wx += 14) if (((wx * 7 + wy * 3) * b.seed | 0) % 3 === 0) c.fillRect(wx, wy, 6, 8);
+            c.fillStyle = Lr[3]; for (var wy = by + 10; wy < H - 56; wy += 16) for (var wx = bx + 8; wx < bx + b.w - 8; wx += 14) if (((wx * 7 + wy * 3) * b.seed | 0) % 5 === 0) c.fillRect(wx, wy, 5, 7);
           });
         });
         (pipes || []).forEach(function (p) {
@@ -857,7 +857,7 @@ var SliskaSim = (function () {
     });
   }
 
-  /* ============== KANGA (dawniej Śliski Wąż; id gry: waz) ============== */
+  /* ============== ŚLISKI WĄŻ (id gry: waz) ============== */
   function waz(el) {
     var head = knagaImg('ikona'), S, dir, nd, food, gold, N = 17, obst = [], slow = null, slowT = 0, combo = 0, comboT = 0, SIM, inp = [], acc = 0;
     var DIRS4 = [[0, -1], [0, 1], [-1, 0], [1, 0]];
