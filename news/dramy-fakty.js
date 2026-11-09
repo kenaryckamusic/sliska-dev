@@ -170,7 +170,7 @@
     else if (R.marta >= 65) E = ['Wróg Plotek24', 'Marta nie odpuszcza. Wasza rywalizacja jest legendą branży, a oboje zarabiacie na tej wojnie.'];
     else if (avg >= 55) E = ['Solidny reporter', 'Nikt Cię nie zwalnia i nikt na Ciebie nie czeka z kwiatami. Ale pensję dostajesz regularnie.'];
     else E = ['Wolny strzelec', 'Po sezonie Zbyszek proponuje umowę zlecenie. „Na razie”, dodaje. Znasz ten ton.'];
-    var dd = H.load(); dd.dramaCareerDone = (dd.dramaCareerDone || 0) + 1; H.save(dd); H.xp('drama'); H.toast('Sezon ukończony: ' + E[0]);
+    var dd = H.load(); dd.dramaCareerDone = (dd.dramaCareerDone || 0) + 1; H.save(dd); H.toast('Sezon ukończony: ' + E[0]);
     box.innerHTML = '<div class="dv"><div class="dv-end"><small>Koniec sezonu · ' + c.n + ' spraw</small><h2>' + esc(E[0]) + '</h2><p>' + esc(E[1]) + '</p><div class="dv-sc"><span><b>' + avg + '</b>średni wynik</span><span><b>' + c.fails + '</b>wpadek</span><span><b>' + R.szef + '</b>zaufanie Szefa</span><span><b>' + R.ola + '</b>Ola</span><span><b>' + R.wrona + '</b>Wrona</span><span><b>' + R.marta + '</b>rywalizacja z Martą</span></div><div class="gm-acts"><button type="button" class="btn btn-primary" data-h="again">Nowy sezon</button><button type="button" class="btn" data-h="share">Udostępnij</button></div></div></div>';
     box.onclick = function (e) { var b = e.target.closest('[data-h]'); if (!b) return; if (b.dataset.h === 'again') { box.onclick = null; back(); } else H.share('Śliska Drama Simulator: ukończyłem sezon (' + c.n + ' spraw) i zostałem: „' + E[0] + '”, średni wynik ' + avg + ' 💦\n' + H.LINK); };
   }
@@ -250,7 +250,7 @@
       var key = endOf(S, R), E = endText(d, key), dd = H.load(); dd.dramaEnd = dd.dramaEnd || {}; var got = dd.dramaEnd[d.id] = dd.dramaEnd[d.id] || [];
       var isNew = got.indexOf(key) < 0, first = !got.length; if (isNew) got.push(key);
       var total = 0; Object.keys(dd.dramaEnd).forEach(function (x) { total += dd.dramaEnd[x].length; }); dd.factDone = dd.factDone || {}; dd.factDone[d.id] = got.length; H.save(dd);
-      if (first) H.xp('drama'); H.submit('drama', Math.min(30, total), true); H.played('drama');
+      H.submit('drama', Math.min(30, total), true); H.played('drama');
       if (isNew) H.toast('Nowe zakończenie: ' + E[0]);
       var score = Math.round((S.k + S.w + (100 - S.p) + (100 - S.n)) / 4);
       $('#df-step').innerHTML = '<span class="dr-dtx">Koniec</span>'; $('#df-ch').innerHTML = '';

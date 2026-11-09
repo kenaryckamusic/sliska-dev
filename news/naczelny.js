@@ -245,7 +245,7 @@
       if (firstEnd) d.nacEnds.push(id);
       if (finished) { d.nacPlayed++; }
       H.save(d);
-      if (finished) { nb = H.submit('naczelny', Math.max(1, sc)); H.xp('drama'); if (nb) H.xp('record'); H.played('naczelny'); }
+      if (finished) { nb = H.submit('naczelny', Math.max(1, sc)); H.played('naczelny'); }
       var fresh = []; d = data();
       ACH.forEach(function (a) { if (d.nacAch.indexOf(a[0]) < 0 && a[4]({ st: st, score: sc, end: id, finished: finished, played: d.nacPlayed, ends: d.nacEnds.length })) { d.nacAch.push(a[0]); fresh.push(a); } });
       if (fresh.length) { H.save(d); fresh.forEach(function (a) { H.toast('🏆 ' + a[1]); }); }
