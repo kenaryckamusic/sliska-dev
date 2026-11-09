@@ -82,7 +82,7 @@
     return v + ' ' + (G(g).unit || '');
   }
   /* ---- ukończenie gry: JEDNO zgłoszenie do serwera (wynik + rekord + XP). Serwer sprawdza bilet startowy, czas i wiarygodność wyniku. ---- */
-  var TK = {}, lastFin = {}, GXP = { slizgle: 'slizgle', drama: 'drama', naczelny: 'drama', krzyzowka: 'krzyzowka' };
+  var TK = {}, TLS = {}, lastFin = {}, GXP = { slizgle: 'slizgle', drama: 'drama', naczelny: 'drama', krzyzowka: 'krzyzowka' };
   function mint(g) {
     if (!logged() || !window.actorApi || !G(g)) return Promise.resolve(null);
     return (TK[g] = actorApi('/gry/start', { method: 'POST', body: JSON.stringify({ game: g }) }).then(function (d) { return d && d.tk || null; }).catch(function () { return null; }));
@@ -93,7 +93,9 @@
     var p = TK[g] || mint(g); delete TK[g];
     p.then(function (tk) {
       if (!tk) return legacy(g, score);                       // stary Worker bez /gry/finish – tymczasowy powrót do dawnych ścieżek
-      return actorApi('/gry/finish', { method: 'POST', body: JSON.stringify({ game: g, score: score, tk: tk }) }).then(function (d) {
+      return actorApi('/gry/finish', { method: 'POST', body: JSON.stringify({ game: g, score: score, tk: tk, tl: TLS[g] || undefined }) }).then(function (d) {
+        delete TLS[g];
+        if (d && d.held) { /* wynik czeka na sprawdzenie */ toast('Świetny wynik! Czeka na sprawdzenie przez redakcję, zanim trafi do rankingu.'); }
         if (d && d.best != null) { if (acc) acc.best[g] = d.best; var b = $('#gry-best'); if (b) b.textContent = fmt(g, best(g)); }
         if (d && d.xp && d.xp.got && window.SnXP) SnXP.gained(d.xp);
       });
@@ -355,13 +357,13 @@
         if (!add.length) return; save(d);
         add.forEach(function (a) { api.newAch.push(a); toast('🏆 ' + a[1]); }); achRefresh(g.id);
       },
-      setScore: function (v) { api.score = v; $('#gry-score').textContent = v; api.check(); },
+      setScore: function (v) { api.score = v; $('#gry-score').textContent = v; var ms = Math.round(api.t * 1000); if (api.tl && (api.tl.length === 0 || ms - api._ls >= 400)) { api.tl.push([ms, v]); api._ls = ms; } api.check(); },
       setLives: function (n) { var l = $('#gry-lives'); if (l) l.textContent = n > 0 ? '💧'.repeat(n) : '—'; },
       burst: function (x, y, col, n) { if (reduce) return; for (var i = 0; i < (n || 10); i++) { var a = Math.random() * 6.28, v = 60 + Math.random() * 160; fx.push({ x: x, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 60, life: .6, c: col, r: 2 + Math.random() * 3 }); } },
       pop: function (x, y, text, col) { fx.push({ x: x, y: y, vx: 0, vy: -50, life: .9, text: text, c: col || '#fff' }); },
       over: function () {
         if (over) return; over = true; running = false; cancelAnimationFrame(raf); api.check();
-        var sc = api.score, nb = sc > 0 && submit(g.id, sc);
+        var sc = api.score; if (api.tl) { api.tl.push([Math.round(api.t * 1000), sc]); TLS[g.id] = api.tl; } var nb = sc > 0 && submit(g.id, sc);
         if (sc > 0) { xp('game'); if (nb) xp('record'); }
         played(g.id);
         var et = opts.endText ? opts.endText(sc) : ['', g.knaga];
@@ -379,7 +381,7 @@
       $('#gry-go').onclick = paused ? resume : start; $('#gry-go').focus({ preventScroll: true });
       var sh = $('#gry-share'); if (sh) sh.onclick = function () { share(g.name + ' na Śliskiej: ' + api.score + ' ' + (g.unit || '') + ' 💦 Pobijesz?\n' + LINK + '/' + g.id); };
     }
-    function start() { $('#gry-over').hidden = true; over = false; paused = false; fx = []; api.t = 0; api.stats = {}; api.newAch = []; api.setScore(0); opts.reset(api); running = true; last = performance.now(); raf = requestAnimationFrame(loop); try { cv.focus({ preventScroll: true }); } catch (e) { /* - */ } }
+    function start() { $('#gry-over').hidden = true; over = false; paused = false; fx = []; api.t = 0; api.stats = {}; api.newAch = []; api.tl = []; api._ls = -1; api.setScore(0); opts.reset(api); running = true; last = performance.now(); raf = requestAnimationFrame(loop); try { cv.focus({ preventScroll: true }); } catch (e) { /* - */ } }
     function pause() { if (!running || over) return; running = false; paused = true; cancelAnimationFrame(raf); menu('<span class="gm-eye">Pauza</span><div class="gm-k">' + K('szlafrok', 'gk') + '</div><p class="gm-end">Knaga czeka. Wynik: <b>' + api.score + '</b></p>', 'Wznów'); }
     function resume() { $('#gry-over').hidden = true; paused = false; running = true; last = performance.now(); raf = requestAnimationFrame(loop); }
     function loop(t) {
