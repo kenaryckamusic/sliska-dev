@@ -7,7 +7,7 @@
   var GATE = /^dev\./.test(location.hostname) || /[?&]gate=1\b/.test(location.search);
 
   /* ---------- Świeża wersja i pełna wysokość w aplikacji z ekranu początkowego ---------- */
-  var BUILD = '20261109n';
+  var BUILD = '20261109o';
   function checkFresh() {
     try {
       fetch('/?_=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
