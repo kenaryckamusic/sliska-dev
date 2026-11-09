@@ -934,3 +934,40 @@ kbd { padding: 2px 7px; border: 1px solid var(--border); border-bottom-width: 3p
   .sz-msg { min-height: 1.2em; margin: 4px 0 6px; font-size: .86rem; }
   .sz-hint { margin-top: 6px; }
 }
+
+/* ---- okna „Start / Pauza / Koniec gry” zawsze mieszczą się w planszy (telefon): przewijanie + zwarty układ ---- */
+.gry-over { display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; overscroll-behavior: contain; }
+.gry-over > .gm { margin: auto; }
+@media (max-width: 640px) {
+  .gry-over { padding: 10px; }
+  .gm { width: min(340px, 100%); padding: 16px 16px 14px; border-radius: 22px; }
+  .gm::before { height: 70px; }
+  .gm-k { width: 78px; height: 78px; margin: -2px 0 0; }
+  .gm h2 { font-size: 1.3rem; margin-bottom: 2px; }
+  .gm-eye { font-size: .62rem; padding: 3px 9px; margin-bottom: 2px; }
+  .gm-end { margin: 0 0 4px; font-size: .84rem; line-height: 1.4; }
+  .gm-score { font-size: 2.9rem; margin: 0 0 2px; }
+  .gm-best, .gm-xp, .gm-note { margin: 0 0 2px; font-size: .78rem; }
+  .gm-keys { gap: 4px; margin: 2px 0 4px; }
+  .gm-keys span { font-size: .72rem; padding: 3px 7px; }
+  .gm-ach { margin: 4px 0 0; }
+  .gm-ach span { font-size: .72rem; padding: 4px 9px; }
+  .gm-acts { gap: 8px; margin-top: 8px; width: 100%; }
+  .gm-acts .btn { flex: 1; min-width: 0; min-height: 44px; padding: 0 12px; }
+
+  /* Układanka */
+  .uk-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .uk-seg { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); margin: 0; }
+  .uk-seg button { padding: 8px 0; }
+  .uk-chip { text-align: center; padding: 6px 8px; }
+  .uk-acts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .uk-acts .btn { width: 100%; justify-content: center; }
+  .uk-frame { padding: 6px; border-radius: 18px; }
+  .uk-board { max-height: none; }
+}
+@media (max-width: 640px) {
+  .gm-keys span:not(:last-child) { display: none; }
+  .gm-k { width: 64px; height: 64px; }
+  .gm-end { font-size: .8rem; line-height: 1.35; }
+  .gm h2 { font-size: 1.2rem; }
+}

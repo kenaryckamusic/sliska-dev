@@ -260,32 +260,61 @@ var SliskaSim = (function () {
   }
   function toast(t) { var n = document.createElement('div'); n.className = 'gry-toast'; n.textContent = t; document.body.appendChild(n); setTimeout(function () { n.classList.add('out'); }, 2200); setTimeout(function () { n.remove(); }, 2700); }
   /* Udostępnianie: tekst + obrazek-karta (jak w „Wrapped”) przez systemowe okno udostępniania – bez zapisywania w galerii. */
+  function mascotImg(slug) {
+    return new Promise(function (res) {
+      try {
+        if (!slug || !window.Knaga) return res(null);
+        var svg = Knaga.svg(slug, { cls: 'gk' }).replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" ');
+        var im = new Image(); im.onload = function () { res(im); }; im.onerror = function () { res(null); };
+        im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+        setTimeout(function () { res(null); }, 2500);
+      } catch (e) { res(null); }
+    });
+  }
+  /* Karta 9:16 (1080×1920) do relacji / stories. Treść trzymamy w bezpiecznym polu (poza górnymi ~250 px i dolnymi ~300 px). */
   function shareCard(o) {
-    return (document.fonts && document.fonts.load ? Promise.race([document.fonts.load('800 80px Figtree'), new Promise(function (r) { setTimeout(r, 800); })]) : Promise.resolve()).catch(function () {}).then(function () {
-      var W = 1080, H = 1350, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    return Promise.all([
+      (document.fonts && document.fonts.load ? Promise.race([document.fonts.load('800 80px Figtree'), new Promise(function (r) { setTimeout(r, 800); })]) : Promise.resolve()).catch(function () {}),
+      mascotImg(o.knaga)
+    ]).then(function (pre) {
+      var im = pre[1], W = 1080, H = 1920, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
       var x = cv.getContext('2d'), F = 'Figtree, "Segoe UI", system-ui, -apple-system, sans-serif', c = o.c || ['#2b0f55', '#c0164a'];
-      var g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, c[0]); g.addColorStop(1, c[1]); x.fillStyle = g; x.fillRect(0, 0, W, H);
-      var r1 = x.createRadialGradient(W * 0.8, H * 0.12, 20, W * 0.8, H * 0.12, 760); r1.addColorStop(0, 'rgba(255,255,255,.22)'); r1.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = r1; x.fillRect(0, 0, W, H);
-      var r2 = x.createRadialGradient(W * 0.1, H * 0.95, 20, W * 0.1, H * 0.95, 700); r2.addColorStop(0, 'rgba(0,0,0,.35)'); r2.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = r2; x.fillRect(0, 0, W, H);
-      x.textAlign = 'center'; x.textBaseline = 'alphabetic';
       var rr = function (px, py, w, h, r) { x.beginPath(); x.moveTo(px + r, py); x.arcTo(px + w, py, px + w, py + h, r); x.arcTo(px + w, py + h, px, py + h, r); x.arcTo(px, py + h, px, py, r); x.arcTo(px, py, px + w, py, r); x.closePath(); };
-      x.font = '800 62px ' + F; x.textAlign = 'left'; var w1 = x.measureText('śliska').width, w2 = x.measureText('news').width, bx = (W - w1 - w2) / 2; x.fillStyle = '#fff'; x.fillText('śliska', bx, 128); x.fillStyle = '#ff4d6d'; x.fillText('news', bx + w1, 128); x.textAlign = 'center';
-      x.fillStyle = 'rgba(255,255,255,.75)'; x.font = '800 36px ' + F; x.fillText(String(o.eyebrow || '').toUpperCase().split('').join(' '), W / 2, 330);
-      x.fillStyle = '#fff'; var fs = 88; do { x.font = '800 ' + fs + 'px ' + F; fs -= 4; } while (x.measureText(o.title || '').width > 940 && fs > 36); x.fillText(o.title || '', W / 2, 430);
-      var y = 520;
-      if (o.rows && o.rows.length) {
-        var n = Math.max.apply(null, o.rows.map(function (r) { return r.length; })), cell = Math.min(120, Math.floor(760 / n) - 14), gap = 14, tw = n * cell + (n - 1) * gap, ox = (W - tw) / 2;
-        o.rows.forEach(function (row, ri) { row.forEach(function (col, ci) { var px = ox + ci * (cell + gap), py = y + ri * (cell + gap); rr(px, py, cell, cell, 18); x.fillStyle = col === 'ok' ? '#22c55e' : col === 'in' ? '#f5b82e' : 'rgba(255,255,255,.22)'; x.fill(); }); });
-        y += o.rows.length * (cell + gap) + 30;
-      } else if (o.big != null) {
-        x.fillStyle = '#fff'; x.font = '800 ' + (String(o.big).length > 4 ? 230 : 330) + 'px ' + F; x.shadowColor = 'rgba(0,0,0,.35)'; x.shadowBlur = 40; x.fillText(String(o.big), W / 2, y + 330); x.shadowBlur = 0;
-        if (o.unit) { x.fillStyle = 'rgba(255,255,255,.85)'; x.font = '700 54px ' + F; x.fillText(o.unit, W / 2, y + 420); }
-        y += 470;
+      /* tło: gradient + poświaty + delikatna siatka kropek */
+      var g = x.createLinearGradient(0, 0, W * 0.7, H); g.addColorStop(0, c[0]); g.addColorStop(1, c[1]); x.fillStyle = g; x.fillRect(0, 0, W, H);
+      var glow = function (cx, cy, r, a) { var q = x.createRadialGradient(cx, cy, 10, cx, cy, r); q.addColorStop(0, 'rgba(255,255,255,' + a + ')'); q.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = q; x.fillRect(0, 0, W, H); };
+      glow(W * 0.85, 330, 760, 0.28); glow(W * 0.1, 1500, 700, 0.12);
+      var vg = x.createRadialGradient(W / 2, H / 2, 500, W / 2, H / 2, 1300); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.42)'); x.fillStyle = vg; x.fillRect(0, 0, W, H);
+      x.fillStyle = 'rgba(255,255,255,.07)'; for (var yy = 40; yy < H; yy += 56) for (var xx = 40 + ((yy / 56) % 2) * 28; xx < W; xx += 56) { x.beginPath(); x.arc(xx, yy, 3, 0, 6.3); x.fill(); }
+      x.strokeStyle = 'rgba(255,255,255,.09)'; x.lineWidth = 46; x.beginPath(); x.arc(W + 40, 420, 380, 0, 6.3); x.stroke(); x.beginPath(); x.arc(-60, 1240, 300, 0, 6.3); x.stroke();
+      x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+      /* logo */
+      x.font = '800 74px ' + F; x.textAlign = 'left'; var w1 = x.measureText('śliska').width, w2 = x.measureText('news').width, bx = (W - w1 - w2) / 2;
+      x.fillStyle = '#fff'; x.fillText('śliska', bx, 330); x.fillStyle = '#ff4d6d'; x.fillText('news', bx + w1, 330); x.textAlign = 'center';
+      var eb = String(o.eyebrow || '').toUpperCase(); x.font = '800 30px ' + F; var ew = x.measureText(eb).width + 64 + eb.length * 3;
+      rr((W - ew) / 2, 370, ew, 62, 31); x.fillStyle = 'rgba(0,0,0,.28)'; x.fill(); x.strokeStyle = 'rgba(255,255,255,.28)'; x.lineWidth = 2; x.stroke();
+      x.fillStyle = '#fff'; x.fillText(eb.split('').join(' '), W / 2, 412);
+      /* układ pionowy: karta z wynikiem dosunięta do stopki, maskotka dostaje całe wolne miejsce nad nią */
+      var title = o.title || '', rows = o.rows && o.rows.length ? o.rows : null, n = rows ? Math.max.apply(null, rows.map(function (r) { return r.length; })) : 0;
+      var gap = 12, cell = rows ? Math.min(rows.length > 4 ? 86 : 104, Math.floor(640 / n) - 12) : 0;
+      var cardH = rows ? 150 + rows.length * (cell + gap) + (o.lines && o.lines.length ? 84 : 28) : 560, cy = 1590 - cardH;
+      var my = 470, ms = Math.min(470, cy - my - 24);
+      if (im && ms >= 220) { var gl = x.createRadialGradient(W / 2, my + ms / 2, 20, W / 2, my + ms / 2, ms * 0.7); gl.addColorStop(0, 'rgba(255,255,255,.34)'); gl.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = gl; x.fillRect(0, my - 60, W, ms + 120); x.shadowColor = 'rgba(0,0,0,.45)'; x.shadowBlur = 50; x.shadowOffsetY = 24; x.drawImage(im, (W - ms) / 2, my, ms, ms); x.shadowColor = 'transparent'; x.shadowBlur = 0; x.shadowOffsetY = 0; }
+      rr(90, cy, W - 180, cardH, 64); x.fillStyle = 'rgba(255,255,255,.15)'; x.fill(); x.strokeStyle = 'rgba(255,255,255,.34)'; x.lineWidth = 3; x.stroke();
+      var fs = 78; do { x.font = '800 ' + fs + 'px ' + F; fs -= 4; } while (x.measureText(title).width > 800 && fs > 34);
+      x.fillStyle = '#fff'; x.fillText(title, W / 2, cy + 104);
+      if (rows) {
+        var tw = n * cell + (n - 1) * gap, ox = (W - tw) / 2, oy = cy + 150;
+        rows.forEach(function (row, ri) { row.forEach(function (col, ci) { var px = ox + ci * (cell + gap), py = oy + ri * (cell + gap); rr(px, py, cell, cell, 20); x.fillStyle = col === 'ok' ? '#22c55e' : col === 'in' ? '#f5b82e' : 'rgba(0,0,0,.28)'; x.fill(); if (col === 'ok' || col === 'in') { var hg = x.createLinearGradient(0, py, 0, py + cell); hg.addColorStop(0, 'rgba(255,255,255,.3)'); hg.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = hg; rr(px, py, cell, cell, 20); x.fill(); } }); });
+        (o.lines || []).forEach(function (l, i) { x.fillStyle = 'rgba(255,255,255,.9)'; x.font = '700 38px ' + F; x.fillText(l, W / 2, oy + rows.length * (cell + gap) + 44 + i * 50); });
+      } else {
+        var bigS = String(o.big == null ? '' : o.big); x.fillStyle = '#fff'; x.font = '800 ' + (bigS.length > 4 ? 210 : bigS.length > 3 ? 250 : 300) + 'px ' + F; x.shadowColor = 'rgba(0,0,0,.35)'; x.shadowBlur = 36; x.shadowOffsetY = 12; x.fillText(bigS, W / 2, cy + 400); x.shadowColor = 'transparent'; x.shadowBlur = 0; x.shadowOffsetY = 0;
+        if (o.unit) { x.fillStyle = 'rgba(255,255,255,.88)'; x.font = '800 52px ' + F; x.fillText(String(o.unit).toUpperCase(), W / 2, cy + 490); }
       }
-      (o.lines || []).forEach(function (l, i) { x.fillStyle = 'rgba(255,255,255,.88)'; x.font = '600 44px ' + F; x.fillText(l, W / 2, y + 60 + i * 60); });
-      var by = H - 190; rr(W / 2 - 330, by, 660, 96, 48); x.fillStyle = 'rgba(255,255,255,.16)'; x.fill(); x.strokeStyle = 'rgba(255,255,255,.38)'; x.lineWidth = 3; x.stroke();
-      x.fillStyle = '#fff'; x.font = '800 40px ' + F; x.fillText('news.sliska.pl/gry', W / 2, by + 62);
-      x.fillStyle = 'rgba(255,255,255,.7)'; x.font = '600 30px ' + F; x.fillText('Dasz radę lepiej?', W / 2, H - 60);
+      /* stopka */
+      var fy = 1640; rr(W / 2 - 340, fy, 680, 104, 52); x.fillStyle = '#fff'; x.fill();
+      x.fillStyle = c[0]; x.font = '800 44px ' + F; x.fillText('news.sliska.pl/gry', W / 2, fy + 68);
+      x.fillStyle = 'rgba(255,255,255,.85)'; x.font = '700 36px ' + F; x.fillText('Dasz radę lepiej?', W / 2, fy + 168);
       return new Promise(function (res) { cv.toBlob(function (b) { res(b); }, 'image/png'); });
     });
   }
@@ -415,7 +444,7 @@ var SliskaSim = (function () {
       }
       var shareTxt = 'Ślizgle #' + (dayIndex() + 1) + ' ' + (st.win ? st.rows.length : 'X') + '/6' + (st.hint ? ' 💡' : '') + '\n' + st.rows.map(function (_, i) { return pattern(i).map(function (s) { return s === 'ok' ? '🟩' : s === 'in' ? '🟨' : '⬛'; }).join(''); }).join('\n') + '\n' + LINK + '/slizgle';
       $('#sz-msg').innerHTML = '<div class="sz-end' + (st.win ? ' is-win' : '') + '">' + face + '<div><b>' + (st.win ? ['Geniusz!', 'Mokro!', 'Świetnie!', 'Nieźle!', 'Uff!', 'Na styk!'][st.rows.length - 1] : 'Tym razem sucho') + '</b><span>' + (st.win ? 'Zgadłeś w ' + st.rows.length + '/6.' : 'Słowo dnia: ' + answer + '.') + ' Nowe słowo o północy.</span></div><button type="button" class="btn btn-primary btn-sm" id="sz-share">Udostępnij wynik</button></div>';
-      $('#sz-share').onclick = function () { share(shareTxt, { c: G('slizgle').c, eyebrow: 'Ślizgle #' + (dayIndex() + 1), title: st.win ? 'Zgadnięte w ' + st.rows.length + '/6' : 'Tym razem sucho', rows: st.rows.map(function (_, i) { return pattern(i); }), lines: st.hint ? ['z podpowiedzią 💡'] : [] }); };
+      $('#sz-share').onclick = function () { share(shareTxt, { knaga: st.win ? 'imprezowa' : 'ratownik', c: G('slizgle').c, eyebrow: 'Ślizgle #' + (dayIndex() + 1), title: st.win ? 'Zgadnięte w ' + st.rows.length + '/6' : 'Tym razem sucho', rows: st.rows.map(function (_, i) { return pattern(i); }), lines: st.hint ? ['z podpowiedzią 💡'] : [] }); };
     }
     /* koniec rundy: statystyki lokalne; rekord i XP przyznał już serwer w odpowiedzi na ostatnią próbę */
     function endRound(win, reply) {
@@ -584,7 +613,7 @@ var SliskaSim = (function () {
       var o = $('#gry-over'); o.hidden = false;
       o.innerHTML = '<div class="gm">' + html + '<div class="gm-acts"><button type="button" class="btn btn-primary" id="gry-go">' + btn + '</button>' + (withShare ? '<button type="button" class="btn" id="gry-share">' + ICO.share + ' Udostępnij</button>' : '') + '</div></div>';
       $('#gry-go').onclick = paused ? resume : start; $('#gry-go').focus({ preventScroll: true });
-      var sh = $('#gry-share'); if (sh) sh.onclick = function () { share(g.name + ' na Śliskiej: ' + api.score + ' ' + (g.unit || '') + ' 💦 Pobijesz?\n' + LINK + '/' + g.id, { c: g.c, eyebrow: 'Śliskie Gry', title: g.name, big: api.score, unit: g.unit || 'pkt', lines: [] }); };
+      var sh = $('#gry-share'); if (sh) sh.onclick = function () { share(g.name + ' na Śliskiej: ' + api.score + ' ' + (g.unit || '') + ' 💦 Pobijesz?\n' + LINK + '/' + g.id, { knaga: g.knaga, c: g.c, eyebrow: 'Śliskie Gry', title: g.name, big: api.score, unit: g.unit || 'pkt', lines: [] }); };
     }
     function start() {
       if (!opts.replay) return begin();
@@ -1085,7 +1114,7 @@ var SliskaSim = (function () {
     function win() {
       grid.classList.add('is-done'); [].forEach.call(grid.querySelectorAll('.kz-c'), function (i) { i.readOnly = true; }); $('#kz-pass').classList.add('is-done'); pass();
       $('#kz-msg').innerHTML = '<div class="sz-end is-win">' + K('imprezowa', 'gk') + '<div><b>Rozwiązane!</b><span>Hasło tygodnia: ' + set.h + '. Mokra robota.' + (arch ? ' <a href="#/gry/krzyzowka-arch">Wróć do archiwum</a>' : '') + '</span></div><button type="button" class="btn btn-primary btn-sm" id="kz-share">' + ICO.share + ' Udostępnij</button></div>';
-      $('#kz-share').onclick = function () { share('Rozwiązałem Krzyżówkę Tygodnia na Śliskiej 🧩 Dasz radę?\n' + LINK + '/krzyzowka', { c: G('krzyzowka').c, eyebrow: arch ? 'Krzyżówka · archiwum' : 'Krzyżówka Tygodnia #' + W, title: 'Rozwiązana', big: '✓', unit: set.r.length + ' wyrazów + hasło', lines: [] }); };
+      $('#kz-share').onclick = function () { share('Rozwiązałem Krzyżówkę Tygodnia na Śliskiej 🧩 Dasz radę?\n' + LINK + '/krzyzowka', { knaga: 'szlafrok', c: G('krzyzowka').c, eyebrow: arch ? 'Krzyżówka · archiwum' : 'Krzyżówka Tygodnia #' + W, title: 'Rozwiązana', big: '✓', unit: set.r.length + ' wyrazów + hasło', lines: [] }); };
       if (!st.done) {
         st.done = 1; lsSet(key, st); lsSet('sn-krzyz-done-' + W, 1); var d = load();
         if (arch) { d.archSolved = (d.archSolved || 0) + 1; save(d); toast('Krzyżówka z archiwum rozwiązana! 🧩'); }
@@ -1120,6 +1149,7 @@ var SliskaSim = (function () {
 
   var RUN = { krzyzowka: krzyzowka, slizgle: slizgle, krople: krople, flappy: flappy, waz: waz, ukladanka: ukladanka, drama: drama, naczelny: naczelny, slizgawka: slizgawka, gabin: function (el) { if (window.GabinGame) GabinGame.mount(el); else hub(el); } };
   window.SliskieGry = {
+    shareCard: shareCard,
     mount: function (el, sub, ctx) {
       stopAll();
       if (sub === 'slizgawka' && !unlocked()) sub = '';
