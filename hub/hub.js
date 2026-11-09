@@ -6,6 +6,27 @@
   var esc = function (v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var GATE = /^dev\./.test(location.hostname) || /[?&]gate=1\b/.test(location.search);
 
+  /* ---------- Świeża wersja i pełna wysokość w aplikacji z ekranu początkowego ---------- */
+  var BUILD = '20261109m';
+  function checkFresh() {
+    try {
+      fetch('/?_=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (t) {
+        var m = /hub\.js\?v=([0-9a-z]+)/.exec(t);
+        if (m && m[1] !== BUILD && sessionStorage.getItem('hub_reload') !== m[1]) { sessionStorage.setItem('hub_reload', m[1]); location.reload(); }
+      }).catch(function () {});
+    } catch (e) { /* ignoruj */ }
+  }
+  checkFresh();
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') checkFresh(); });
+  function fitHeight() {
+    var de = document.documentElement, sh = window.screen && screen.height, ih = window.innerHeight;
+    var standalone = window.navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+    var gap = standalone && sh && ih && sh - ih > 20 && sh - ih < 140 ? sh - ih : 0;   // iOS: widok krótszy niż ekran
+    de.style.setProperty('--gap', gap + 'px'); de.classList.toggle('has-gap', !!gap);
+    de.setAttribute('data-vp', [ih, sh, window.visualViewport ? Math.round(visualViewport.height) : 0].join('/'));
+  }
+  fitHeight(); addEventListener('resize', fitHeight); addEventListener('orientationchange', function () { setTimeout(fitHeight, 300); });
+
   /* ---------- Podstrony ----------
      tool: w którym narzędziu się otwiera; h: adres wewnątrz studia; src: adres narzędzia; need: kto ma dostęp */
   var R = {
@@ -365,7 +386,7 @@
       '<div class="npop-l">' + (N.items.length ? N.items.map(function (x) {
         return '<a class="ni' + (x.at > s && !x.done ? ' new' : '') + '" href="' + x.href + '" data-nav><i>' + icon(x) + '</i><div><b>' + esc(x.title) + '</b><span>' + esc(x.text) + '</span><small>' + ago(new Date(x.at).toISOString()) + '</small></div></a>';
       }).join('') : '<p class="empty">Na razie nic nowego.</p>') + '</div>' +
-      '<div class="npop-f">Nowe tematy, zgłoszone błędy, reklamy i poczta.' + (!pushOK() ? '<br>Na iPhonie: otwórz stronę z ikony na ekranie początkowym, żeby włączyć powiadomienia.' : perm === 'denied' ? '<br>Powiadomienia są zablokowane w ustawieniach telefonu dla tej aplikacji.' : '<button class="btn btn-sm" type="button" data-n-perm>' + (N.pushOn ? 'Wyłącz powiadomienia na tym telefonie' : 'Włącz powiadomienia na tym telefonie') + '</button>') + '</div>';
+      '<div class="npop-f"><small style="opacity:.6">build ' + BUILD + ' · ' + document.documentElement.getAttribute('data-vp') + '</small><br>Nowe tematy, zgłoszone błędy, reklamy i poczta.' + (!pushOK() ? '<br>Na iPhonie: otwórz stronę z ikony na ekranie początkowym, żeby włączyć powiadomienia.' : perm === 'denied' ? '<br>Powiadomienia są zablokowane w ustawieniach telefonu dla tej aplikacji.' : '<button class="btn btn-sm" type="button" data-n-perm>' + (N.pushOn ? 'Wyłącz powiadomienia na tym telefonie' : 'Włącz powiadomienia na tym telefonie') + '</button>') + '</div>';
     if (pushOK() && N.pushOn === undefined) { N.pushOn = null; pushState().then(function (v) { N.pushOn = v; if (N.pop) drawPop(); }); }
   }
   function closeNotes() { if (N.pop) { N.pop.remove(); N.pop = null; } }
