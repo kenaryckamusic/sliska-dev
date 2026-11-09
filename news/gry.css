@@ -1053,3 +1053,11 @@ kbd { padding: 2px 7px; border: 1px solid var(--border); border-bottom-width: 3p
   .gh-tile-k { width: 118px; height: 118px; }
 }
 @media (max-width: 640px) { .gh-tile { min-height: 218px; } .gh-tile-k { width: 112px; height: 112px; top: -8px; right: -8px; } .gh-tile .gh-tag { max-width: 100%; } }
+
+/* korekta kafelków: czysty gradient, maskotka nad tekstem (bez nakładania) */
+.gh-tile::before { display: none; }
+.gh-tile, .gh-feat { border: 0; box-shadow: 0 12px 26px color-mix(in srgb, var(--g1) 30%, transparent); }
+.gh-tile { min-height: 268px; padding-top: 128px; }
+.gh-tile-k { width: 124px; height: 124px; top: 8px; right: 10px; }
+.gh-tile small { max-width: 100%; }
+@media (max-width: 640px) { .gh-tile { min-height: 236px; padding-top: 112px; } .gh-tile-k { width: 104px; height: 104px; top: 6px; right: 6px; } }
