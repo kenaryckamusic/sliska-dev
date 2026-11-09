@@ -29,7 +29,6 @@
 *, *::before, *::after { box-sizing: border-box; }
 html, body { height: 100%; overscroll-behavior: none; }
 /* telefon / aplikacja z ekranu początkowego: strona nie „odjeżdża” przy przeciąganiu (szare pole pod dolnym paskiem) */
-@media (max-width: 1023px) { html, body { position: static; width: 100%; height: 100%; overflow: hidden; overscroll-behavior: none; } .shell { height: 100%; } }
 /* iPhone (aplikacja z ekranu początkowego): pełny ekran bez luki pod dolnym paskiem i bez rozmycia przy statusie */
 body::after { content: ""; position: fixed; left: 0; right: 0; top: 0; height: env(safe-area-inset-top, 0px); z-index: 80; background: var(--side); pointer-events: none; }
 body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 var(--font); -webkit-font-smoothing: antialiased; overflow: hidden; }
@@ -262,3 +261,60 @@ button { cursor: pointer; }
 body.is-dim .shell-dim { opacity: 1; pointer-events: auto; }
 body.is-dim .stage { z-index: 56; }
 
+
+/* =====================================================================
+   TELEFON – układ zrobiony od nowa (strona przewija się normalnie jak publiczna, dolny pasek jest „pływający”,
+   żadnych przypiętych html/body ani wysokości 100dvh, które na iPhonie tworzyły dziurę pod dolnym paskiem)
+   ===================================================================== */
+@media (max-width: 1023px) {
+  :root { --tab-h: 64px; --mt: calc(56px + env(safe-area-inset-top, 0px)); --hh: 52px; --float: calc(10px + env(safe-area-inset-bottom, 0px)); }
+  html { background: var(--bg); height: auto; }
+  body { height: auto; min-height: 100vh; overflow: visible; background: var(--bg); -webkit-tap-highlight-color: transparent; padding-bottom: calc(var(--tab-h) + 28px + env(safe-area-inset-bottom, 0px)); }
+  body.menu-open { overflow: hidden; }
+  .shell { display: block; height: auto; }
+  .main { display: block; min-height: 0; --hh: 52px; }
+  .main.bare { --hh: 0px; }
+
+  /* góra: lepki pasek z logo */
+  .mtop { position: sticky; top: 0; z-index: 40; height: var(--mt); padding: env(safe-area-inset-top, 0px) 12px 0 16px; background: color-mix(in srgb, var(--side) 94%, transparent); -webkit-backdrop-filter: saturate(1.4) blur(14px); backdrop-filter: saturate(1.4) blur(14px); border-bottom: 1px solid var(--line); }
+  .mtop img { height: 26px; }
+  .mtop .btn-sq, .mtop .bell { width: 42px; height: 42px; border-radius: 14px; }
+  .head { position: sticky; top: var(--mt); z-index: 39; height: var(--hh); min-height: 0; padding: 0 16px; align-items: center; background: color-mix(in srgb, var(--bg) 94%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+  .head h1 { font-size: 1.15rem; }
+
+  /* treść */
+  .stage { position: static; flex: none; }
+  .page { position: static; inset: auto; overflow: visible; padding: 14px 14px 8px; }
+  .dash { max-width: 640px; }
+  .hello { margin: 4px 2px 16px; align-items: center; }
+  .hello h2 { font-size: 1.55rem; }
+
+  .quick { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
+  .qa { border-radius: 20px; padding: 14px; gap: 10px; flex-direction: row; align-items: center; min-height: 64px; box-shadow: 0 1px 2px rgba(16, 24, 40, .05); }
+  .qa.main-qa { grid-column: 1 / -1; min-height: 76px; background: linear-gradient(135deg, var(--accent), var(--accent-dark)); box-shadow: 0 10px 24px color-mix(in srgb, var(--accent) 32%, transparent); }
+  .qa.main-qa b { font-size: 1.12rem; }
+  .qa .qi { width: 40px; height: 40px; border-radius: 13px; flex: none; }
+  .qa b { font-size: .95rem; line-height: 1.2; }
+
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
+  .kpi { border-radius: 20px; padding: 14px 16px; box-shadow: 0 1px 2px rgba(16, 24, 40, .05); }
+  .kpi span { font-size: .82rem; color: var(--muted); font-weight: 600; }
+  .kpi b { display: block; margin-top: 2px; font-size: 1.9rem; line-height: 1.1; letter-spacing: -.02em; }
+
+  .cols { display: block; }
+  .card { border-radius: 20px; margin-bottom: 14px; box-shadow: 0 1px 2px rgba(16, 24, 40, .05); }
+
+  /* narzędzia (ramki) zajmują wolne miejsce między górą a pływającym paskiem */
+  .main:has(.frame.on) .stage, .main:has(.loader:not([hidden])) .stage { position: fixed; left: 0; right: 0; top: calc(var(--mt) + var(--hh)); bottom: calc(var(--tab-h) + var(--float) + 8px); z-index: 10; }
+  .main:has(.frame.on) .page, .main:has(.loader:not([hidden])) .page { display: none; }
+  .frame, .loader { position: absolute; inset: 0; width: 100%; height: 100%; bottom: auto; }
+
+  /* dolny pasek: pływający, jak na stronie publicznej */
+  .tabbar { left: 12px; right: 12px; bottom: var(--float); height: var(--tab-h); padding: 6px; border: 1px solid var(--line); border-radius: 30px; background: color-mix(in srgb, var(--side) 90%, transparent); -webkit-backdrop-filter: saturate(1.5) blur(18px); backdrop-filter: saturate(1.5) blur(18px); box-shadow: 0 10px 30px rgba(16, 24, 40, .16); }
+  .tabbar a, .tabbar button { border-radius: 22px; }
+  .tabbar .on { background: var(--accent-soft); }
+  .tabbar .plus.on { background: transparent; }
+  .tabbar .plus span:first-child { width: 48px; height: 48px; border-radius: 18px; box-shadow: 0 6px 16px color-mix(in srgb, var(--accent) 40%, transparent); }
+
+  .toasts { position: fixed; left: 12px; right: 12px; width: auto; bottom: calc(var(--tab-h) + var(--float) + 12px); z-index: 70; }
+}
