@@ -242,6 +242,9 @@ var SliskaSim = (function () {
     return nb;
   }
   function played(g) { if (Date.now() - (lastFin[g] || 0) < 4000) return; try { fetch(API + '/gry/play', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ game: g }), keepalive: true }).catch(function () {}); } catch (e) { /* ignoruj */ } }
+  /* rola Właściciela dociąga się po zalogowaniu: gdy zmieni się widoczność GABINA, odśwież widok gier */
+  var gabinSeen = window.GabinGame ? GabinGame.owner() : false;
+  window.addEventListener('sn:reader', function () { setTimeout(function () { var o = window.GabinGame ? GabinGame.owner() : false; if (o !== gabinSeen) { gabinSeen = o; if (/^#\/gry(\/gabin)?$/.test(location.hash)) window.dispatchEvent(new HashChangeEvent('hashchange')); } }, 400); });
   window.addEventListener('sn:reader', function () { acc = null; var cg = $('.gp[data-game]'); if (cg) mint(cg.dataset.game); accLoad().then(function () { var b = $('#gry-best'), cur = $('.gp[data-game]'); if (b && cur) b.textContent = fmt(cur.dataset.game, best(cur.dataset.game)); }); });
 
   /* ---------- najlepsi gracze ---------- */

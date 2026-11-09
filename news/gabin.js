@@ -3,7 +3,7 @@
 (function () {
   'use strict';
   var KEY = 'sn-gabin';
-  var owner = function () { return document.documentElement.classList.contains('is-dev') || !!window.__GABIN_TEST; };
+  var owner = function () { return !!window.__GABIN_TEST || (document.documentElement.classList.contains('is-dev') && typeof isOwnerRole === 'function' && isOwnerRole()); };   // tylko dev i tylko konto z rolą Właściciel
   var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var ls = { get: function () { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }, set: function (o) { try { localStorage.setItem(KEY, JSON.stringify(o)); } catch (e) { /* - */ } } };
 
