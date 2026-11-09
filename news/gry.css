@@ -971,3 +971,35 @@ kbd { padding: 2px 7px; border: 1px solid var(--border); border-bottom-width: 3p
   .gm-end { font-size: .8rem; line-height: 1.35; }
   .gm h2 { font-size: 1.2rem; }
 }
+
+/* ---- SZLIF v3: Ślizgle, krzyżówka, układanka ---- */
+.sz-c { border-radius: 14px; background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 70%, var(--bg)), var(--bg)); box-shadow: inset 0 2px 0 rgba(255, 255, 255, .55), 0 2px 6px rgba(0, 0, 0, .05); transition: transform .12s, box-shadow .2s; }
+.sz-c.sz-f { box-shadow: 0 0 0 3px color-mix(in srgb, var(--g1) 22%, transparent), 0 6px 14px rgba(0, 0, 0, .08); }
+.sz-ok, .sz-in, .sz-no { border-radius: 14px; text-shadow: 0 1px 0 rgba(0, 0, 0, .18); }
+.sz-ok { background: linear-gradient(160deg, #22c55e, #15803d) !important; border-color: #14803c !important; box-shadow: 0 6px 14px rgba(21, 128, 61, .35), inset 0 2px 0 rgba(255, 255, 255, .35) !important; }
+.sz-in { background: linear-gradient(160deg, #fbbf24, #d9930a) !important; border-color: #c07f00 !important; box-shadow: 0 6px 14px rgba(217, 147, 10, .32), inset 0 2px 0 rgba(255, 255, 255, .4) !important; }
+.sz-no { background: linear-gradient(160deg, #7b7590, #5a5470) !important; box-shadow: inset 0 2px 0 rgba(255, 255, 255, .18) !important; }
+.sz-key { box-shadow: 0 2px 0 rgba(0, 0, 0, .08), inset 0 1px 0 rgba(255, 255, 255, .6); }
+.sz-key.sz-ok { background: linear-gradient(160deg, #22c55e, #15803d) !important; color: #fff; }
+.sz-key.sz-in { background: linear-gradient(160deg, #fbbf24, #d9930a) !important; color: #fff; }
+.sz-key.sz-no { background: linear-gradient(160deg, #7b7590, #5a5470) !important; color: #fff; }
+.sz-end { border: 1px solid color-mix(in srgb, var(--g1) 18%, var(--border)); box-shadow: 0 10px 26px rgba(0, 0, 0, .07); }
+
+.kz-paper { background: linear-gradient(180deg, var(--surface), color-mix(in srgb, var(--soft) 55%, var(--surface))); box-shadow: 0 14px 34px rgba(31, 36, 112, .10); border-color: color-mix(in srgb, var(--g1) 14%, var(--border)); }
+.kz-c { border-radius: 11px; background: linear-gradient(180deg, var(--surface), var(--bg)); box-shadow: inset 0 2px 0 rgba(255, 255, 255, .6), 0 2px 4px rgba(0, 0, 0, .06); }
+.kz-c.is-h { background: linear-gradient(160deg, #ffe08a, #f5b324); border-color: #d99a00; color: #3a2800; box-shadow: 0 4px 10px rgba(245, 179, 36, .4), inset 0 2px 0 rgba(255, 255, 255, .5); }
+.kz-grid.is-done .kz-c.is-h { background: linear-gradient(160deg, #22c55e, #15803d); box-shadow: 0 4px 12px rgba(21, 128, 61, .4); }
+.kz-clues li { transition: background .15s, transform .15s; border: 1px solid transparent; }
+.kz-clues li:hover { transform: translateX(2px); }
+.kz-clues li b { background: linear-gradient(135deg, var(--g1), var(--g2)); box-shadow: 0 3px 8px color-mix(in srgb, var(--g1) 40%, transparent); }
+.kz-clues li.is-on { border-color: color-mix(in srgb, var(--g2) 35%, transparent); }
+
+.uk-frame { background: radial-gradient(120% 120% at 20% 0%, #5b3417, #25120a 70%); box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .08), inset 0 10px 30px rgba(0, 0, 0, .35), 0 18px 36px rgba(122, 61, 0, .28); }
+.uk-t { border-radius: 12px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2), 0 4px 10px rgba(0, 0, 0, .35); transition: transform .12s, box-shadow .2s; }
+.uk-t:hover { transform: translateY(-1px); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .35), 0 8px 16px rgba(0, 0, 0, .4); }
+.uk-t i { backdrop-filter: blur(4px); background: rgba(20, 10, 4, .6); }
+.uk-t.is-ok i { background: linear-gradient(135deg, #22c55e, #15803d); }
+.uk-t.is-empty { background: rgba(0, 0, 0, .28); box-shadow: inset 0 3px 10px rgba(0, 0, 0, .5); }
+.uk-chip { background: linear-gradient(180deg, var(--surface), var(--soft)); box-shadow: 0 4px 10px rgba(0, 0, 0, .06); border: 1px solid var(--border); }
+.uk-seg button.is-on { background: linear-gradient(135deg, var(--g1), var(--g2)); color: #fff; box-shadow: 0 6px 14px color-mix(in srgb, var(--g1) 40%, transparent); }
+.gry-stage { box-shadow: 0 20px 44px color-mix(in srgb, var(--g1) 30%, transparent), 0 0 0 1px rgba(255, 255, 255, .06); }
