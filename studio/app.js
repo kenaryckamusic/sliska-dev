@@ -3833,6 +3833,7 @@ function applyData(d) {
   $('#f-review-year').value = d.reviewYear;
   updateReviewUi();
   // autor: nowy artykuł = nazwa z profilu; edycja = autor zostaje taki, jaki był
+  editor.ownerPicked = '';
   editor.author = editor.mode === 'new' ? (state.profile.name || 'Redaktor') : (d.author || state.profile.name || 'Redaktor');
   $('#editor-author').textContent = 'Autor: ' + editor.author;
   $('#f-urgent').checked = d.urgent;
@@ -4651,7 +4652,7 @@ function updateIgUi() {
 
 /* ---------- Szybkie przełączanie kont (konta czytelników zapamiętane na tym urządzeniu) ---------- */
 const Accounts = {
-  KEY: 'sliska_accounts', MAX: 5, SESSION_MS: 365 * 24 * 3600e3,
+  KEY: 'sliska_accounts', MAX: 8, SESSION_MS: 365 * 24 * 3600e3,
   list() { try { const l = JSON.parse(localStorage.getItem(this.KEY)); return Array.isArray(l) ? l : []; } catch { return []; } },
   save(l) { try { localStorage.setItem(this.KEY, JSON.stringify(l.slice(0, this.MAX))); } catch { /* ignoruj */ } },
   /** Zapamiętuje zalogowane konto (sesja Firebase, bez hasła), żeby dało się do niego wrócić jednym kliknięciem. */
@@ -4662,6 +4663,23 @@ const Accounts = {
     const l = this.list(), i = l.findIndex(a => a.uid === user.uid);
     if (i >= 0) l[i] = entry; else l.push(entry);
     this.save(l);
+  },
+  /** Szybkie okienko przy ikonie konta (na każdej podstronie): lista kont, przełączenie jednym kliknięciem. */
+  quick(btn) {
+    const old = document.getElementById('acc-quick'); if (old) { old.remove(); return true; }
+    const l = this.list(); if (l.length < 2 || !Readers.user) return false;
+    const cur = Readers.user.uid, pop = document.createElement('div');
+    pop.id = 'acc-quick'; pop.className = 'acc-quick'; pop.setAttribute('role', 'menu');
+    pop.innerHTML = l.map(a => { const on = a.uid === cur, exp = this.expired(a);
+      return `<button type="button" role="menuitem" class="acc-q-row${on ? ' is-on' : ''}" ${on ? 'data-acc-go="1"' : `data-acc-switch="${Utils.esc(a.uid)}"`}><span class="avatar" aria-hidden="true">${readerAvatar(a.name, a.av, a.pub)}</span><span class="acc-sw-main"><strong>${Utils.esc(a.name)}</strong><small>${Utils.esc(ROLE_LABEL[a.role] || 'Czytelnik')}${on ? ' · aktywne – otwórz konto' : exp ? ' · wymaga logowania' : ''}</small></span></button>`; }).join('')
+      + (l.length < this.MAX ? '<button type="button" class="acc-q-add" id="acc-add">+ Dodaj kolejne konto</button>' : '');
+    document.body.appendChild(pop);
+    const r = btn.getBoundingClientRect();
+    pop.style.top = (r.bottom + 8) + 'px'; pop.style.right = Math.max(8, innerWidth - r.right) + 'px';
+    const off = ev => { if (!pop.contains(ev.target) && !btn.contains(ev.target)) { pop.remove(); document.removeEventListener('click', off, true); } };
+    setTimeout(() => document.addEventListener('click', off, true), 0);
+    pop.addEventListener('click', ev => { if (ev.target.closest('[data-acc-go]')) { pop.remove(); location.hash = '#/konto'; } if (ev.target.closest('#acc-add')) pop.remove(); });
+    return true;
   },
   forget(uid) { this.save(this.list().filter(a => a.uid !== uid)); },
   expired(a) { return !a.authTime || Date.now() - a.authTime > this.SESSION_MS - 600e3; },
@@ -4708,7 +4726,7 @@ const Accounts = {
       </div>`;
     }).join('');
     return `<section class="panel st-card">
-      <div class="st-head"><h2 class="st-h">Przełącz konto</h2><p class="st-sub">Konta zalogowane na tym urządzeniu. Hasła nie są zapamiętywane, a sesja trwa 24 godziny od logowania.</p></div>
+      <div class="st-head"><h2 class="st-h">Przełącz konto</h2><p class="st-sub">Konta zalogowane na tym urządzeniu. Hasła nie są zapamiętywane – zostaje bezpieczna sesja, która odnawia się sama (do roku).</p></div>
       <div class="acc-sw-list">${rows}</div>
       ${l.length < this.MAX ? '<div class="st-actions"><button type="button" class="btn btn-sm" id="acc-add">+ Dodaj kolejne konto</button></div>' : ''}
     </section>`;
@@ -5472,6 +5490,65 @@ async function discardRestored() {
   setStatus('');
 }
 
+
+/* ---------- Konto właściciela: wybór redaktora przy zapisie artykułu ---------- */
+async function editorRoster() {
+  const map = new Map();
+  const add = (name, uid, photo, n) => {
+    name = authorBase(name); if (!name) return;
+    const k = authorKey(name), e = map.get(k) || { name, uid: '', photo: '', n: 0 };
+    if (uid && !e.uid) e.uid = uid;
+    if (photo && !e.photo) e.photo = photo;
+    e.n = Math.max(e.n, n || 0);
+    map.set(k, e);
+  };
+  try { await Authors.load(true); } catch { /* ignoruj */ }
+  Authors.list().forEach(a => add(a.name, '', a.photo, a.n));
+  try {
+    const d = await adminApi('/admin/users?q=');
+    (d.users || []).filter(u => u.role === 'editor' || u.role === 'chief' || (u.staff && u.role !== 'owner')).forEach(u => add(u.name, u.uid, '', 0));
+  } catch { /* sama lista autorów wystarczy */ }
+  const me = authorKey(state.profile.name);
+  map.forEach((e, k) => { if (k === me) map.delete(k); });
+  return [...map.values()].sort((x, y) => y.n - x.n || x.name.localeCompare(y.name, 'pl'));
+}
+function pickEditorDialog(roster, preset) {
+  return new Promise(resolve => {
+    let m = document.getElementById('pick-editor-modal'); if (m) m.remove();
+    m = document.createElement('div');
+    m.className = 'modal'; m.id = 'pick-editor-modal';
+    const esc = Utils.esc;
+    const item = (e, i) => `<button type="button" class="pe-item" data-i="${i}">${e.photo ? `<img src="${esc(e.photo)}" alt="">` : `<span class="pe-ini">${esc(e.name.slice(0, 1).toUpperCase())}</span>`}<span><b>${esc(e.name)}</b><small>${e.uid ? 'konto redaktora' : (e.n ? e.n + ' art.' : 'bez konta')}</small></span></button>`;
+    m.innerHTML = `<div class="modal-box pe-box" role="dialog" aria-modal="true" aria-label="Wybierz redaktora">
+      <h2>Czyj to artykuł?</h2>
+      <p class="muted">Piszesz z konta właściciela – wybierz redaktora, do którego ma trafić artykuł.</p>
+      <div class="pe-list">${roster.map(item).join('') || '<p class="muted">Nie ma jeszcze żadnego redaktora – dodaj pierwszego plusikiem.</p>'}</div>
+      <div class="pe-add"><button type="button" class="pe-plus" id="pe-plus" aria-label="Dodaj nowego redaktora" title="Nowy redaktor (bez konta)">+</button>
+        <input type="text" id="pe-new" maxlength="60" placeholder="Nowy redaktor – imię i nazwisko (bez konta)" hidden><button type="button" class="btn btn-primary btn-sm" id="pe-new-ok" hidden>Dodaj i wybierz</button></div>
+      <div class="modal-actions"><button type="button" class="btn" id="pe-me">Pod moim imieniem (${esc(state.profile.name || 'Redaktor')})</button><button type="button" class="btn" id="pe-cancel">Anuluj</button></div></div>`;
+    document.body.appendChild(m); m.hidden = false; document.body.classList.add('modal-open');
+    const done = v => { m.remove(); if (!$$('.modal').some(x => !x.hidden)) document.body.classList.remove('modal-open'); resolve(v); };
+    m.addEventListener('click', ev => {
+      const it = ev.target.closest('.pe-item');
+      if (it) return done(roster[+it.dataset.i]);
+      if (ev.target.closest('#pe-plus')) { $('#pe-new', m).hidden = false; $('#pe-new-ok', m).hidden = false; $('#pe-new', m).focus(); return; }
+      if (ev.target.closest('#pe-new-ok')) return addNew();
+      if (ev.target.closest('#pe-me')) return done({ name: state.profile.name || 'Redaktor', uid: Auth.uid(), own: true });
+      if (ev.target.closest('#pe-cancel') || ev.target === m) return done(null);
+    });
+    const addNew = async () => {
+      const name = $('#pe-new', m).value.replace(/\s+/g, ' ').trim();
+      if (name.length < 2) { toast('Wpisz imię i nazwisko redaktora.', 'error'); return; }
+      const dup = roster.find(e => authorKey(e.name) === authorKey(name));
+      if (dup) return done(dup);
+      try { await actorApi('/author', { method: 'POST', body: JSON.stringify({ name, bio: 'Redaktor Śliska News.' }) }); await Authors.load(true); } catch { /* artykuł i tak zapisze imię */ }
+      done({ name, uid: '', fresh: true });
+    };
+    $('#pe-new', m).addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); addNew(); } });
+    m.addEventListener('keydown', ev => { if (ev.key === 'Escape') done(null); });
+  });
+}
+
 /* ---------- Edytor: publikacja, podgląd, zdjęcia ---------- */
 async function saveArticle(e) {
   e.preventDefault();
@@ -5481,7 +5558,16 @@ async function saveArticle(e) {
   const d = collectData();
   const title = d.title.trim();
   const lead = d.lead.trim();
-  const author = (d.author || '').trim() || 'Redaktor';
+  let author = (d.author || '').trim() || 'Redaktor';
+  let pickedUid = null;
+  if (isOwnerRole() && !editor.ownerPicked && (!editor.existing || !authorKey(author) || authorKey(author) === authorKey(state.profile.name))) {
+    if (!title || !lead || !d.content || !d.categories.length) { toast('Najpierw uzupełnij tytuł, lead, treść i kategorię – potem wybierzesz redaktora.', 'error'); return; }
+    const pick = await pickEditorDialog(await editorRoster(), author);
+    if (!pick) return;
+    author = pick.name; pickedUid = pick.own ? Auth.uid() : (pick.uid || '');
+    editor.ownerPicked = author; editor.author = author;
+    $('#editor-author').textContent = 'Autor: ' + author;
+  } else if (isOwnerRole() && editor.ownerPicked) { author = editor.ownerPicked; }
   if (!Utils.parseTags(d.tags).length) {
     const sug = suggestedTags();
     if (sug.length && confirm(`Artykuł nie ma tagów. Dodać proponowane: ${sug.slice(0, 5).join(', ')}?`)) {
@@ -5531,7 +5617,7 @@ async function saveArticle(e) {
   }
 
   const ownProfile = authorKey(author) === authorKey(state.profile.name) && state.profile.avatar && state.profile.showPhoto !== false;
-  const authorPhoto = ownProfile ? await shrinkAvatar(state.profile.avatar) : ((editor.existing && editor.existing.authorPhoto) || '');
+  const authorPhoto = ownProfile ? await shrinkAvatar(state.profile.avatar) : (pickedUid !== null && authorKey(author) !== authorKey((editor.existing && editor.existing.author) || '') ? '' : ((editor.existing && editor.existing.authorPhoto) || ''));
 
   const article = {
     id: editor.articleId || Utils.uid(),
@@ -5541,7 +5627,7 @@ async function saveArticle(e) {
     categories: d.categories,
     tags: Utils.parseTags(d.tags),
     author,
-    authorUid: Auth.uid(),
+    authorUid: pickedUid !== null ? pickedUid : ((editor.existing && editor.existing.authorUid) || Auth.uid()),
     authorPhoto,
     image: d.image,
     imagePos: d.image && d.imagePos ? d.imagePos : null,
@@ -6638,7 +6724,7 @@ async function shrinkToJpeg(file, size = 1200, maxChars = 1300000) {
 function bindReaderEvents() {
   $('#btn-account').addEventListener('click', () => {
     const go = h => { if (location.hash === h) { route(); window.scrollTo({ top: 0, behavior: 'smooth' }); } else location.hash = h; };   // ten sam adres = wcześniej „nic się nie działo”
-    if (Readers.loggedIn()) go('#/konto');
+    if (Readers.loggedIn()) { if (!Accounts.quick($('#btn-account'))) go('#/konto'); }
     else if (Auth.isAdmin()) go('#/panel');
     else openReaderModal('login');
   });
