@@ -4651,7 +4651,7 @@ function updateIgUi() {
 
 /* ---------- Szybkie przełączanie kont (konta czytelników zapamiętane na tym urządzeniu) ---------- */
 const Accounts = {
-  KEY: 'sliska_accounts', MAX: 5, SESSION_MS: 24 * 3600e3,
+  KEY: 'sliska_accounts', MAX: 5, SESSION_MS: 365 * 24 * 3600e3,
   list() { try { const l = JSON.parse(localStorage.getItem(this.KEY)); return Array.isArray(l) ? l : []; } catch { return []; } },
   save(l) { try { localStorage.setItem(this.KEY, JSON.stringify(l.slice(0, this.MAX))); } catch { /* ignoruj */ } },
   /** Zapamiętuje zalogowane konto (sesja Firebase, bez hasła), żeby dało się do niego wrócić jednym kliknięciem. */
