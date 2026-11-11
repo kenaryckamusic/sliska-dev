@@ -1865,6 +1865,6 @@ var SliskaSim = (function () {
       window.scrollTo(0, 0);
     },
     stop: stopAll,
-    best: best, fmt: fmt, games: GAMES, _t: window.__GRY_TEST ? { submit: submit, played: played, share: share } : null
+    best: best, fmt: fmt, games: GAMES, achs: ACHS, stars: STARS, _t: window.__GRY_TEST ? { submit: submit, played: played, share: share } : null
   };
 })();

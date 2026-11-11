@@ -1030,6 +1030,7 @@ function currentRoute() {
   if (parts[0] === 'sezon') return { name: 'season', m: parts[1] || '' };
   if (parts[0] === 'drama' && parts[1]) return { name: 'saga', id: decodeURIComponent(parts[1]) };
   if (parts[0] === 'dramy') return { name: 'sagas' };
+  if (parts[0] === 'wiedza') return { name: 'wiedza' };
   if (parts[0] === 'prywatnosc' || parts[0] === 'regulamin') return { name: 'legal', doc: parts[0] };
   if (parts[0] === 'o-nas' || parts[0] === 'kontakt') return { name: 'legal', doc: 'o-nas' };
   if (parts[0] === 'zapisane') return { name: 'saved' };
@@ -3280,6 +3281,7 @@ const Readers = {
   async saveBio(bio) { this.me = await this.api('/me', { method: 'POST', body: JSON.stringify({ bio }) }); this.render(); },
   async saveAvatar(dataUrl) { this.me = await this.api('/me', { method: 'POST', body: JSON.stringify({ avatar: dataUrl || null }) }); this.render(); },
   render() {
+    window.SnReaders = this;
     renderReaderCard();
     updatePushButton();
     const b = $('#btn-account');
@@ -4165,6 +4167,13 @@ function routeCore() {
     document.title = `${t} – ${CONFIG.SITE_NAME}`;
     setMeta(t, r.name === 'season' ? 'Ranking Ślizgaczy: punkty XP za czytanie, komentarze i gry. Nowy sezon co miesiąc.' : 'Twój miesiąc na Śliskiej News w liczbach.');
     if (window.SnXP) SnXP.ranking($('#view-xp'), r.m);
+    window.scrollTo(0, 0);
+  } else if (r.name === 'wiedza') {
+    showView('xp');
+    document.title = `Centrum wiedzy – ${CONFIG.SITE_NAME}`;
+    setMeta('Centrum wiedzy', 'Zasady i limity serwisu – tylko dla Właściciela.');
+    window.SnReaders = Readers;
+    if (window.Wiedza) Wiedza.render($('#view-xp')); else $('#view-xp').innerHTML = notFoundHtml('Nie udało się wczytać strony. Odśwież.');
     window.scrollTo(0, 0);
   } else if (r.name === 'saga' || r.name === 'sagas') {
     showView('xp');
