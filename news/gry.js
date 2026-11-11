@@ -568,8 +568,8 @@ var SliskaSim = (function () {
       ['f_15', 'Nowa scena', 'Dolec do drugiej sceny (15 pkt)', 'bolt', function (s) { return s.score >= 15; }],
       ['f_30', 'Super Knaga', 'Zdobądź 30 punktów', 'trophy', function (s) { return s.score >= 30; }],
       ['f_50', 'Legenda sceny', 'Zdobądź 50 punktów', 'trophy', function (s) { return s.score >= 50; }],
-      ['f_sh', 'Tarcza', 'Złap złotą tarczę', 'shield', function (s) { return s.shield >= 1; }],
-      ['f_save', 'Twardziel', 'Tarcza przyjmie za Ciebie uderzenie', 'check', function (s) { return s.shieldsave >= 1; }],
+      ['f_sh', 'Zabezpieczony', 'Złap złotą gumkę', 'shield', function (s) { return s.shield >= 1; }],
+      ['f_save', 'Twardziel', 'Gumka pęka za Ciebie przy uderzeniu', 'check', function (s) { return s.shieldsave >= 1; }],
       ['f_drop', 'Zbieracz kropli', 'Złap 5 kropli w jednym locie', 'drop', function (s) { return s.drop >= 5; }],
       ['f_t', 'Maraton', 'Leć 90 sekund bez uderzenia', 'clock', function (s) { return s.t >= 90; }]
     ],
@@ -647,8 +647,10 @@ var SliskaSim = (function () {
   function achRefresh(gid) { var u = $('#gry-ach'), c = $('#gry-ach-c'); if (u) u.innerHTML = achItems(gid); if (c) c.textContent = achGot(gid).length + '/' + ACHS[gid].length; }
 
   /* ============== wspólny silnik gier zręcznościowych (canvas) ============== */
-  var STARS = { krople: [25, 130, 250], flappy: [6, 35, 60], waz: [8, 45, 80], slizgawka: [150, 1000, 2500], kregle: [90, 160, 230], pojedynek: [60, 200, 450], ratunek: [20, 70, 150], karny: [40, 130, 280] };
+  var STARS = { krople: [25, 130, 250], flappy: [6, 35, 60], waz: [8, 45, 80], slizgawka: [150, 1000, 2500], kregle: [90, 160, 230], pojedynek: [60, 200, 450], ratunek: [22, 80, 175], karny: [40, 130, 280] };
   var STAR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.4l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.2 6.1 20.4l1.2-6.5L2.5 9.3l6.6-.9z" stroke-linejoin="round" stroke-width="1.4"/></svg>';
+  /* XP za ukończenie: 3 / 5 / 8 / 12 wg liczby gwiazdek (to samo liczy serwer); gry bez progów – 5 */
+  function gameXpFor(gid, sc) { var th = STARS[gid]; return th ? [3, 5, 8, 12][th.filter(function (v) { return sc >= v; }).length] : 5; }
   function starsHtml(gid, sc) { var th = STARS[gid]; if (!th) return ''; var n = th.filter(function (v) { return sc >= v; }).length; return '<div class="gm-stars" aria-label="' + n + ' z 3 gwiazdek">' + [0, 1, 2].map(function (i) { return '<span class="' + (i < n ? 'on' : '') + '" style="--d:' + (.25 + i * .22) + 's">' + STAR_SVG + '</span>'; }).join('') + '</div>'; }
   var imgCache = {};
   function knagaImg(slug) {
@@ -689,7 +691,7 @@ var SliskaSim = (function () {
         menu('<span class="gm-eye">Koniec gry</span><div class="gm-k">' + K(et[1] || g.knaga, 'gk') + '</div><p class="gm-end">' + et[0] + '</p>' + starsHtml(g.id, sc) + '<div class="gm-score">' + sc + '<small>' + (g.unit || '') + '</small></div>' +
           (nb ? '<span class="gry-new">Nowy rekord!</span>' : '<p class="gm-best">Twój rekord: <b>' + fmt(g.id, best(g.id)) + '</b></p>') +
           (api.newAch.length ? '<div class="gm-ach"><small>Nowe osiągnięcia</small>' + api.newAch.map(function (a) { return '<span>' + aIcon(a[3], 15) + a[1] + '</span>'; }).join('') + '</div>' : '') +
-          (logged() ? (sc > 0 ? '<p class="gm-xp">+' + (nb ? 15 : 5) + ' XP do sezonu</p>' : '') : '<p class="gm-note">Zaloguj się, żeby rekord zapisał się na koncie.</p>'),
+          (logged() ? (sc > 0 ? '<p class="gm-xp">+' + (gameXpFor(g.id, sc) + (nb ? 10 : 0)) + ' XP do sezonu</p>' : '') : '<p class="gm-note">Zaloguj się, żeby rekord zapisał się na koncie.</p>'),
         'Jeszcze raz', true);
         if (nb) loadTop(g.id);
       }
@@ -766,11 +768,12 @@ var SliskaSim = (function () {
   function heart(c, x, y, s) { c.save(); c.translate(x, y); c.scale(s / 20, s / 20); c.beginPath(); c.moveTo(0, 6); c.bezierCurveTo(-14, -4, -8, -16, 0, -8); c.bezierCurveTo(8, -16, 14, -4, 0, 6); c.fillStyle = '#ff2d55'; c.fill(); c.lineWidth = 2.4; c.strokeStyle = INK; c.stroke(); c.restore(); }
   /* odznaka power-upu: 'mag' magnes, 'shield' tarcza/parasol, 'slow' zegar */
   function badge(c, x, y, kind, t) {
-    var col = kind === 'mag' ? '#ef4444' : kind === 'shield' ? '#7c5cff' : '#14b8a6', bob = Math.sin((t || 0) * 5 + x / 30) * 3;
+    var col = kind === 'mag' ? '#ef4444' : kind === 'shield' ? '#7c5cff' : kind === 'gum' ? '#f59e0b' : '#14b8a6', bob = Math.sin((t || 0) * 5 + x / 30) * 3;
     c.save(); c.translate(x, y + bob); c.shadowColor = col; c.shadowBlur = 14;
     c.fillStyle = '#fff'; c.strokeStyle = col; c.lineWidth = 3.5; c.beginPath(); c.arc(0, 0, 17, 0, 7); c.fill(); c.stroke(); c.shadowBlur = 0;
     c.strokeStyle = col; c.fillStyle = col; c.lineWidth = 3; c.lineCap = 'round';
     if (kind === 'mag') { c.beginPath(); c.arc(0, -1, 8, Math.PI, 0); c.lineTo(8, 8); c.moveTo(-8, -1); c.lineTo(-8, 8); c.stroke(); c.fillStyle = '#1f2937'; c.fillRect(-11, 5, 6, 5); c.fillRect(5, 5, 6, 5); }
+    else if (kind === 'gum') { c.save(); c.rotate(-.35); c.beginPath(); c.rect(-10, -7, 20, 14); c.fill(); c.fillStyle = '#fff'; c.beginPath(); c.arc(0, 0, 4.6, 0, 7); c.fill(); c.strokeStyle = col; c.lineWidth = 1.8; c.stroke(); c.fillStyle = col; for (var gz = -8; gz <= 8; gz += 4) { c.fillRect(-11.5, gz - 1, 2, 2); c.fillRect(9.5, gz - 1, 2, 2); } c.restore(); }
     else if (kind === 'shield') { c.beginPath(); c.arc(0, -1, 9, Math.PI, 0); c.closePath(); c.fill(); c.beginPath(); c.moveTo(0, -1); c.lineTo(0, 8); c.arc(-3, 8, 3, 0, Math.PI); c.stroke(); }
     else { c.beginPath(); c.arc(0, 0, 9, 0, 7); c.stroke(); c.beginPath(); c.moveTo(0, -6); c.lineTo(0, 0); c.lineTo(5, 2); c.stroke(); }
     c.restore();
@@ -868,7 +871,7 @@ var SliskaSim = (function () {
     for (var L = 0; L < 2; L++) { var x = 0; while (x < 2400) { var w = 40 + Math.random() * 70; city[L].push({ x: x, w: w, h: (L ? 70 : 120) + Math.random() * (L ? 90 : 150), seed: Math.random() }); x += w + (L ? 6 : 10); } }
     canvasGame(el, G('flappy'), {
       replay: true,
-      intro: 'Super Knaga leci nad sceną. Machaj peleryną i przelatuj między statywami. Zbieraj krople (+2) i złotą tarczę, która wybacza jedno uderzenie. Od 12 punktów statywy się ruszają, a co 15 punktów zmienia się scena.',
+      intro: 'Super Knaga leci nad sceną. Machaj peleryną i przelatuj między statywami. Zbieraj krople (+2) i złotą gumkę, która wybacza jedno uderzenie (potem pęka). Od 12 punktów statywy się ruszają, a co 15 punktów zmienia się scena.',
       keys: [['Spacja', 'w górę'], ['klik / stuknięcie', 'w górę'], ['Esc', 'pauza']],
       endText: function (s) { return s >= 30 ? ['Super Knaga to Ty! Scena należy do Ciebie.', 'super'] : s >= 12 ? ['Lata całkiem sprawnie. Prawie gwiazda.', 'gwiazdor'] : s >= 4 ? ['Krótki lot, ale z klasą.', 'ziomek'] : ['Knaga opadła.', 'niesmiala']; },
       init: function (a, cv) {
@@ -884,8 +887,8 @@ var SliskaSim = (function () {
           if (SIM.score !== before) a.setScore(SIM.score);
           var b = SIM.B;
           SIM.ev.forEach(function (e) {
-            if (e[0] === 'shieldsave') { a.ev('shieldsave'); a.pop(b.x, b.y - 44, 'Tarcza pękła', '#ffcf4a'); a.burst(b.x, b.y, '#ffcf4a', 18); }
-            else if (e[0] === 'shield') { a.ev('shield'); a.pop(b.x, b.y - 44, 'Tarcza!', '#ffcf4a'); }
+            if (e[0] === 'shieldsave') { a.ev('shieldsave'); a.pop(b.x, b.y - 44, 'Gumka pękła!', '#ffcf4a'); a.burst(b.x, b.y, '#ffcf4a', 18); }
+            else if (e[0] === 'shield') { a.ev('shield'); a.pop(b.x, b.y - 44, 'Gumka!', '#ffcf4a'); }
             else if (e[0] === 'drop') { a.ev('drop'); a.pop(b.x, b.y - 44, '+2', '#5cc8ff'); }
             else if (e[0] === 'burst') a.burst(e[1], e[2], e[3] ? '#ffcf4a' : '#5cc8ff', 10);
             else if (e[0] === 'pass') {
@@ -928,7 +931,7 @@ var SliskaSim = (function () {
             c.fillStyle = '#d6001c'; c.fillRect(p.x - 26, s[2] ? hy : hy + 38, 52, 6);
           });
           if (p.coin) dropPath(c, p.x, p.top + p.gp / 2 + Math.sin(a.t * 5 + p.ph) * 4, 9, '#5cc8ff', true);
-          if (p.sh) badge(c, p.x, p.top + p.gp / 2, 'shield', a.t);
+          if (p.sh) badge(c, p.x, p.top + p.gp / 2, 'gum', a.t);
         });
         c.fillStyle = '#140a1c'; c.fillRect(0, H - 46, W, 46); c.fillStyle = '#2a1636'; var so = (t * 200) % 40; for (var gx = -so; gx < W; gx += 40) c.fillRect(gx, H - 46, 20, 6);
         var fgd = c.createLinearGradient(0, H - 46, 0, H); fgd.addColorStop(0, 'rgba(255,207,74,.28)'); fgd.addColorStop(.35, 'rgba(255,207,74,0)'); c.fillStyle = fgd; c.fillRect(0, H - 46, W, 46);
@@ -1398,17 +1401,17 @@ var SliskaSim = (function () {
       reset: function (a) { P = { x: a.W / 2 }; tx = a.W / 2; items = []; lives = 3; spawn = .6; combo = 0; lvl = 1; a.setLives(lives); },
       step: function (a, dt) {
         var W = a.W, H = a.H; if (keysD.ArrowLeft) tx = (tx == null ? P.x : tx) - 520 * dt; if (keysD.ArrowRight) tx = (tx == null ? P.x : tx) + 520 * dt;
-        tx = Math.max(40, Math.min(W - 40, tx)); P.x += (tx - P.x) * Math.min(1, dt * 11);
-        lvl = 1 + a.score / 16; spawn -= dt;
+        tx = Math.max(40, Math.min(W - 40, tx)); P.x += (tx - P.x) * Math.min(1, dt * 12.5);
+        lvl = 1 + a.score / 26; spawn -= dt;
         if (spawn <= 0) {
-          spawn = Math.max(.3, .95 - lvl * .07) * (.75 + Math.random() * .5);
-          var nSp = lvl > 4 && Math.random() < Math.min(.45, (lvl - 4) * .06) ? 2 : 1;
+          spawn = Math.max(.42, 1.05 - lvl * .065) * (.78 + Math.random() * .44);
+          var nSp = lvl > 5 && Math.random() < Math.min(.28, (lvl - 5) * .04) ? 2 : 1;
           for (var q0 = 0; q0 < nSp; q0++) {
-            var jel = Math.random() < Math.min(.45, .2 + lvl * .03), bx0 = 36 + Math.random() * (W - 72);
-            items.push({ x: bx0, bx: bx0, amp: lvl > 3 ? Math.random() * Math.min(70, (lvl - 3) * 10) : 0, ph: Math.random() * 6, y: -40 - q0 * 90, v: 190 + Math.min(260, lvl * 20) + Math.random() * 50, jel: jel, im: FALL[Math.floor(Math.random() * FALL.length)], rot: Math.random() * 6, rv: (Math.random() - .5) * 3 });
+            var jel = Math.random() < Math.min(.4, .17 + lvl * .025), bx0 = 36 + Math.random() * (W - 72);
+            items.push({ x: bx0, bx: bx0, amp: lvl > 4 ? Math.random() * Math.min(50, (lvl - 4) * 8) : 0, ph: Math.random() * 6, y: -40 - q0 * 90, v: 170 + Math.min(200, lvl * 16) + Math.random() * 45, jel: jel, im: FALL[Math.floor(Math.random() * FALL.length)], rot: Math.random() * 6, rv: (Math.random() - .5) * 3 });
           }
         }
-        var ringY = H - 78, rr = 42;
+        var ringY = H - 78, rr = 44;
         items = items.filter(function (it) {
           it.y += it.v * dt; it.rot += it.rv * dt; if (it.amp) it.x = Math.max(30, Math.min(W - 30, it.bx + Math.sin(it.y / 70 + it.ph) * it.amp));
           if (it.y > ringY - 14 && it.y < ringY + 24 && Math.abs(it.x - P.x) < rr) {
