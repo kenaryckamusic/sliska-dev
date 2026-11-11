@@ -649,8 +649,8 @@ var SliskaSim = (function () {
   /* ============== wspólny silnik gier zręcznościowych (canvas) ============== */
   var STARS = { krople: [25, 130, 250], flappy: [6, 35, 60], waz: [8, 45, 80], slizgawka: [150, 1000, 2500], kregle: [90, 160, 230], pojedynek: [60, 200, 450], ratunek: [22, 80, 175], karny: [40, 130, 280] };
   var STAR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.4l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.2 6.1 20.4l1.2-6.5L2.5 9.3l6.6-.9z" stroke-linejoin="round" stroke-width="1.4"/></svg>';
-  /* XP za ukończenie: 3 / 5 / 8 / 12 wg liczby gwiazdek (to samo liczy serwer); gry bez progów – 5 */
-  function gameXpFor(gid, sc) { var th = STARS[gid]; return th ? [3, 5, 8, 12][th.filter(function (v) { return sc >= v; }).length] : 5; }
+  /* XP za ukończenie rośnie z wynikiem: 12 XP przy progu 3 gwiazdek, proporcjonalnie niżej/wyżej, 2–20 (to samo liczy serwer); gry bez progów – 5 */
+  function gameXpFor(gid, sc) { var th = STARS[gid]; return th ? Math.max(2, Math.min(20, Math.round(12 * sc / th[2]))) : 5; }
   function starsHtml(gid, sc) { var th = STARS[gid]; if (!th) return ''; var n = th.filter(function (v) { return sc >= v; }).length; return '<div class="gm-stars" aria-label="' + n + ' z 3 gwiazdek">' + [0, 1, 2].map(function (i) { return '<span class="' + (i < n ? 'on' : '') + '" style="--d:' + (.25 + i * .22) + 's">' + STAR_SVG + '</span>'; }).join('') + '</div>'; }
   var imgCache = {};
   function knagaImg(slug) {
