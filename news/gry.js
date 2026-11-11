@@ -556,8 +556,8 @@ var SliskaSim = (function () {
       ['k_life', 'Dodatkowe życie', 'Złap serduszko', 'heart', function (s) { return s.life >= 1; }],
       ['k_c10', 'Kombinator', 'Złap 10 kropli z rzędu', 'bolt', function (s) { return s.combo >= 10; }],
       ['k_c25', 'Mega combo', 'Złap 25 kropli z rzędu', 'flame', function (s) { return s.combo >= 25; }],
-      ['k_umb', 'Pod parasolem', 'Parasol uratuje Cię przed pozwem', 'shield', function (s) { return s.shieldsave >= 1; }],
-      ['k_set', 'Zestaw bonusów', 'Złap magnes, parasol i saunę w jednej grze', 'star', function (s) { return s.pw_mag >= 1 && s.pw_shield >= 1 && s.pw_slow >= 1; }],
+      ['k_umb', 'Dobrze zabezpieczony', 'Gumka uratuje Cię przed pozwem', 'shield', function (s) { return s.shieldsave >= 1; }],
+      ['k_set', 'Zestaw bonusów', 'Złap magnes, gumkę i saunę w jednej grze', 'star', function (s) { return s.pw_mag >= 1 && s.pw_shield >= 1 && s.pw_slow >= 1; }],
       ['k_dry', 'Bez pozwu', '40 punktów bez utraty życia', 'check', function (s) { return s.score >= 40 && !(s.lost > 0); }],
       ['k_100', 'Wanna po brzegi', 'Zdobądź 100 punktów', 'trophy', function (s) { return s.score >= 100; }],
       ['k_200', 'Potop', 'Zdobądź 200 punktów', 'trophy', function (s) { return s.score >= 200; }]
@@ -581,7 +581,7 @@ var SliskaSim = (function () {
       ['s_dtrick', 'Podwójne salto', 'Zrób podwójne salto', 'flame', function (s) { return s.dtrick >= 1; }],
       ['s_duck', 'Pod dronem', 'Prześlizgnij się pod dronem z pozwem', 'check', function (s) { return s.duck >= 1; }],
       ['s_dive', 'Nurek', 'Nurkuj w powietrzu', 'drop', function (s) { return s.dive >= 1; }],
-      ['s_save', 'Parasol ratuje', 'Parasol przyjmie za Ciebie uderzenie', 'shield', function (s) { return s.shieldsave >= 1; }],
+      ['s_save', 'Gumka ratuje', 'Gumka przyjmie za Ciebie uderzenie', 'shield', function (s) { return s.shieldsave >= 1; }],
       ['s_night', 'Nocna zmiana', 'Dopłyń do nocy (400 m)', 'star', function (s) { return s.dist >= 400; }],
       ['s_800', 'Neonowa fala', 'Dopłyń do neonu (800 m)', 'star', function (s) { return s.dist >= 800; }],
       ['s_1500', 'Legenda fali', 'Przepłyń 1500 m', 'trophy', function (s) { return s.dist >= 1500; }]
@@ -766,16 +766,15 @@ var SliskaSim = (function () {
     c.fillStyle = 'rgba(255,255,255,.75)'; c.beginPath(); c.ellipse(x - r * .35, y + r * .05, r * .22, r * .42, -.4, 0, 7); c.fill(); c.restore();
   }
   function heart(c, x, y, s) { c.save(); c.translate(x, y); c.scale(s / 20, s / 20); c.beginPath(); c.moveTo(0, 6); c.bezierCurveTo(-14, -4, -8, -16, 0, -8); c.bezierCurveTo(8, -16, 14, -4, 0, 6); c.fillStyle = '#ff2d55'; c.fill(); c.lineWidth = 2.4; c.strokeStyle = INK; c.stroke(); c.restore(); }
-  /* odznaka power-upu: 'mag' magnes, 'shield' tarcza/parasol, 'slow' zegar */
+  /* odznaka power-upu: 'mag' magnes, 'shield' tarcza/gumka, 'slow' zegar */
   function badge(c, x, y, kind, t) {
-    var col = kind === 'mag' ? '#ef4444' : kind === 'shield' ? '#7c5cff' : kind === 'gum' ? '#f59e0b' : '#14b8a6', bob = Math.sin((t || 0) * 5 + x / 30) * 3;
+    var col = kind === 'mag' ? '#ef4444' : kind === 'shield' ? '#f59e0b' : kind === 'gum' ? '#f59e0b' : '#14b8a6', bob = Math.sin((t || 0) * 5 + x / 30) * 3;
     c.save(); c.translate(x, y + bob); c.shadowColor = col; c.shadowBlur = 14;
     c.fillStyle = '#fff'; c.strokeStyle = col; c.lineWidth = 3.5; c.beginPath(); c.arc(0, 0, 17, 0, 7); c.fill(); c.stroke(); c.shadowBlur = 0;
     c.strokeStyle = col; c.fillStyle = col; c.lineWidth = 3; c.lineCap = 'round';
     if (kind === 'mag') { c.beginPath(); c.arc(0, -1, 8, Math.PI, 0); c.lineTo(8, 8); c.moveTo(-8, -1); c.lineTo(-8, 8); c.stroke(); c.fillStyle = '#1f2937'; c.fillRect(-11, 5, 6, 5); c.fillRect(5, 5, 6, 5); }
-    else if (kind === 'gum') { c.save(); c.rotate(-.35); c.beginPath(); c.rect(-10, -7, 20, 14); c.fill(); c.fillStyle = '#fff'; c.beginPath(); c.arc(0, 0, 4.6, 0, 7); c.fill(); c.strokeStyle = col; c.lineWidth = 1.8; c.stroke(); c.fillStyle = col; for (var gz = -8; gz <= 8; gz += 4) { c.fillRect(-11.5, gz - 1, 2, 2); c.fillRect(9.5, gz - 1, 2, 2); } c.restore(); }
-    else if (kind === 'shield') { c.beginPath(); c.arc(0, -1, 9, Math.PI, 0); c.closePath(); c.fill(); c.beginPath(); c.moveTo(0, -1); c.lineTo(0, 8); c.arc(-3, 8, 3, 0, Math.PI); c.stroke(); }
-    else { c.beginPath(); c.arc(0, 0, 9, 0, 7); c.stroke(); c.beginPath(); c.moveTo(0, -6); c.lineTo(0, 0); c.lineTo(5, 2); c.stroke(); }
+    else if (kind === 'gum' || kind === 'shield') { c.save(); c.rotate(-.35); c.beginPath(); c.rect(-10, -7, 20, 14); c.fill(); c.fillStyle = '#fff'; c.beginPath(); c.arc(0, 0, 4.6, 0, 7); c.fill(); c.strokeStyle = col; c.lineWidth = 1.8; c.stroke(); c.fillStyle = col; for (var gz = -8; gz <= 8; gz += 4) { c.fillRect(-11.5, gz - 1, 2, 2); c.fillRect(9.5, gz - 1, 2, 2); } c.restore(); }
+        else { c.beginPath(); c.arc(0, 0, 9, 0, 7); c.stroke(); c.beginPath(); c.moveTo(0, -6); c.lineTo(0, 0); c.lineTo(5, 2); c.stroke(); }
     c.restore();
   }
   /* paski aktywnych power-upów: [nazwa, pozostały czas, kolor, czas całkowity] */
@@ -796,10 +795,10 @@ var SliskaSim = (function () {
 
   /* ============== ŁAP KROPLE ============== */
   function krople(el) {
-    var img = knagaImg('kapiel'), P, items, lives, spawn, combo, keys = {}, bub = [], rip = [], pw, lvl, PW = ['mag', 'shield', 'slow'], PN = { mag: 'Magnes!', shield: 'Parasol!', slow: 'Sauna: wolniej!' }, PB = function (t) { return .2 + Math.min(.1, t * .0015); };
+    var img = knagaImg('kapiel'), P, items, lives, spawn, combo, keys = {}, bub = [], rip = [], pw, lvl, PW = ['mag', 'shield', 'slow'], PN = { mag: 'Magnes!', shield: 'Gumka!', slow: 'Sauna: wolniej!' }, PB = function (t) { return .2 + Math.min(.1, t * .0015); };
     for (var i = 0; i < 16; i++) bub.push({ x: Math.random(), y: Math.random(), r: 3 + Math.random() * 9, v: .03 + Math.random() * .06 });
     canvasGame(el, G('krople'), {
-      lives: true, intro: 'Przesuwaj wannę z Knagą i łap krople. Mocz +5, serduszko oddaje życie, a pozew je zabiera. Łap bonusy: magnes przyciąga krople, parasol łapie pozew, sauna zwalnia czas. Co 30 punktów nowy poziom.',
+      lives: true, intro: 'Przesuwaj wannę z Knagą i łap krople. Mocz +5, serduszko oddaje życie, a pozew je zabiera. Łap bonusy: magnes przyciąga krople, gumka łapie pozew, sauna zwalnia czas. Co 30 punktów nowy poziom.',
       keys: [['← →', 'ruch'], ['mysz / palec', 'przesuń'], ['Esc', 'pauza']],
       endText: function (s) { return s > 120 ? ['Wanna pełna po brzegi. Mokro jak nigdy!', 'imprezowa'] : s > 50 ? ['Porządnie się zmoczyła.', 'kapiel'] : s > 15 ? ['Ledwo wilgotno. Stać Cię na więcej.', 'sauna'] : ['Sucho jak na Saharze. Knaga się nie zmoczyła.', 'niesmiala']; },
       init: function (a, cv) {
@@ -822,7 +821,7 @@ var SliskaSim = (function () {
           it.y += it.v * dt;
           if (!it.hit && it.y > py - 26 && it.y < py + 14 && Math.abs(it.x - P.x) < 62) {
             it.hit = true; if (it.k !== 'bad') rip.push({ x: it.x, t: 0 });
-            if (it.k === 'bad') { if (pw.shield <= 0) a.shake(14); if (pw.shield > 0) { pw.shield = 0; a.ev('shieldsave'); a.burst(it.x, it.y, '#7c5cff', 14); a.pop(it.x, it.y - 20, 'Parasol zadziałał!', '#c4b5fd'); } else { lives--; a.ev('lost'); combo = 0; a.setLives(lives); a.burst(it.x, it.y, '#d6001c', 14); a.pop(it.x, it.y - 20, '−1 życie', '#ff6b6b'); if (lives <= 0) a.over(); } }
+            if (it.k === 'bad') { if (pw.shield <= 0) a.shake(14); if (pw.shield > 0) { pw.shield = 0; a.ev('shieldsave'); a.burst(it.x, it.y, '#f59e0b', 14); a.pop(it.x, it.y - 20, 'Gumka pękła!', '#c4b5fd'); } else { lives--; a.ev('lost'); combo = 0; a.setLives(lives); a.burst(it.x, it.y, '#d6001c', 14); a.pop(it.x, it.y - 20, '−1 życie', '#ff6b6b'); if (lives <= 0) a.over(); } }
             else if (PW.indexOf(it.k) >= 0) { a.ev('pw_' + it.k); pw[it.k] = it.k === 'shield' ? 14 : 8; a.pop(it.x, it.y - 22, PN[it.k], '#fff'); a.burst(it.x, it.y, '#ffcf4a', 12); }
             else if (it.k === 'life') { a.ev('life'); lives = Math.min(5, lives + 1); a.setLives(lives); a.pop(it.x, it.y - 20, '+1 życie', '#ff8fb0'); a.burst(it.x, it.y, '#ff2d55', 10); }
             else { var v = it.k === 'gold' ? 5 : 1; a.ev(it.k === 'gold' ? 'gold' : 'drop'); combo++; a.mx('combo', combo); if (combo % 10 === 0) { v += 5; a.pop(P.x, py - 70, 'COMBO +5', '#ffcf4a'); } a.setScore(a.score + v); a.burst(it.x, it.y, it.k === 'gold' ? '#ffcf4a' : '#5cc8ff', 8); a.pop(it.x, it.y - 18, '+' + (it.k === 'gold' ? 5 : 1), it.k === 'gold' ? '#ffcf4a' : '#fff'); }
@@ -857,8 +856,8 @@ var SliskaSim = (function () {
         c.fillStyle = INK; c.beginPath(); c.roundRect(bx - 50, by2 + 46, 10, 10, 3); c.roundRect(bx + 40, by2 + 46, 10, 10, 3); c.fill();
         c.fillStyle = '#fff'; [[-58, -12, 9], [-44, -16, 7], [50, -13, 8], [62, -9, 6]].forEach(function (f) { c.beginPath(); c.arc(bx + f[0], by2 + f[1], f[2], 0, 7); c.fill(); });
         c.fillStyle = 'rgba(255,255,255,.5)'; c.beginPath(); c.roundRect(bx - 56, by2 + 12, 40, 6, 3); c.fill();
-        if (pw && pw.shield > 0) { c.strokeStyle = 'rgba(124,92,255,.85)'; c.lineWidth = 4; c.beginPath(); c.arc(bx, by2 - 10, 88, Math.PI * 1.08, Math.PI * 1.92); c.stroke(); }
-        if (pw) pills(c, [['Magnes', pw.mag, '#ef4444', 8], ['Parasol', pw.shield, '#7c5cff', 14], ['Sauna', pw.slow, '#14b8a6', 8]], 12, 62);
+        if (pw && pw.shield > 0) { c.strokeStyle = 'rgba(245,158,11,.9)'; c.lineWidth = 4; c.beginPath(); c.arc(bx, by2 - 10, 88, Math.PI * 1.08, Math.PI * 1.92); c.stroke(); }
+        if (pw) pills(c, [['Magnes', pw.mag, '#ef4444', 8], ['Gumka', pw.shield, '#f59e0b', 14], ['Sauna', pw.slow, '#14b8a6', 8]], 12, 62);
         if (lvl) { c.font = '900 13px Figtree, Arial'; c.textAlign = 'right'; c.fillStyle = 'rgba(30,60,90,.7)'; c.fillText('POZIOM ' + lvl, W - 14, H - 44); }
       }
     });
@@ -1042,7 +1041,7 @@ var SliskaSim = (function () {
     for (i = 0; i < 4; i++) birds.push({ x: Math.random(), y: .12 + Math.random() * .22, p: Math.random() * 6 });
     (function () { var x = 0; while (x < 1700) { var k = Math.random(), w = 90 + Math.random() * 120; isl.push({ x: x, w: w, h: 22 + Math.random() * 40, k: k < .22 ? 'lh' : k < .6 ? 'isl' : 'city', s: Math.random() }); x += w + 60 + Math.random() * 120; } })();
     canvasGame(el, G('slizgawka'), {
-      intro: 'Knaga surfuje od zachodu słońca przez noc i neon aż po zorzę. Skacz (2× = podwójny skok i salto), schylaj się pod dronami z pozwami, wjeżdżaj na fale-rampy po triki i zbieraj krople. Parasol chroni przed jednym uderzeniem, magnes przyciąga krople.',
+      intro: 'Knaga surfuje od zachodu słońca przez noc i neon aż po zorzę. Skacz (2× = podwójny skok i salto), schylaj się pod dronami z pozwami, wjeżdżaj na fale-rampy po triki i zbieraj krople. Gumka chroni przed jednym uderzeniem, magnes przyciąga krople.',
       keys: [['Spacja / stuknięcie', 'skok (2× w powietrzu)'], ['↓ / lewa strona', 'schyl się / nurkuj']],
       endText: function (s) { return s > 1800 ? ['Legenda fali. Nawet ocean bije brawo.', 'super'] : s > 700 ? ['Ładnie się ślizga. Prawie surfer roku.', 'surfer'] : s > 250 ? ['Niezły przejazd, ale fala wygrała.', 'ziomek'] : ['Knaga się zmoczyła.', 'kapiel']; },
       init: function (a, cv) {
@@ -1080,7 +1079,7 @@ var SliskaSim = (function () {
         if (Math.random() < dt * .35) drops.push({ x: W + 20, y: gy - 60 - Math.random() * 110 });
         pw.shield = Math.max(0, pw.shield - dt); pw.mag = Math.max(0, pw.mag - dt);
         if (Math.random() < dt * .09) ups.push({ x: W + 20, y: gy - 70 - Math.random() * 90, k: Math.random() < .5 ? 'shield' : 'mag' });
-        ups.forEach(function (u) { u.x -= sp * dt; if (!u.hit && Math.abs(u.x - kx) < 34 && Math.abs(u.y - ky) < 46) { u.hit = true; pw[u.k] = u.k === 'shield' ? 15 : 9; a.ev('pw_' + u.k); a.pop(u.x, u.y - 22, u.k === 'shield' ? 'Parasol!' : 'Magnes!', '#fff'); a.burst(u.x, u.y, '#ffcf4a', 10); } });
+        ups.forEach(function (u) { u.x -= sp * dt; if (!u.hit && Math.abs(u.x - kx) < 34 && Math.abs(u.y - ky) < 46) { u.hit = true; pw[u.k] = u.k === 'shield' ? 15 : 9; a.ev('pw_' + u.k); a.pop(u.x, u.y - 22, u.k === 'shield' ? 'Gumka!' : 'Magnes!', '#fff'); a.burst(u.x, u.y, '#ffcf4a', 10); } });
         ramps.forEach(function (rp) { rp.x -= sp * dt; if (!rp.used && P.y === 0 && Math.abs(rp.x - kx) < 30) { rp.used = true; P.vy = -830; P.j = 1; P.spin = true; a.ev('ramp'); a.pop(kx, gy - 90, 'FALA!', '#7dd3fc'); a.burst(kx, gy, '#fff', 12); } });
         if (dist >= nextMs) { a.pop(W / 2, 110, nextMs + ' m!', '#ffcf4a'); nextMs += 500; }
         var bi = Math.floor(dist / 400); if (bi > lastBi) { lastBi = bi; a.pop(W / 2, 150, PALS[bi % 4].name, '#fff'); }
@@ -1091,7 +1090,7 @@ var SliskaSim = (function () {
           var hitIt = false;
           if (o.fly) { if (Math.abs(o.x - kx) < 34 && !duckOn && feet - 74 < gy - 72 && feet > gy - 118) hitIt = true; if (!o.pass && o.x < kx - 34) { o.pass = true; if (duckOn) a.ev('duck'); } }
           else if (Math.abs(o.x - kx) < 30 && feet > gy - o.h) hitIt = true;
-          if (hitIt) { if (pw.shield > 0) { pw.shield = 0; o.gone = true; a.ev('shieldsave'); a.pop(o.x, gy - 100, 'Parasol zadziałał!', '#c4b5fd'); a.burst(o.x, gy - 80, '#7c5cff', 14); } else { a.shake(16); a.over(); } }
+          if (hitIt) { if (pw.shield > 0) { pw.shield = 0; o.gone = true; a.ev('shieldsave'); a.pop(o.x, gy - 100, 'Gumka pękła!', '#c4b5fd'); a.burst(o.x, gy - 80, '#f59e0b', 14); } else { a.shake(16); a.over(); } }
         });
         drops.forEach(function (d) { d.x -= sp * dt; if (pw.mag > 0 && d.x > kx - 40 && d.x < kx + 240) { d.x += (kx - d.x) * dt * 4; d.y += (ky - d.y) * dt * 4; } if (!d.hit && Math.abs(d.x - kx) < 30 && Math.abs(d.y - ky) < 42) { d.hit = true; dist += 10; a.ev('drop'); a.pop(d.x, d.y - 16, '+10', '#5cc8ff'); a.burst(d.x, d.y, '#5cc8ff', 8); } });
         obs = obs.filter(function (o) { return o.x > -80 && !o.gone; }); drops = drops.filter(function (d) { return !d.hit && d.x > -30; }); ups = ups.filter(function (u) { return !u.hit && u.x > -30; }); ramps = ramps.filter(function (rp) { return rp.x > -200; });
@@ -1151,7 +1150,7 @@ var SliskaSim = (function () {
           drawK(c, img, 0, -18, 92, 0);
           if (pw.shield > 0) { c.strokeStyle = 'rgba(167,139,250,.9)'; c.lineWidth = 4; c.beginPath(); c.arc(0, -22, 58, Math.PI * 1.1, Math.PI * 1.9); c.stroke(); }
           c.restore();
-          pills(c, [['Magnes', pw.mag, '#ef4444', 9], ['Parasol', pw.shield, '#7c5cff', 15]], 12, 62);
+          pills(c, [['Magnes', pw.mag, '#ef4444', 9], ['Gumka', pw.shield, '#f59e0b', 15]], 12, 62);
         }
         if (sp > 420) { c.strokeStyle = 'rgba(255,255,255,' + Math.min(.35, (sp - 420) / 1200) + ')'; c.lineWidth = 1.5; for (var sl = 0; sl < 9; sl++) { var ly = (sl * 83 + 17) % (gy - 40) + 20, lx = W - ((t * sp * 1.6 + sl * 131) % (W + 140)); c.beginPath(); c.moveTo(lx, ly); c.lineTo(lx + 70, ly); c.stroke(); } }
         c.font = '900 12px Figtree, Arial'; c.textAlign = 'left'; c.fillStyle = 'rgba(255,255,255,.8)'; c.fillText(PALS[bm.i].name.toUpperCase() + ' · ' + Math.round(sp / 2.7) + ' KM/H', 14, H - 14);
