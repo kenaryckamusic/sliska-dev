@@ -58,7 +58,7 @@
     { id: 'pojedynek', name: 'Pojedynek', knaga: 'kowboj', sub: 'Kto pierwszy, ten żyje.', tag: 'Nowość', unit: 'pkt', c: ['#b45309', '#fbbf24'],
       how: 'Czekaj na napis STRZELAJ! i wtedy kliknij albo stuknij w ekran, szybciej niż rywal. Za wczesny strzał kosztuje życie. Z każdą wygraną rywal jest szybszy, a im szybciej strzelisz, tym więcej punktów.' },
     { id: 'ratunek', name: 'Ratunek', knaga: 'ratownik', sub: 'Łap Knagi i omijaj meduzy.', tag: 'Nowość', unit: 'pkt', c: ['#0284c7', '#22d3ee'],
-      how: 'Przesuwaj palcem w lewo i prawo, żeby koło ratunkowe łapało spadające Knagi. Seria daje bonus. Uciekająca Knaga albo złapana meduza to utrata życia.' },
+      how: 'Przesuwaj palcem w lewo i prawo, żeby koło ratunkowe łapało spadające Knagi. Seria daje bonus. Uciekająca Knaga albo złapana meduza to utrata życia. Z czasem robi się coraz szybciej i gęściej, a Knagi zbaczają na boki.' },
     { id: 'karny', name: 'Rzut karny', knaga: 'kibic', sub: 'Pokonaj bramkarza.', tag: 'Nowość', unit: 'pkt', c: ['#15803d', '#ef4444'],
       how: 'Przeciągnij palcem od piłki w stronę bramki i puść. Kierunek to strona strzału, a długość to wysokość. Górne rogi dają najwięcej punktów, ale łatwo o pudło. Bramkarz jest coraz lepszy, a trzy nieudane karne kończą grę.' },
     { id: 'kregle', name: 'Kręgle', knaga: 'ziomek', sub: 'Machnij palcem i zbij wszystkie.', tag: 'Nowość', unit: 'pkt', c: ['#0f766e', '#f59e0b'],
@@ -647,7 +647,7 @@ var SliskaSim = (function () {
   function achRefresh(gid) { var u = $('#gry-ach'), c = $('#gry-ach-c'); if (u) u.innerHTML = achItems(gid); if (c) c.textContent = achGot(gid).length + '/' + ACHS[gid].length; }
 
   /* ============== wspólny silnik gier zręcznościowych (canvas) ============== */
-  var STARS = { krople: [25, 130, 250], flappy: [6, 35, 60], waz: [8, 45, 80], slizgawka: [150, 1000, 2500], kregle: [90, 160, 230], pojedynek: [60, 200, 450], ratunek: [25, 90, 200], karny: [40, 130, 280] };
+  var STARS = { krople: [25, 130, 250], flappy: [6, 35, 60], waz: [8, 45, 80], slizgawka: [150, 1000, 2500], kregle: [90, 160, 230], pojedynek: [60, 200, 450], ratunek: [20, 70, 150], karny: [40, 130, 280] };
   var STAR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.4l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.2 6.1 20.4l1.2-6.5L2.5 9.3l6.6-.9z" stroke-linejoin="round" stroke-width="1.4"/></svg>';
   function starsHtml(gid, sc) { var th = STARS[gid]; if (!th) return ''; var n = th.filter(function (v) { return sc >= v; }).length; return '<div class="gm-stars" aria-label="' + n + ' z 3 gwiazdek">' + [0, 1, 2].map(function (i) { return '<span class="' + (i < n ? 'on' : '') + '" style="--d:' + (.25 + i * .22) + 's">' + STAR_SVG + '</span>'; }).join('') + '</div>'; }
   var imgCache = {};
@@ -1386,7 +1386,7 @@ var SliskaSim = (function () {
     function drawJelly(c, x, y, r, t) { c.save(); c.translate(x, y); c.fillStyle = '#c084fc'; c.strokeStyle = '#6d28d9'; c.lineWidth = 3; c.beginPath(); c.arc(0, 0, r, Math.PI, 0); c.quadraticCurveTo(r, r * .3, r * .6, r * .3); c.quadraticCurveTo(0, r * .5, -r * .6, r * .3); c.quadraticCurveTo(-r, r * .3, -r, 0); c.fill(); c.stroke(); c.strokeStyle = '#a855f7'; c.lineWidth = 3; c.lineCap = 'round'; for (var i = -2; i <= 2; i++) { c.beginPath(); c.moveTo(i * r * .3, r * .3); c.bezierCurveTo(i * r * .3 + Math.sin(t * 5 + i) * 6, r * .8, i * r * .3 - Math.sin(t * 5 + i) * 6, r * 1.2, i * r * .3 + Math.sin(t * 4 + i) * 5, r * 1.6); c.stroke(); } c.fillStyle = '#fff'; c.beginPath(); c.arc(-r * .3, -r * .35, r * .15, 0, 7); c.arc(r * .3, -r * .35, r * .15, 0, 7); c.fill(); c.fillStyle = '#2a1050'; c.beginPath(); c.arc(-r * .3, -r * .33, r * .07, 0, 7); c.arc(r * .3, -r * .33, r * .07, 0, 7); c.fill(); c.restore(); }
     canvasGame(el, G('ratunek'), {
       lives: true, lifeIcon: '🛟', ratio: '5 / 6',
-      intro: 'Przesuwaj palcem w lewo i prawo, żeby ratownik złapał spadające Knagi w koło ratunkowe. Każda uratowana Knaga to punkty, a seria daje bonus. Uciekająca Knaga albo meduza to utrata życia.',
+      intro: 'Przesuwaj palcem w lewo i prawo, żeby ratownik złapał spadające Knagi w koło ratunkowe. Każda uratowana Knaga to punkty, a seria daje bonus. Uciekająca Knaga albo meduza to utrata życia. Z czasem spada coraz szybciej i gęściej, a Knagi zaczynają zbaczać na boki.',
       keys: [['← →', 'ruch'], ['palec', 'przeciągnij']],
       endText: function (s) { return s >= 200 ? ['Bohater plaży. Medal gwarantowany!', 'ratownik'] : s >= 80 ? ['Sporo uratowanych. Dobra zmiana!', 'ziomek'] : ['Plaża była dziś wyjątkowo zdradliwa.', 'niesmiala']; },
       init: function (a, cv) {
@@ -1398,12 +1398,19 @@ var SliskaSim = (function () {
       reset: function (a) { P = { x: a.W / 2 }; tx = a.W / 2; items = []; lives = 3; spawn = .6; combo = 0; lvl = 1; a.setLives(lives); },
       step: function (a, dt) {
         var W = a.W, H = a.H; if (keysD.ArrowLeft) tx = (tx == null ? P.x : tx) - 520 * dt; if (keysD.ArrowRight) tx = (tx == null ? P.x : tx) + 520 * dt;
-        tx = Math.max(40, Math.min(W - 40, tx)); P.x += (tx - P.x) * Math.min(1, dt * 14);
-        lvl = 1 + a.score / 40; spawn -= dt;
-        if (spawn <= 0) { spawn = Math.max(.55, 1.15 - lvl * .06) * (.8 + Math.random() * .4); var jel = Math.random() < Math.min(.34, .14 + lvl * .02); items.push({ x: 36 + Math.random() * (W - 72), y: -40, v: 150 + Math.min(150, lvl * 12) + Math.random() * 40, jel: jel, im: FALL[Math.floor(Math.random() * FALL.length)], rot: Math.random() * 6, rv: (Math.random() - .5) * 3 }); }
-        var ringY = H - 78, rr = 46;
+        tx = Math.max(40, Math.min(W - 40, tx)); P.x += (tx - P.x) * Math.min(1, dt * 11);
+        lvl = 1 + a.score / 16; spawn -= dt;
+        if (spawn <= 0) {
+          spawn = Math.max(.3, .95 - lvl * .07) * (.75 + Math.random() * .5);
+          var nSp = lvl > 4 && Math.random() < Math.min(.45, (lvl - 4) * .06) ? 2 : 1;
+          for (var q0 = 0; q0 < nSp; q0++) {
+            var jel = Math.random() < Math.min(.45, .2 + lvl * .03), bx0 = 36 + Math.random() * (W - 72);
+            items.push({ x: bx0, bx: bx0, amp: lvl > 3 ? Math.random() * Math.min(70, (lvl - 3) * 10) : 0, ph: Math.random() * 6, y: -40 - q0 * 90, v: 190 + Math.min(260, lvl * 20) + Math.random() * 50, jel: jel, im: FALL[Math.floor(Math.random() * FALL.length)], rot: Math.random() * 6, rv: (Math.random() - .5) * 3 });
+          }
+        }
+        var ringY = H - 78, rr = 42;
         items = items.filter(function (it) {
-          it.y += it.v * dt; it.rot += it.rv * dt;
+          it.y += it.v * dt; it.rot += it.rv * dt; if (it.amp) it.x = Math.max(30, Math.min(W - 30, it.bx + Math.sin(it.y / 70 + it.ph) * it.amp));
           if (it.y > ringY - 14 && it.y < ringY + 24 && Math.abs(it.x - P.x) < rr) {
             if (it.jel) { lives--; combo = 0; a.ev('jelly'); a.setLives(lives); a.shake(10); a.burst(it.x, it.y, '#c084fc', 16); a.pop(it.x, it.y - 24, 'AUĆ!', '#ff6b6b'); }
             else { combo++; a.ev('catch'); a.mx('combo', combo); var pts = 1 + Math.min(4, Math.floor(combo / 3)); a.setScore(a.score + pts); a.burst(it.x, it.y, '#4cc3ff', 10); a.pop(it.x, it.y - 24, '+' + pts, '#ffcf4a'); }
