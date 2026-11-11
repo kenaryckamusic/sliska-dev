@@ -85,7 +85,7 @@ td input[type=number]{width:96px;height:32px}
       <div class="bar"><input type="text" id="kz-h" maxlength="12" placeholder="HASŁO (3–12 liter), np. SKANDAL" style="max-width:320px;text-transform:uppercase"><button type="button" class="btn g s" id="kz-auto">Wypełnij propozycjami</button></div>
       <div class="kz-rows" id="kz-rows"></div>
       <div class="prev" id="kz-prev"></div>
-      <div class="stick"><button type="button" class="btn" id="kz-save">Zapisz krzyżówkę</button><button type="button" class="btn g s" id="kz-regen">Wygeneruj od nowa</button><button type="button" class="btn d s" id="kz-del">Usuń moją (wróci wygenerowana)</button><span class="msg" id="kz-msg" style="margin:0"></span></div>
+      <div class="stick"><button type="button" class="btn" id="kz-save">Zapisz krzyżówkę</button><button type="button" class="btn s" id="kz-now" hidden title="Gracze dostaną tę krzyżówkę od razu, a nie dopiero w poniedziałek">Opublikuj od razu</button><button type="button" class="btn d s" id="kz-undo" hidden>Cofnij publikację od razu</button><button type="button" class="btn g s" id="kz-regen">Wygeneruj od nowa</button><button type="button" class="btn d s" id="kz-del">Usuń moją (wróci wygenerowana)</button><span class="msg" id="kz-msg" style="margin:0"></span></div>
     </div>
   </section>
 
@@ -218,7 +218,12 @@ td input[type=number]{width:96px;height:32px}
     cur = src ? { h: src.h, r: src.r.map(function (x) { return [x[0], x[1], x[2]]; }) } : { h: '', r: [] };
     $('#kz-h').value = cur.h;
     $('#kz-state').textContent = s ? 'Twoja krzyżówka' : gen ? 'Wygenerowana z artykułów – możesz ją poprawić i zapisać' : 'Brak artykułów – ułóż własną';
-    $('#kz-del').hidden = !s; krzDraw();
+    $('#kz-del').hidden = !s; krzDraw(); krzAheadUi();
+  }
+  function krzAheadUi() {
+    var w = +$('#kz-week').value, on = D.cfg && D.cfg.krzAhead && D.cfg.krzAhead.from === D.week;
+    $('#kz-now').hidden = !(w === D.week + 1 && !on); $('#kz-undo').hidden = !(on && w === D.week + 1);
+    if (on && w === D.week + 1) $('#kz-state').textContent += ' · OPUBLIKOWANA OD RAZU (gracze grają w nią już teraz)';
   }
   function krzSync() { var h = $('#kz-h').value.toUpperCase().replace(/[^A-ZĄĆĘŁŃÓŚŹŻ]/g, ''); cur.h = h; var r = []; for (var i = 0; i < h.length; i++) r.push(cur.r[i] || ['', '', -1]); cur.r = r; }
   function krzDraw() {
@@ -258,6 +263,16 @@ td input[type=number]{width:96px;height:32px}
     if (bad) { say($('#kz-msg'), 'Uzupełnij wszystkie wiersze: wyraz z literą hasła i pytanie (' + bad + ' do poprawy).'); return; }
     api('/gry/admin/cfg', { krzyz: { week: w, set: { h: cur.h, r: cur.r } } }).then(function (d) { D.cfg = d.cfg; say($('#kz-msg'), 'Zapisano krzyżówkę na tydzień ' + weekRange(w) + '.', 1); krzWeeks(); }).catch(function (e) { say($('#kz-msg'), e.message); });
   };
+  $('#kz-now').onclick = function () {
+    krzSync(); var w = +$('#kz-week').value;
+    if (w !== D.week + 1) { say($('#kz-msg'), 'Od razu można opublikować tylko krzyżówkę na następny tydzień.'); return; }
+    if (cur.h.length < 3) { say($('#kz-msg'), 'Hasło musi mieć co najmniej 3 litery.'); return; }
+    var bad = cur.r.filter(function (r, i) { return !r[0] || r[0].indexOf(cur.h[i]) < 0 || !String(r[1]).trim(); }).length;
+    if (bad) { say($('#kz-msg'), 'Uzupełnij wszystkie wiersze (' + bad + ' do poprawy).'); return; }
+    if (!confirm('Opublikować tę krzyżówkę od razu? Gracze dostaną ją natychmiast, a obecna krzyżówka trafi do archiwum.')) return;
+    api('/gry/admin/cfg', { krzyz: { week: w, set: { h: cur.h, r: cur.r } } }).then(function () { return api('/gry/admin/cfg', { krzAhead: true }); }).then(function (d) { D.cfg = d.cfg; say($('#kz-msg'), 'Opublikowano od razu – gracze (po odświeżeniu) grają w nową krzyżówkę.', 1); krzWeeks(); }).catch(function (e) { say($('#kz-msg'), e.message); });
+  };
+  $('#kz-undo').onclick = function () { if (!confirm('Cofnąć? Gracze wrócą do obecnej krzyżówki tygodnia.')) return; api('/gry/admin/cfg', { krzAhead: false }).then(function (d) { D.cfg = d.cfg; say($('#kz-msg'), 'Cofnięto.', 1); krzWeeks(); }).catch(function (e) { say($('#kz-msg'), e.message); }); };
   $('#kz-del').onclick = function () { var w = +$('#kz-week').value; if (!confirm('Usunąć Twoją krzyżówkę z tego tygodnia?')) return; api('/gry/admin/cfg', { krzyz: { week: w, set: null } }).then(function (d) { D.cfg = d.cfg; say($('#kz-msg'), 'Usunięto.', 1); krzWeeks(); }).catch(function (e) { say($('#kz-msg'), e.message); }); };
 
   /* ---------- teksty Knagi ---------- */

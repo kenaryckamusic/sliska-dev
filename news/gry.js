@@ -18,7 +18,8 @@
   var stopFns = [];
   function stopAll() { stopFns.forEach(function (f) { try { f(); } catch (e) { /* ignoruj */ } }); stopFns = []; }
   function dayIndex() { var d = new Date(); return Math.floor((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - Date.UTC(2026, 10, 1)) / 864e5); }
-  function weekIndex() { return Math.floor((dayIndex() + 6) / 7); }
+  var weekAdj = 0;       // 1, gdy Właściciel opublikował krzyżówkę następnego tygodnia od razu
+  function weekIndex() { return Math.floor((dayIndex() + 6) / 7) + weekAdj; }
   var ICO = {
     back: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>',
     share: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v13M7 8l5-5 5 5"/><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>',
@@ -30,6 +31,8 @@
 
   /* ---------- konfiguracja właściciela (Ślizgle, krzyżówka, teksty Knagi) ---------- */
   window.SnCfg = window.SnCfg || fetch(API + '/gry/cfg', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; });
+  if (window.SnCfg) window.SnCfg.then(function (c) { var r = Math.floor((dayIndex() + 6) / 7); if (c && c.week && c.week - r >= 0 && c.week - r <= 1) weekAdj = c.week - r; }).catch(function () {});
+
   /* właściciel mógł wyzerować wszystko w grach: wtedy kasujemy też zakończenia, rekordy i postępy zapisane w tej przeglądarce */
   window.SnCfg.then(function (c) {
     try {
