@@ -488,7 +488,7 @@ var SliskaSim = (function () {
       draw();
     }
     $('#sz-kb').addEventListener('click', function (e) { var b = e.target.closest('[data-k]'); if (b) press(b.dataset.k); });
-    var onKey = function (e) { if (e.ctrlKey || e.metaKey || e.altKey || /input|textarea/i.test((e.target || {}).tagName)) return; if (e.key === 'Enter' || e.key === 'Backspace' || /^[a-ząćęłńóśźż]$/i.test(e.key)) { e.preventDefault(); press(e.key); } };
+    var onKey = function (e) { if (e.metaKey || ((e.ctrlKey || e.altKey) && !/^[ąćęłńóśźż]$/i.test(e.key)) || /input|textarea/i.test((e.target || {}).tagName)) return; if (e.key === 'Enter' || e.key === 'Backspace' || /^[a-ząćęłńóśźż]$/i.test(e.key)) { e.preventDefault(); press(e.key); } };
     document.addEventListener('keydown', onKey);
     slizgleRun.off = function () { document.removeEventListener('keydown', onKey); slizgleRun.off = null; };
     stopFns.push(function () { if (slizgleRun.off) slizgleRun.off(); });
