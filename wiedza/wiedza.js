@@ -2,7 +2,6 @@
 (function () {
   'use strict';
   var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
-  var isOwner = function () { try { var R = window.SnReaders; return !!(R && R.me && R.me.role === 'owner'); } catch (e) { return false; } };
   var tbl = function (head, rows) { return '<div class="wz-scroll"><table class="wz-t"><thead><tr>' + head.map(function (h) { return '<th>' + h + '</th>'; }).join('') + '</tr></thead><tbody>' + rows.map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + c + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>'; };
   var sec = function (id, title, body) { return '<section class="wz-s" id="wz-' + id + '"><h2>' + title + '</h2>' + body + '</section>'; };
   var li = function (a) { return '<ul class="wz-l">' + a.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>'; };
@@ -53,7 +52,7 @@
     return '<p>Razem <b>' + total + '</b> osiągnięć, w tym <b>' + hid + '</b> ukrytych (gracze widzą je jako „???”, dopóki ich nie odblokują). Osiągnięcia zapisują się na koncie gracza (tabela <code>game_ach</code>), bez logowania lokalnie w przeglądarce. Nie dają XP.</p>' + out;
   }
   function html() {
-    return '<div class="wz"><header class="wz-h"><span class="gry-eyebrow">Tylko dla Właściciela</span><h1>Centrum wiedzy</h1><p>Zasady, limity i sekrety całego serwisu w jednym miejscu. Dane o grach i osiągnięciach są czytane na żywo z kodu, więc zawsze są aktualne.</p></header>' +
+    return '<div class="wz"><header class="wz-h"><span class="wz-eye">Tylko dla Właściciela</span><h1>Centrum wiedzy</h1><p>Zasady, limity i sekrety całego serwisu w jednym miejscu. Dane o grach i osiągnięciach są czytane na żywo z kodu, więc zawsze są aktualne.</p></header>' +
       '<nav class="wz-nav">' + [['xp', 'XP i poziomy'], ['gry', 'Gry'], ['osi', 'Osiągnięcia'], ['konta', 'Konta i role'], ['kom', 'Komentarze'], ['push', 'Powiadomienia'], ['studio', 'Studio'], ['lim', 'Limity i zabezpieczenia'], ['tre', 'Treści i reklamy'], ['adr', 'Adresy i wdrażanie']].map(function (x) { return '<a href="#" data-wz="' + x[0] + '">' + x[1] + '</a>'; }).join('') + '</nav>' +
       sec('xp', 'XP, limity i poziomy',
         tbl(['Za co', 'XP', 'Limit', 'Licznik sezonu'], XP.map(function (r) { return r.map(esc); })) +
@@ -85,13 +84,8 @@
       '</div>';
   }
   function render(el) {
-    if (!isOwner()) { el.innerHTML = '<div class="wz"><header class="wz-h"><h1>Centrum wiedzy</h1><p>Ta strona jest tylko dla Właściciela. Zaloguj się na konto właściciela.</p></header></div>'; return; }
     el.innerHTML = html();
     el.querySelector('.wz-nav').addEventListener('click', function (e) { var a = e.target.closest('[data-wz]'); if (!a) return; e.preventDefault(); var t = el.querySelector('#wz-' + a.dataset.wz); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
   }
-  var link = function () { ['wiedza-link', 'nav-wiedza'].forEach(function (id) { var a = document.getElementById(id); if (a) a.hidden = !isOwner(); }); };
-  var tries = 0, iv = setInterval(function () { link(); if (isOwner() || ++tries > 40) clearInterval(iv); }, 1000);
-  window.addEventListener('hashchange', link);
-  window.addEventListener('sn:reader', function () { link(); var el = document.getElementById('view-xp'); if (el && /^#\/wiedza/.test(location.hash)) render(el); });
-  window.Wiedza = { render: render, isOwner: isOwner };
+  window.Wiedza = { render: render };
 })();
