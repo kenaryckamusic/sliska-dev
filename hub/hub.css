@@ -259,7 +259,7 @@ button { cursor: pointer; }
 /* okienko otwarte w narzędziu: przyciemnione też menu i nagłówek */
 .shell-dim { position: fixed; inset: 0; z-index: 55; background: rgba(16, 24, 40, .55); opacity: 0; pointer-events: none; transition: opacity .15s; }
 body.is-dim .shell-dim { opacity: 1; pointer-events: auto; }
-body.is-dim .stage { z-index: 56; }
+body.is-dim .stage { z-index: 56 !important; }
 
 
 /* =====================================================================
