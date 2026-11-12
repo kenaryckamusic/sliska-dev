@@ -17,8 +17,9 @@
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var stopFns = [];
   /* ===== dźwięki gier: syntezator Web Audio (bez plików), przycisk wyciszenia zapamiętany w przeglądarce ===== */
+  var AMBMAP = { slizgawka: 'sea', ratunek: 'sea', karny: 'crowd', kregle: 'alley', krople: 'drip', flappy: 'wind', waz: 'groove', pojedynek: 'western' };
   var SND = (function () {
-    var ac = null, mst = null, nbuf = null, on = true, lastPop = 0, lastT = {};
+    var ac = null, mst = null, nbuf = null, on = true, lastPop = 0, lastT = {}, game = '';
     try { on = localStorage.getItem('sliska_snd') !== '0'; } catch (e) {}
     function ctx() {
       if (!on) return null;
@@ -50,14 +51,14 @@
       pop: function () { tone(520, .09, 'sine', .2, 1100); },
       whoosh: function () { noise(.28, .16, 500, 1.2, 0, 2600); },
       kick: function () { tone(150, .12, 'sine', .4, 55); noise(.08, .18, 900, 1); P.whoosh(); },
-      goal: function () { noise(1.1, .2, 1400, .6, 0, 700); arp([523, 659, 784, 1046, 1318], .09, 'triangle', .15, .3); tone(130, .5, 'sine', .25, 80); },
-      save: function () { tone(200, .12, 'square', .1, 120); noise(.12, .15, 700); tone(300, .3, 'triangle', .1, 160, .1); },
-      post: function () { tone(1250, .5, 'triangle', .22); tone(1880, .35, 'sine', .12); noise(.05, .2, 4000); },
-      miss: function () { tone(400, .35, 'sawtooth', .1, 140); },
-      roll: function () { noise(1.1, .1, 180, 2, 0, 320); tone(70, 1, 'sine', .08, 90); },
+      goal: function () { P.cheer(1); arp([523, 659, 784, 1046, 1318], .09, 'triangle', .13, .3); tone(130, .5, 'sine', .25, 80); tone(2600, .5, 'sine', .05, 2200, .1); },
+      save: function () { tone(200, .12, 'square', .1, 120); noise(.12, .15, 700); P.boo(.8); },
+      post: function () { tone(1250, .5, 'triangle', .22); tone(1880, .35, 'sine', .12); noise(.05, .2, 4000); P.ooh(); },
+      miss: function () { tone(400, .3, 'sawtooth', .08, 150); P.boo(1); },
+      roll: function () { noise(1.5, .22, 160, 2, 0, 420); tone(62, 1.5, 'sine', .14, 95); noise(1.2, .05, 1800, 3, .1); },
       crash: function (n) { n = Math.max(.35, Math.min(1, n || 1)); for (var i = 0; i < 4 + Math.round(n * 5); i++) { var d = i * .045 + Math.random() * .03; noise(.16, .22 * n, 1800 + Math.random() * 2600, 3, d); tone(900 + Math.random() * 900, .12, 'triangle', .07 * n, 0, d); } tone(80, .3, 'sine', .35 * n, 40); },
-      strike: function () { P.crash(1); arp([392, 523, 659, 784, 1046], .07, 'square', .08, .22); },
-      spare: function () { arp([660, 880, 1100], .08, 'triangle', .18, .22); },
+      strike: function () { P.crash(1); arp([392, 523, 659, 784, 1046], .07, 'square', .08, .22); P.cheer(.8); },
+      spare: function () { arp([660, 880, 1100], .08, 'triangle', .18, .22); P.cheer(.4); },
       flap: function () { tone(380, .09, 'square', .07, 760); },
       jump: function () { tone(300, .16, 'square', .09, 720); },
       duck: function () { tone(500, .12, 'square', .07, 220); },
@@ -67,11 +68,61 @@
       level: function () { arp([523, 659, 784, 1046], .08, 'square', .09, .2); },
       over: function () { arp([440, 392, 330, 262], .16, 'triangle', .18, .4); },
       record: function () { arp([523, 659, 784, 1046, 784, 1046, 1318], .1, 'triangle', .17, .3); noise(.9, .08, 3500, .8); },
-      click: function () { tone(900, .04, 'sine', .08); }
+      click: function () { tone(900, .04, 'sine', .08); },
+      key: function () { tone(1100 + Math.random() * 300, .035, 'square', .04); noise(.03, .05, 3000); },
+      slide: function () { noise(.09, .12, 900, 1.5); tone(210, .08, 'triangle', .12, 150); },
+      flip: function () { tone(520, .06, 'triangle', .1, 800); },
+      win: function () { arp([523, 659, 784, 1046], .1, 'triangle', .17, .3); P.cheer(.7); },
+      drip: function () { var f = 900 + Math.random() * 900; tone(f, .1, 'sine', .16, f * .5); },
+      splash: function () { noise(.45, .2, 1200, .5, 0, 300); tone(260, .2, 'sine', .15, 90); },
+      munch: function () { noise(.06, .2, 1700, 2); tone(300, .08, 'square', .06, 180); },
+      zap: function () { tone(900, .25, 'sawtooth', .1, 90); noise(.2, .12, 3000); },
+      gull: function () { tone(1500, .14, 'sine', .05, 1000); tone(1700, .18, 'sine', .05, 1050, .16); },
+      /* ludzki tłum: szum + kilka "głosów" (piła przez filtr) */
+      voices: function (dur, base, to, v, vib) {
+        var a = ctx(); if (!a) return; for (var i = 0; i < 5; i++) {
+          var t0 = a.currentTime + Math.random() * .12, o = a.createOscillator(), fl = a.createBiquadFilter(), g = a.createGain(), lf = a.createOscillator(), lg = a.createGain(), f0 = base * (.8 + Math.random() * .5);
+          o.type = 'sawtooth'; o.frequency.setValueAtTime(f0, t0); o.frequency.linearRampToValueAtTime(f0 * (to || 1), t0 + dur); lf.frequency.value = 4 + Math.random() * 3; lg.gain.value = f0 * (vib || .02); lf.connect(lg); lg.connect(o.frequency);
+          fl.type = 'bandpass'; fl.frequency.value = 700 + Math.random() * 300; fl.Q.value = 1.2;
+          g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(v, t0 + dur * .25); g.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
+          o.connect(fl); fl.connect(g); g.connect(mst); o.start(t0); lf.start(t0); o.stop(t0 + dur + .05); lf.stop(t0 + dur + .05);
+        }
+      },
+      cheer: function (k) { k = k || 1; noise(2, .22 * k, 1300, .5, 0, 800); noise(1.6, .12 * k, 3200, .6, .05); P.voices(1.7, 300, 1.35, .05 * k, .03); },
+      boo: function (k) { k = k || 1; noise(1.5, .13 * k, 500, .5, 0, 300); P.voices(1.5, 210, .72, .06 * k, .025); },
+      aww: function () { noise(.9, .1, 700, .6); P.voices(1.1, 380, .6, .045, .02); },
+      ooh: function () { noise(.8, .1, 900, .6); P.voices(.9, 260, 1.25, .04, .02); }
     };
     function play(k, a, b) {
       if (!on || !P[k]) return; var now = Date.now(); if (lastT[k] && now - lastT[k] < 40) return; lastT[k] = now;
       try { P[k](a, b); } catch (e) {}
+    }
+    var amb = null, ambT = [];
+    function ambStop() {
+      ambT.forEach(function (i) { clearInterval(i); clearTimeout(i); }); ambT = [];
+      if (amb) { var A = amb; amb = null; try { A.g.gain.cancelScheduledValues(0); A.g.gain.setTargetAtTime(0, ac.currentTime, .15); setTimeout(function () { A.n.forEach(function (x) { try { x.stop(); } catch (e) {} }); }, 700); } catch (e) {} }
+    }
+    function bed(f, q, v, lfoHz, lfoD, type, to) {
+      var a = ctx(); if (!a || !amb) return; var s = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain();
+      s.buffer = nbuf; s.loop = true; fl.type = type || 'bandpass'; fl.frequency.value = f; fl.Q.value = q; g.gain.value = v;
+      if (lfoHz) { var lf = a.createOscillator(), lg = a.createGain(); lf.frequency.value = lfoHz; lg.gain.value = lfoD; lf.connect(lg); lg.connect(g.gain); lf.start(); amb.n.push(lf); }
+      s.connect(fl); fl.connect(g); g.connect(amb.g); s.start(0, Math.random()); amb.n.push(s);
+    }
+    function every(fn, lo, hi) { var run = function () { if (!amb) return; fn(); ambT.push(setTimeout(run, lo + Math.random() * (hi - lo))); }; ambT.push(setTimeout(run, lo + Math.random() * (hi - lo))); }
+    var AMB = {
+      sea: function () { bed(520, .35, .075, .11, .05, 'lowpass'); bed(1900, .4, .02, .17, .014); bed(130, .5, .06, .07, .03, 'lowpass'); every(function () { play('gull'); }, 7000, 14000); },
+      crowd: function () { bed(750, .4, .06, .27, .02); bed(1700, .5, .025, .4, .01); every(function () { if (Math.random() < .5) P.voices(.8, 260, 1.1, .012, .02); }, 3500, 8000); },
+      alley: function () { bed(380, .4, .035, .2, .01); bed(1200, .6, .015); every(function () { noise(.07, .05, 3000 + Math.random() * 2000, 4); tone(500 + Math.random() * 600, .05, 'triangle', .03); }, 2500, 6000); every(function () { P.voices(.6, 240, 1.05, .008, .02); }, 5000, 11000); },
+      drip: function () { bed(900, .5, .02, .15, .008); every(function () { var f = 800 + Math.random() * 1000; tone(f, .1, 'sine', .035, f * .5); }, 600, 2200); },
+      wind: function () { bed(450, .5, .05, .17, .03); bed(1500, .6, .015, .23, .01); },
+      groove: function () { var n = [110, 131, 147, 165, 196], i = 0; ambT.push(setInterval(function () { if (!amb) return; tone(n[[0, 2, 1, 3, 0, 4, 2, 1][i % 8]], .2, 'triangle', .045); if (i % 4 === 0) tone(55, .3, 'sine', .06, 40); i++; }, 260)); },
+      western: function () { bed(430, .5, .045, .12, .025); ambT.push(setInterval(function () { if (!amb) return; for (var k = 0; k < 3; k++) tone(4300, .03, 'square', .01, 0, k * .05); }, 900)); every(function () { tone(330, .9, 'triangle', .03, 310); tone(392, .9, 'triangle', .02, 370, .02); }, 6000, 12000); },
+      office: function () { bed(600, .4, .02, .2, .01); every(function () { for (var k = 0; k < 4 + Math.round(Math.random() * 5); k++) { noise(.025, .04, 2800, 3, k * (.07 + Math.random() * .04)); } }, 2000, 5000); },
+      drone: function () { var a = ctx(); [55, 82.4].forEach(function (f) { var o = a.createOscillator(), g = a.createGain(); o.type = 'sine'; o.frequency.value = f; g.gain.value = .05; o.connect(g); g.connect(amb.g); o.start(); amb.n.push(o); }); bed(300, .5, .015, .08, .01); }
+    };
+    function ambStart(kind) {
+      ambStop(); if (!on || !AMB[kind]) return; var a = ctx(); if (!a) return;
+      var g = a.createGain(); g.gain.setValueAtTime(0, a.currentTime); g.gain.setTargetAtTime(1, a.currentTime, .4); g.connect(mst); amb = { g: g, n: [], kind: kind }; AMB[kind]();
     }
     function popText(t) {
       lastPop = Date.now(); t = String(t || '');
@@ -81,17 +132,22 @@
       if (/SŁUPEK/i.test(t)) return play('post');
       if (/OBRONION/i.test(t)) return play('save');
       if (/NAD POPRZ|OBOK|PUDŁO|RYNN/i.test(t)) return play('miss');
-      if (/AUĆ|−1|Plusk|ZA WCZE|ZA WOL/i.test(t)) return play('bad');
+      if (/Plusk/i.test(t)) return play('splash');
+      if (/AUĆ/i.test(t)) return play(game === 'ratunek' ? 'zap' : 'bad');
+      if (/−1|ZA WCZE|ZA WOL/i.test(t)) return play('bad');
       if (/pękła/i.test(t)) return play('pop');
       if (/COMBO|SALTO|FALA|\+1 życie|\+10|\+5/i.test(t)) return play('combo');
       if (/Poziom|Nowa|\bm!/i.test(t)) return play('level');
+      if (/^\+/.test(t) && game === 'krople') return play('drip');
+      if (/^\+/.test(t) && game === 'waz') return play('munch');
       if (/^\+|Gumka|Magnes|Zwolnienie/.test(t)) return play('coin');
       if (/kręgl|kręgi/i.test(t)) return play('crash', .6);
     }
     return {
-      play: play, popText: popText, tone: tone, noise: noise,
+      play: play, popText: popText, tone: tone, noise: noise, amb: ambStart, ambStop: ambStop, game: function (g) { game = g; },
       get on() { return on; }, get lastPop() { return lastPop; },
-      set: function (v) { on = !!v; try { localStorage.setItem('sliska_snd', on ? '1' : '0'); } catch (e) {} if (on) { ctx(); play('click'); } },
+      set: function (v) { on = !!v; try { localStorage.setItem('sliska_snd', on ? '1' : '0'); } catch (e) {} if (on) { ctx(); play('click'); if (SND.want) ambStart(SND.want); } else ambStop(); },
+      want: '',
       unlock: function () { ctx(); }
     };
   })();
@@ -577,7 +633,7 @@ var SliskaSim = (function () {
     }
     function shake() { var a = $('.sz-row.is-act'); if (a) { a.classList.remove('is-shake'); void a.offsetWidth; a.classList.add('is-shake'); } }
     function accept(word, reply, win, over) {
-      st.rows.push(word); flipRow = st.rows.length - 1; cur = '';
+      st.rows.push(word); flipRow = st.rows.length - 1; cur = ''; for (var fi = 0; fi < L; fi++) (function (d) { setTimeout(function () { SND.play('flip'); }, d); })(fi * 110); setTimeout(function () { SND.play(win ? 'win' : over ? 'over' : 'click'); }, L * 110 + 120);
       if (!train) { st.pat.push(reply.res); st.tok = reply.st; if (reply.answer) st.ans = reply.answer; }
       if (over) endRound(win, reply);
       msg(''); if (!train) lsSet(slizgleKey(), st);
@@ -596,7 +652,7 @@ var SliskaSim = (function () {
       if (k === '⌫' || k === 'Backspace') cur = cur.slice(0, -1);
       else if (k === '⏎' || k === 'Enter') { submitRow(); return; }
       else if (/^[A-ZĄĆĘŁŃÓŚŹŻ]$/i.test(k) && cur.length < L) cur += k.toUpperCase();
-      draw();
+      SND.play('key'); draw();
     }
     $('#sz-kb').addEventListener('click', function (e) { var b = e.target.closest('[data-k]'); if (b) press(b.dataset.k); });
     var onKey = function (e) { if (e.metaKey || ((e.ctrlKey || e.altKey) && !/^[ąćęłńóśźż]$/i.test(e.key)) || /input|textarea/i.test((e.target || {}).tagName)) return; if (e.key === 'Enter' || e.key === 'Backspace' || /^[a-ząćęłńóśźż]$/i.test(e.key)) { e.preventDefault(); press(e.key); } };
@@ -889,6 +945,7 @@ var SliskaSim = (function () {
     shell(el, g, '<div class="gry-stage" style="' + (opts.ratio ? 'aspect-ratio:' + opts.ratio : '') + '"><canvas id="gry-cv" tabindex="0" aria-label="' + g.name + '"></canvas>' +
       '<div class="gry-hud"><span class="hud-p"><small>Wynik</small><b id="gry-score">0</b></span>' + (opts.lives ? '<span class="hud-p"><small>Życia</small><b id="gry-lives"></b></span>' : '') +
       '<button type="button" class="hud-btn gry-snd" id="gry-snd" aria-label="Dźwięk" aria-pressed="true"></button><button type="button" class="hud-btn" id="gry-pause" aria-label="Pauza">' + ICO.pause + '</button></div><div class="gry-over" id="gry-over"></div></div>', ACHS[g.id] ? { side: achBox(g.id) } : {});
+    SND.want = ''; stopFns.push(function () { SND.want = ''; SND.ambStop(); });
     var cv = $('#gry-cv'), ctx = cv.getContext('2d'), W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2), raf = 0, last = 0, running = false, paused = false, over = false, starting = false;
     function size() { var r = cv.parentNode.getBoundingClientRect(); W = r.width; H = r.height; cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px'; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); if (!running && api.ready) { opts.draw(api); } }
     var fx = [], cd = 0, vg = null, lastN = 0;
@@ -910,7 +967,7 @@ var SliskaSim = (function () {
       burst: function (x, y, col, n) { if (reduce) return; for (var i = 0; i < (n || 10); i++) { var a = Math.random() * 6.28, v = 60 + Math.random() * 160; fx.push({ x: x, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 60, life: .6, c: col, r: 2 + Math.random() * 3 }); } },
       pop: function (x, y, text, col) { SND.popText(text); fx.push({ x: x, y: y, vx: 0, vy: -50, life: .9, text: text, c: col || '#fff' }); },
       over: function () {
-        if (over) return; over = true; running = false; cancelAnimationFrame(raf); api.check();
+        if (over) return; over = true; running = false; SND.ambStop(); cancelAnimationFrame(raf); api.check();
         var sc = api.score; if (api.tl) { api.tl.push([Math.round(api.t * 1000), sc]); TLS[g.id] = opts.replay ? undefined : api.tl; } var nb = sc > 0 && submit(g.id, sc, false, !!opts.replay && !RUNS[g.id]);
         played(g.id); SND.play(nb ? 'record' : 'over');
         var et = opts.endText ? opts.endText(sc) : ['', g.knaga];
@@ -934,9 +991,9 @@ var SliskaSim = (function () {
       var fin = function (run) { if (!starting) return; starting = false; RUNS[g.id] = run; api.seed = run ? run.seed : (Math.random() * 4294967296) >>> 0; begin(); };
       mintRun(g.id).then(fin); setTimeout(function () { fin(null); }, 3500);
     }
-    function begin() { SND.unlock(); api._lv = undefined; lastN = 0; mint(g.id); $('#gry-over').hidden = true; over = false; paused = false; fx = []; api.t = 0; api.stats = {}; api.newAch = []; api.tl = []; api._ls = -1; api.setScore(0); opts.reset(api); cd = reduce ? 0 : 1.8; running = true; last = performance.now(); raf = requestAnimationFrame(loop); try { cv.focus({ preventScroll: true }); } catch (e) { /* - */ } }
-    function pause() { if (!running || over) return; running = false; paused = true; cancelAnimationFrame(raf); menu('<span class="gm-eye">Pauza</span><div class="gm-k">' + K('szlafrok', 'gk') + '</div><p class="gm-end">Knaga czeka. Wynik: <b>' + api.score + '</b></p>', 'Wznów'); }
-    function resume() { $('#gry-over').hidden = true; paused = false; running = true; last = performance.now(); raf = requestAnimationFrame(loop); }
+    function begin() { SND.unlock(); SND.game(g.id); SND.want = AMBMAP[g.id] || ''; SND.amb(SND.want); api._lv = undefined; lastN = 0; mint(g.id); $('#gry-over').hidden = true; over = false; paused = false; fx = []; api.t = 0; api.stats = {}; api.newAch = []; api.tl = []; api._ls = -1; api.setScore(0); opts.reset(api); cd = reduce ? 0 : 1.8; running = true; last = performance.now(); raf = requestAnimationFrame(loop); try { cv.focus({ preventScroll: true }); } catch (e) { /* - */ } }
+    function pause() { if (!running || over) return; SND.ambStop(); running = false; paused = true; cancelAnimationFrame(raf); menu('<span class="gm-eye">Pauza</span><div class="gm-k">' + K('szlafrok', 'gk') + '</div><p class="gm-end">Knaga czeka. Wynik: <b>' + api.score + '</b></p>', 'Wznów'); }
+    function resume() { SND.amb(SND.want); $('#gry-over').hidden = true; paused = false; running = true; last = performance.now(); raf = requestAnimationFrame(loop); }
     function loop(t) {
       if (!running) return; var dt = Math.min(0.034, (t - last) / 1000); last = t;
       if (cd > 0) { cd -= dt; api.shk = 0; var nn = Math.ceil(cd / .6); if (nn !== lastN) { if (nn > 0) SND.play('beep'); lastN = nn; } if (cd <= 0) SND.play('go'); draw(); raf = requestAnimationFrame(loop); return; }
@@ -1836,11 +1893,11 @@ var SliskaSim = (function () {
       var b = e.target.closest('[data-i]'); if (!b) return; var i = +b.dataset.i, e0 = tiles.indexOf(N * N - 1);
       var ri = Math.floor(i / N), re = Math.floor(e0 / N); if (i === e0 || (ri !== re && i % N !== e0 % N)) return;
       var stp = ri === re ? (i > e0 ? 1 : -1) : (i > e0 ? N : -N); for (var pp = e0; pp !== i; pp += stp) tiles[pp] = tiles[pp + stp];
-      tiles[i] = N * N - 1; moves++; tlU.push([Date.now() - tu0, moves]); var mvd = i;
+      tiles[i] = N * N - 1; moves++; SND.play('slide'); tlU.push([Date.now() - tu0, moves]); var mvd = i;
       if (!t0) { t0 = Date.now(); timer = setInterval(function () { var s = Math.floor((Date.now() - t0) / 1000); $('#uk-t').textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }, 500); }
       draw();
       if (tiles.every(function (v, k) { return v === k; })) {
-        clearInterval(timer); var dd = load(); dd.ukBest = dd.ukBest || {}; var nbl = !dd.ukBest[N] || moves < dd.ukBest[N]; if (nbl) { dd.ukBest[N] = moves; save(dd); } if (N === 4) TLS.ukladanka = tlU; var nb = N === 4 ? submit('ukladanka', moves) : nbl; played('ukladanka'); var pr = PAR[N] || [999, 999]; achEval('ukladanka', { done: true, n: N, gold: moves <= pr[0], sec: Math.floor((Date.now() - t0) / 1000) }); var medal = moves <= pr[0] ? 'Złoty medal' : moves <= pr[1] ? 'Srebrny medal' : 'Ułożone';
+        SND.play('win'); clearInterval(timer); var dd = load(); dd.ukBest = dd.ukBest || {}; var nbl = !dd.ukBest[N] || moves < dd.ukBest[N]; if (nbl) { dd.ukBest[N] = moves; save(dd); } if (N === 4) TLS.ukladanka = tlU; var nb = N === 4 ? submit('ukladanka', moves) : nbl; played('ukladanka'); var pr = PAR[N] || [999, 999]; achEval('ukladanka', { done: true, n: N, gold: moves <= pr[0], sec: Math.floor((Date.now() - t0) / 1000) }); var medal = moves <= pr[0] ? 'Złoty medal' : moves <= pr[1] ? 'Srebrny medal' : 'Ułożone';
         $('#uk-board').classList.add('is-done');
         var dn = $('#uk-done'); dn.hidden = false;
         dn.innerHTML = '<div class="gm">' + (nb ? '<span class="gry-new">Nowy rekord!</span>' : '<span class="gm-eye">' + medal + '</span>') + '<div class="gm-score">' + moves + '<small>ruchów</small></div><p class="gm-end">' + (nb ? medal + ' · ' : '') + 'Czas: ' + $('#uk-t').textContent + ' · poziom ' + N + '×' + N + (N === 4 ? ' (liczy się do rankingu)' : '') + '</p><div class="gm-acts"><button type="button" class="btn btn-primary" id="uk-again">Jeszcze raz</button>' + (art ? '<a class="btn" href="#/artykul/' + encodeURIComponent(art.id) + '">Czytaj artykuł</a>' : '') + '</div></div>';
@@ -1865,12 +1922,14 @@ var SliskaSim = (function () {
   /* ============== DRAMA SIMULATOR (news/drama.js) ============== */
   function drama(el) {
     if (!window.DramaSim) { shell(el, G('drama'), '<p class="gp-empty">Nie udało się wczytać gry. Odśwież stronę.</p>'); return; }
+    SND.game('drama'); el.addEventListener('click', function (e) { if (e.target.closest('button,a.btn')) SND.play('click'); SND.unlock(); }); SND.want = 'drone'; SND.amb('drone'); stopFns.push(function () { SND.want = ''; SND.ambStop(); });
     DramaSim.mount(el, { G: G, K: K, esc: esc, shell: shell, submit: submit, played: played, share: share, load: load, save: save, toast: toast, LINK: LINK + '/drama' });
   }
 
   /* ============== REDAKTOR NACZELNY (news/naczelny.js) ============== */
   function naczelny(el) {
     if (!window.NaczelnySim) { shell(el, G('naczelny'), '<p class="gp-empty">Nie udało się wczytać gry. Odśwież stronę.</p>'); return; }
+    SND.game('naczelny'); el.addEventListener('click', function (e) { if (e.target.closest('button,a.btn')) SND.play('click'); SND.unlock(); }); SND.want = 'office'; SND.amb('office'); stopFns.push(function () { SND.want = ''; SND.ambStop(); });
     NaczelnySim.mount(el, { G: G, K: K, esc: esc, shell: shell, submit: submit, played: played, share: share, load: load, save: save, toast: toast, LINK: LINK + '/naczelny' });
   }
 
@@ -1945,7 +2004,7 @@ var SliskaSim = (function () {
       var i = e.target; if (!i.classList.contains('kz-c')) return;
       var v = (i.value || '').toUpperCase().replace(/[^A-ZĄĆĘŁŃÓŚŹŻ]/g, ''); i.value = v.slice(-1);
       i.closest('.kz-row').classList.remove('is-bad', 'is-ok');
-      if (i.value) { var cs = cellsOf(+i.dataset.r), n = cs[cs.indexOf(i) + 1]; if (n) n.focus(); }
+      SND.play('key'); if (i.value) { var cs = cellsOf(+i.dataset.r), n = cs[cs.indexOf(i) + 1]; if (n) n.focus(); }
       store();
     });
     grid.addEventListener('keydown', function (e) {
@@ -1958,7 +2017,7 @@ var SliskaSim = (function () {
     });
     document.querySelector('.kz-clues').addEventListener('click', function (e) { var li = e.target.closest('[data-r]'); if (li) { var c = cellsOf(+li.dataset.r).find(function (x) { return !x.value; }) || cellsOf(+li.dataset.r)[0]; c.focus(); } });
     function win() {
-      grid.classList.add('is-done'); [].forEach.call(grid.querySelectorAll('.kz-c'), function (i) { i.readOnly = true; }); $('#kz-pass').classList.add('is-done'); pass();
+      SND.play('win'); grid.classList.add('is-done'); [].forEach.call(grid.querySelectorAll('.kz-c'), function (i) { i.readOnly = true; }); $('#kz-pass').classList.add('is-done'); pass();
       $('#kz-msg').innerHTML = '<div class="sz-end is-win">' + K('imprezowa', 'gk') + '<div><b>Rozwiązane!</b><span>Hasło tygodnia: ' + set.h + '. Mokra robota.' + (arch ? ' <a href="#/gry/krzyzowka-arch">Wróć do archiwum</a>' : '') + '</span></div><button type="button" class="btn btn-primary btn-sm" id="kz-share">' + ICO.share + ' Udostępnij</button></div>';
       $('#kz-share').onclick = function () { share('Rozwiązałem Krzyżówkę Tygodnia na Śliskiej 🧩 Dasz radę?\n' + LINK + '/krzyzowka', { knaga: 'szlafrok', c: G('krzyzowka').c, eyebrow: arch ? 'Krzyżówka · archiwum' : 'Krzyżówka Tygodnia #' + W, title: 'Rozwiązana', big: '✓', unit: set.r.length + ' wyrazów + hasło', lines: [] }); };
       if (!st.done) {
