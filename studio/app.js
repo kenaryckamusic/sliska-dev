@@ -162,13 +162,13 @@ const Utils = {
 
   tagsOf(a) { const t = a && Array.isArray(a.tags) ? a.tags : []; return TAX ? TAX.normTags(t) : t; },
 
-  /** „Tamara Kenarycka, #Album; RP” → ['tamarakenarycka','album','rzeczpospolita'] – jeden styl tagów (taxonomy.js), bez duplikatów, maks. 12. */
+  /** „Tamara Kenarycka, #Album; RP” → ['tamarakenarycka','album','rzeczpospolita'] – jeden styl tagów (taxonomy.js), bez duplikatów, bez limitu. */
   parseTags(str) {
     const raw = String(str || '').split(/[,;\n]/).map(t => t.trim()).filter(Boolean);
     if (TAX) return TAX.normTags(raw);
     const seen = new Set(), out = [];
     raw.forEach(r => { const t = r.replace(/^#+/, '').slice(0, 40).trim(), k = t.toLowerCase(); if (t && !seen.has(k)) { seen.add(k); out.push(t); } });
-    return out.slice(0, 12);
+    return out;
   },
 
   same(a, b) { return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase(); },
@@ -2039,7 +2039,7 @@ function loadImage(src, cors) {
 /** Opis do wklejenia pod postem. */
 function instagramCaption(a) {
   const lead = (a.lead || '').replace(/\s+/g, ' ').trim();
-  const tags = Utils.tagsOf(a).slice(0, 6).map(t => '#' + t.replace(/[^\p{L}\p{N}]+/gu, '')).filter(t => t.length > 1);
+  const tags = Utils.tagsOf(a).slice(0, 30).map(t => '#' + t.replace(/[^\p{L}\p{N}]+/gu, '')).filter(t => t.length > 1);
   const cats = Utils.catsOf(a).map(c => '#' + c.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ''));
   const all = [...new Set([...tags, ...cats, '#śliskanews', '#śliska'])];
   const score = a.review && a.review.score != null ? `\n⭐ Ocena: ${String(a.review.score).replace('.', ',')}/10` : '';
@@ -2657,7 +2657,7 @@ async function drawSlide(a, kind, theme, o = {}) {
     ctx.textAlign = 'left';
   } else if (kind === 'tags') {
     chip('O KIM MOWA');
-    const tags = Utils.tagsOf(a).slice(0, 10);
+    const tags = Utils.tagsOf(a);
     ctx.font = `800 52px ${family}`; ctx.textBaseline = 'middle';
     const hgt = 100;
     let rowsN = 1, xx = PAD;
@@ -3808,7 +3808,7 @@ function toggleTag(tag) {
   const cur = Utils.parseTags($('#f-tags').value);
   const i = cur.findIndex(t => Utils.same(t, tag));
   if (i >= 0) cur.splice(i, 1); else cur.push(tag);
-  $('#f-tags').value = cur.slice(0, 12).join(', ');
+  $('#f-tags').value = cur.join(', ');
   renderTagChips();
   onFormChange();
 }
@@ -8002,7 +8002,7 @@ function bindEvents() {
     if (e.target.closest('[data-tag-all]')) {
       const cur = Utils.parseTags($('#f-tags').value);
       suggestedTags().forEach(t => { if (!cur.some(x => Utils.same(x, t))) cur.push(t); });
-      $('#f-tags').value = cur.slice(0, 12).join(', ');
+      $('#f-tags').value = cur.join(', ');
       renderTagChips();
       onFormChange();
       return;
