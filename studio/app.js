@@ -7522,7 +7522,7 @@ async function sendSocial(id, to, btn) {
     }
     if (d.ok) toast(to === 'discord' ? 'Wysłano na Discord.' : `Wysłano ${where} – post pojawi się za chwilę.`);
     else toast(d.error || 'Nie udało się wysłać.', 'error');
-  } catch (err) { toast(err.message, 'error'); }
+  } catch (err) { toast(/load failed|failed to fetch|networkerror/i.test(err.message || '') ? 'Brak odpowiedzi z serwera (Worker). Sprawdź https://api.sliska.pl/buffer-test i wgraj najnowszy og-worker.js.' : err.message, 'error'); }
   if (btn) setTimeout(() => { btn.disabled = false; }, 4000);
 }
 
