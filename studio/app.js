@@ -1618,6 +1618,18 @@ if (Shell.on) {
   new MutationObserver(syncModal).observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ['hidden'] });
 }
 
+function socialButtons(id, quick) {
+  if (!canManage()) return '';
+  const safe = Utils.esc(id), what = quick ? 'wpisie' : 'artykule';
+  const ico = {
+    x: '<svg class="ic" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M17.8 3h3.1l-6.8 7.7L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.2-8.3L2 3h6.4l4.4 5.8zm-1.1 16.2h1.7L7.4 4.7H5.6z"/></svg>',
+    discord: '<svg class="ic" viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M19.6 5.3A17 17 0 0 0 15.4 4l-.5 1.1a15.6 15.6 0 0 0-5.8 0L8.6 4a17 17 0 0 0-4.2 1.3C1.7 9.3 1 13.2 1.3 17a17 17 0 0 0 5.2 2.6l1.1-1.8c-.6-.2-1.2-.5-1.8-.9l.4-.3a12.2 12.2 0 0 0 11.6 0l.4.3c-.6.4-1.2.7-1.8.9l1.1 1.8a17 17 0 0 0 5.2-2.6c.4-4.4-.7-8.3-3.1-11.7zM8.7 14.7c-1 0-1.9-1-1.9-2.2s.8-2.2 1.9-2.2 1.9 1 1.9 2.2-.8 2.2-1.9 2.2zm6.6 0c-1 0-1.9-1-1.9-2.2s.8-2.2 1.9-2.2 1.9 1 1.9 2.2-.8 2.2-1.9 2.2z"/></svg>',
+    ig: '<svg class="ic" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r=".8" fill="currentColor"/></svg>'
+  };
+  return `<button type="button" class="btn btn-sm btn-social" data-action="social-x" data-id="${safe}" title="Opublikuj post o tym ${what} na X (przez Buffer)">${ico.x}Na X</button>` +
+    (quick ? '' : `<button type="button" class="btn btn-sm btn-social" data-action="social-discord" data-id="${safe}" title="Wyślij wiadomość o tym artykule na kanał Discorda">${ico.discord}Na Discord</button><button type="button" class="btn btn-sm btn-social" data-action="social-ig" data-id="${safe}" title="Opublikuj grafikę artykułu z opisem na Instagramie (przez Buffer)">${ico.ig}Na Instagram</button>`);
+}
+
 function adminButtons(id) {
   if (!Auth.isAdmin()) return '';
   const safe = Utils.esc(id);
@@ -1625,6 +1637,7 @@ function adminButtons(id) {
     <button type="button" class="btn btn-sm" data-action="edit" data-id="${safe}">Edytuj</button>
     <button type="button" class="btn btn-sm" data-action="ig-post" data-id="${safe}" title="Grafiki na Instagram, Story, X i recenzję – z opisem do wklejenia">Grafika</button>
     ${canManage() ? `<button type="button" class="btn btn-sm btn-push-send" data-action="push-send" data-id="${safe}" title="Wyślij powiadomienie push o tym artykule do wszystkich subskrybentów">🔔 Powiadom</button>` : ''}
+    ${socialButtons(id, false)}
     <button type="button" class="btn btn-sm btn-danger" data-action="delete" data-id="${safe}">Usuń</button>
   </span>`;
 }
@@ -4967,7 +4980,7 @@ function quickItemHtml(a, withAdmin) {
     ? `<span class="quick-from">Źródło:</span> <a class="quick-src" href="${Utils.esc(a.link)}" target="_blank" rel="noopener noreferrer">${Utils.esc(srcName || 'link')} →</a>`
     : (srcName ? `<span class="quick-from">Źródło:</span> <span class="quick-src quick-src-plain">${Utils.esc(srcName)}</span>` : '');
   const admin = withAdmin && Auth.isAdmin()
-    ? `<span class="admin-actions"><button type="button" class="btn btn-sm" data-action="quick-edit" data-id="${Utils.esc(a.id)}">Edytuj</button><button type="button" class="btn btn-sm" data-action="quick-expand" data-id="${Utils.esc(a.id)}">Rozwiń w artykuł</button>${canManage() ? `<button type="button" class="btn btn-sm btn-push-send" data-action="push-send" data-id="${Utils.esc(a.id)}" title="Wyślij powiadomienie push o tej nowince">🔔 Powiadom</button>` : ''}<button type="button" class="btn btn-sm btn-danger" data-action="quick-delete" data-id="${Utils.esc(a.id)}">Usuń</button></span>` : '';
+    ? `<span class="admin-actions"><button type="button" class="btn btn-sm" data-action="quick-edit" data-id="${Utils.esc(a.id)}">Edytuj</button><button type="button" class="btn btn-sm" data-action="quick-expand" data-id="${Utils.esc(a.id)}">Rozwiń w artykuł</button>${canManage() ? `<button type="button" class="btn btn-sm btn-push-send" data-action="push-send" data-id="${Utils.esc(a.id)}" title="Wyślij powiadomienie push o tej nowince">🔔 Powiadom</button>` : ''}${socialButtons(a.id, true)}<button type="button" class="btn btn-sm btn-danger" data-action="quick-delete" data-id="${Utils.esc(a.id)}">Usuń</button></span>` : '';
   return `<li class="quick-item">
     <time class="quick-time" datetime="${Utils.esc(a.createdAt)}">${Utils.formatTime(a.createdAt)}</time>
     <div class="quick-body">
