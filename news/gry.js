@@ -16,6 +16,85 @@
   var uid = function () { try { return Readers.user && Readers.user.uid; } catch (e) { return ''; } };
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var stopFns = [];
+  /* ===== dźwięki gier: syntezator Web Audio (bez plików), przycisk wyciszenia zapamiętany w przeglądarce ===== */
+  var SND = (function () {
+    var ac = null, mst = null, nbuf = null, on = true, lastPop = 0, lastT = {};
+    try { on = localStorage.getItem('sliska_snd') !== '0'; } catch (e) {}
+    function ctx() {
+      if (!on) return null;
+      if (!ac) { try { var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null; ac = new AC(); mst = ac.createGain(); mst.gain.value = .55; var cmp = ac.createDynamicsCompressor(); mst.connect(cmp); cmp.connect(ac.destination); var n = ac.sampleRate * 1.2, b = ac.createBuffer(1, n, ac.sampleRate), d = b.getChannelData(0); for (var i = 0; i < n; i++) d[i] = Math.random() * 2 - 1; nbuf = b; } catch (e) { return null; } }
+      if (ac.state === 'suspended') ac.resume().catch(function () {});
+      return ac;
+    }
+    function tone(f, d, type, v, to, at) {
+      var a = ctx(); if (!a) return; var t0 = a.currentTime + (at || 0), o = a.createOscillator(), g = a.createGain();
+      o.type = type || 'sine'; o.frequency.setValueAtTime(f, t0); if (to) o.frequency.exponentialRampToValueAtTime(Math.max(20, to), t0 + d);
+      g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(v || .2, t0 + .012); g.gain.exponentialRampToValueAtTime(.0001, t0 + d);
+      o.connect(g); g.connect(mst); o.start(t0); o.stop(t0 + d + .03);
+    }
+    function noise(d, v, f, q, at, to) {
+      var a = ctx(); if (!a) return; var t0 = a.currentTime + (at || 0), s = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain();
+      s.buffer = nbuf; fl.type = 'bandpass'; fl.frequency.setValueAtTime(f || 1500, t0); if (to) fl.frequency.exponentialRampToValueAtTime(to, t0 + d); fl.Q.value = q || .8;
+      g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(v || .2, t0 + .015); g.gain.exponentialRampToValueAtTime(.0001, t0 + d);
+      s.connect(fl); fl.connect(g); g.connect(mst); s.start(t0, Math.random() * .5); s.stop(t0 + d + .03);
+    }
+    function arp(notes, step, type, v, dur) { notes.forEach(function (f, i) { tone(f, dur || .22, type || 'triangle', v || .16, 0, i * step); }); }
+    var P = {
+      tick: function () { tone(740, .07, 'sine', .12); },
+      coin: function () { tone(988, .07, 'square', .08); tone(1318, .16, 'square', .08, 0, .07); },
+      good: function () { tone(660, .08, 'triangle', .16); tone(990, .14, 'triangle', .16, 0, .07); },
+      combo: function () { arp([523, 659, 784, 1046], .06, 'triangle', .16, .16); },
+      bad: function () { tone(330, .28, 'sawtooth', .13, 120); noise(.12, .08, 500); },
+      life: function () { tone(440, .1, 'square', .08); tone(330, .1, 'square', .08, 0, .09); tone(220, .22, 'square', .09, 0, .18); },
+      thud: function () { tone(120, .2, 'sine', .35, 38); noise(.1, .12, 220, 1); },
+      pop: function () { tone(520, .09, 'sine', .2, 1100); },
+      whoosh: function () { noise(.28, .16, 500, 1.2, 0, 2600); },
+      kick: function () { tone(150, .12, 'sine', .4, 55); noise(.08, .18, 900, 1); P.whoosh(); },
+      goal: function () { noise(1.1, .2, 1400, .6, 0, 700); arp([523, 659, 784, 1046, 1318], .09, 'triangle', .15, .3); tone(130, .5, 'sine', .25, 80); },
+      save: function () { tone(200, .12, 'square', .1, 120); noise(.12, .15, 700); tone(300, .3, 'triangle', .1, 160, .1); },
+      post: function () { tone(1250, .5, 'triangle', .22); tone(1880, .35, 'sine', .12); noise(.05, .2, 4000); },
+      miss: function () { tone(400, .35, 'sawtooth', .1, 140); },
+      roll: function () { noise(1.1, .1, 180, 2, 0, 320); tone(70, 1, 'sine', .08, 90); },
+      crash: function (n) { n = Math.max(.35, Math.min(1, n || 1)); for (var i = 0; i < 4 + Math.round(n * 5); i++) { var d = i * .045 + Math.random() * .03; noise(.16, .22 * n, 1800 + Math.random() * 2600, 3, d); tone(900 + Math.random() * 900, .12, 'triangle', .07 * n, 0, d); } tone(80, .3, 'sine', .35 * n, 40); },
+      strike: function () { P.crash(1); arp([392, 523, 659, 784, 1046], .07, 'square', .08, .22); },
+      spare: function () { arp([660, 880, 1100], .08, 'triangle', .18, .22); },
+      flap: function () { tone(380, .09, 'square', .07, 760); },
+      jump: function () { tone(300, .16, 'square', .09, 720); },
+      duck: function () { tone(500, .12, 'square', .07, 220); },
+      shot: function () { noise(.2, .35, 1200, .7, 0, 200); tone(110, .22, 'sawtooth', .22, 40); },
+      beep: function () { tone(440, .14, 'square', .1); },
+      go: function () { tone(880, .35, 'square', .12); tone(1320, .3, 'triangle', .1, 0, .02); },
+      level: function () { arp([523, 659, 784, 1046], .08, 'square', .09, .2); },
+      over: function () { arp([440, 392, 330, 262], .16, 'triangle', .18, .4); },
+      record: function () { arp([523, 659, 784, 1046, 784, 1046, 1318], .1, 'triangle', .17, .3); noise(.9, .08, 3500, .8); },
+      click: function () { tone(900, .04, 'sine', .08); }
+    };
+    function play(k, a, b) {
+      if (!on || !P[k]) return; var now = Date.now(); if (lastT[k] && now - lastT[k] < 40) return; lastT[k] = now;
+      try { P[k](a, b); } catch (e) {}
+    }
+    function popText(t) {
+      lastPop = Date.now(); t = String(t || '');
+      if (/STRIKE/i.test(t)) return play('strike');
+      if (/SPARE/i.test(t)) return play('spare');
+      if (/GOOOL|GOL W/i.test(t)) return play('goal');
+      if (/SŁUPEK/i.test(t)) return play('post');
+      if (/OBRONION/i.test(t)) return play('save');
+      if (/NAD POPRZ|OBOK|PUDŁO|RYNN/i.test(t)) return play('miss');
+      if (/AUĆ|−1|Plusk|ZA WCZE|ZA WOL/i.test(t)) return play('bad');
+      if (/pękła/i.test(t)) return play('pop');
+      if (/COMBO|SALTO|FALA|\+1 życie|\+10|\+5/i.test(t)) return play('combo');
+      if (/Poziom|Nowa|\bm!/i.test(t)) return play('level');
+      if (/^\+|Gumka|Magnes|Zwolnienie/.test(t)) return play('coin');
+      if (/kręgl|kręgi/i.test(t)) return play('crash', .6);
+    }
+    return {
+      play: play, popText: popText, tone: tone, noise: noise,
+      get on() { return on; }, get lastPop() { return lastPop; },
+      set: function (v) { on = !!v; try { localStorage.setItem('sliska_snd', on ? '1' : '0'); } catch (e) {} if (on) { ctx(); play('click'); } },
+      unlock: function () { ctx(); }
+    };
+  })();
   function stopAll() { stopFns.forEach(function (f) { try { f(); } catch (e) { /* ignoruj */ } }); stopFns = []; }
   function dayIndex() { var d = new Date(); return Math.floor((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - Date.UTC(2026, 10, 1)) / 864e5); }
   var weekAdj = 0;       // 1, gdy Właściciel opublikował krzyżówkę następnego tygodnia od razu
@@ -809,12 +888,12 @@ var SliskaSim = (function () {
   function canvasGame(el, g, opts) {
     shell(el, g, '<div class="gry-stage" style="' + (opts.ratio ? 'aspect-ratio:' + opts.ratio : '') + '"><canvas id="gry-cv" tabindex="0" aria-label="' + g.name + '"></canvas>' +
       '<div class="gry-hud"><span class="hud-p"><small>Wynik</small><b id="gry-score">0</b></span>' + (opts.lives ? '<span class="hud-p"><small>Życia</small><b id="gry-lives"></b></span>' : '') +
-      '<button type="button" class="hud-btn" id="gry-pause" aria-label="Pauza">' + ICO.pause + '</button></div><div class="gry-over" id="gry-over"></div></div>', ACHS[g.id] ? { side: achBox(g.id) } : {});
+      '<button type="button" class="hud-btn gry-snd" id="gry-snd" aria-label="Dźwięk" aria-pressed="true"></button><button type="button" class="hud-btn" id="gry-pause" aria-label="Pauza">' + ICO.pause + '</button></div><div class="gry-over" id="gry-over"></div></div>', ACHS[g.id] ? { side: achBox(g.id) } : {});
     var cv = $('#gry-cv'), ctx = cv.getContext('2d'), W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2), raf = 0, last = 0, running = false, paused = false, over = false, starting = false;
     function size() { var r = cv.parentNode.getBoundingClientRect(); W = r.width; H = r.height; cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px'; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); if (!running && api.ready) { opts.draw(api); } }
-    var fx = [], cd = 0, vg = null;
+    var fx = [], cd = 0, vg = null, lastN = 0;
     var api = {
-      shk: 0, get counting() { return cd > 0; }, shake: function (n) { if (!reduce) api.shk = Math.max(api.shk, n || 8); },
+      shk: 0, get counting() { return cd > 0; }, shake: function (n) { SND.play('thud'); if (!reduce) api.shk = Math.max(api.shk, n || 8); },
       ctx: ctx, get W() { return W; }, get H() { return H; }, score: 0, t: 0,
       stats: {}, newAch: [],
       ev: function (k, n) { api.stats[k] = (api.stats[k] || 0) + (n || 1); api.check(); },
@@ -826,14 +905,14 @@ var SliskaSim = (function () {
         if (!add.length) return; achAdd(g.id, add.map(function (a) { return a[0]; }));
         add.forEach(function (a) { api.newAch.push(a); toast('🏆 ' + a[1]); }); achRefresh(g.id); metaCheck();
       },
-      setScore: function (v) { api.score = v; $('#gry-score').textContent = v; var ms = Math.round(api.t * 1000); if (api.tl && (api.tl.length === 0 || ms - api._ls >= 400)) { api.tl.push([ms, v]); api._ls = ms; } api.check(); },
-      setLives: function (n) { var l = $('#gry-lives'); if (l) l.textContent = n > 0 ? (opts.lifeIcon || '💧').repeat(n) : '—'; },
+      setScore: function (v) { if (v > api.score) { SND.unlock(); setTimeout(function () { if (Date.now() - SND.lastPop > 120) SND.play('tick'); }, 40); } api.score = v; $('#gry-score').textContent = v; var ms = Math.round(api.t * 1000); if (api.tl && (api.tl.length === 0 || ms - api._ls >= 400)) { api.tl.push([ms, v]); api._ls = ms; } api.check(); },
+      setLives: function (n) { if (api._lv !== undefined && n < api._lv) SND.play('life'); api._lv = n; var l = $('#gry-lives'); if (l) l.textContent = n > 0 ? (opts.lifeIcon || '💧').repeat(n) : '—'; },
       burst: function (x, y, col, n) { if (reduce) return; for (var i = 0; i < (n || 10); i++) { var a = Math.random() * 6.28, v = 60 + Math.random() * 160; fx.push({ x: x, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 60, life: .6, c: col, r: 2 + Math.random() * 3 }); } },
-      pop: function (x, y, text, col) { fx.push({ x: x, y: y, vx: 0, vy: -50, life: .9, text: text, c: col || '#fff' }); },
+      pop: function (x, y, text, col) { SND.popText(text); fx.push({ x: x, y: y, vx: 0, vy: -50, life: .9, text: text, c: col || '#fff' }); },
       over: function () {
         if (over) return; over = true; running = false; cancelAnimationFrame(raf); api.check();
         var sc = api.score; if (api.tl) { api.tl.push([Math.round(api.t * 1000), sc]); TLS[g.id] = opts.replay ? undefined : api.tl; } var nb = sc > 0 && submit(g.id, sc, false, !!opts.replay && !RUNS[g.id]);
-        played(g.id);
+        played(g.id); SND.play(nb ? 'record' : 'over');
         var et = opts.endText ? opts.endText(sc) : ['', g.knaga];
         menu('<span class="gm-eye">Koniec gry</span><div class="gm-k">' + K(et[1] || g.knaga, 'gk') + '</div><p class="gm-end">' + et[0] + '</p>' + starsHtml(g.id, sc) + '<div class="gm-score">' + sc + '<small>' + (g.unit || '') + '</small></div>' +
           (nb ? '<span class="gry-new">Nowy rekord!</span>' : '<p class="gm-best">Twój rekord: <b>' + fmt(g.id, best(g.id)) + '</b></p>') +
@@ -855,12 +934,12 @@ var SliskaSim = (function () {
       var fin = function (run) { if (!starting) return; starting = false; RUNS[g.id] = run; api.seed = run ? run.seed : (Math.random() * 4294967296) >>> 0; begin(); };
       mintRun(g.id).then(fin); setTimeout(function () { fin(null); }, 3500);
     }
-    function begin() { mint(g.id); $('#gry-over').hidden = true; over = false; paused = false; fx = []; api.t = 0; api.stats = {}; api.newAch = []; api.tl = []; api._ls = -1; api.setScore(0); opts.reset(api); cd = reduce ? 0 : 1.8; running = true; last = performance.now(); raf = requestAnimationFrame(loop); try { cv.focus({ preventScroll: true }); } catch (e) { /* - */ } }
+    function begin() { SND.unlock(); api._lv = undefined; lastN = 0; mint(g.id); $('#gry-over').hidden = true; over = false; paused = false; fx = []; api.t = 0; api.stats = {}; api.newAch = []; api.tl = []; api._ls = -1; api.setScore(0); opts.reset(api); cd = reduce ? 0 : 1.8; running = true; last = performance.now(); raf = requestAnimationFrame(loop); try { cv.focus({ preventScroll: true }); } catch (e) { /* - */ } }
     function pause() { if (!running || over) return; running = false; paused = true; cancelAnimationFrame(raf); menu('<span class="gm-eye">Pauza</span><div class="gm-k">' + K('szlafrok', 'gk') + '</div><p class="gm-end">Knaga czeka. Wynik: <b>' + api.score + '</b></p>', 'Wznów'); }
     function resume() { $('#gry-over').hidden = true; paused = false; running = true; last = performance.now(); raf = requestAnimationFrame(loop); }
     function loop(t) {
       if (!running) return; var dt = Math.min(0.034, (t - last) / 1000); last = t;
-      if (cd > 0) { cd -= dt; api.shk = 0; draw(); raf = requestAnimationFrame(loop); return; }
+      if (cd > 0) { cd -= dt; api.shk = 0; var nn = Math.ceil(cd / .6); if (nn !== lastN) { if (nn > 0) SND.play('beep'); lastN = nn; } if (cd <= 0) SND.play('go'); draw(); raf = requestAnimationFrame(loop); return; }
       api.t += dt; api.shk = Math.max(0, api.shk - dt * 30);
       opts.step(api, dt); if (!running && over) { draw(); return; } draw(); raf = requestAnimationFrame(loop);
       fx.forEach(function (p) { p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt; if (!p.text) p.vy += 400 * dt; }); fx = fx.filter(function (p) { return p.life > 0; });
@@ -894,6 +973,8 @@ var SliskaSim = (function () {
       ctx.restore();
     }
     size(); var ro = new ResizeObserver(size); ro.observe(cv.parentNode);
+    var sb = $('#gry-snd'), sbDraw = function () { sb.innerHTML = SND.on ? '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/></svg>' : '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M17 9l5 6M22 9l-5 6"/></svg>'; sb.setAttribute('aria-pressed', SND.on ? 'true' : 'false'); sb.title = SND.on ? 'Wycisz dźwięk' : 'Włącz dźwięk'; };
+    sbDraw(); sb.onclick = function () { SND.set(!SND.on); sbDraw(); };
     $('#gry-pause').onclick = function () { if (running) pause(); };
     var onKey = function (e) { if ((e.key === 'Escape' || e.key === 'p' || e.key === 'P') && running) { e.preventDefault(); pause(); } };
     var onVis = function () { if (document.hidden) pause(); };
@@ -1021,7 +1102,7 @@ var SliskaSim = (function () {
       keys: [['Spacja', 'w górę'], ['klik / stuknięcie', 'w górę'], ['Esc', 'pauza']],
       endText: function (s) { return s >= 30 ? ['Super Knaga to Ty! Scena należy do Ciebie.', 'super'] : s >= 12 ? ['Lata całkiem sprawnie. Prawie gwiazda.', 'gwiazdor'] : s >= 4 ? ['Krótki lot, ale z klasą.', 'ziomek'] : ['Knaga opadła.', 'niesmiala']; },
       init: function (a, cv) {
-        var flap = function (e) { if (e.type === 'keydown') { if (e.code !== 'Space' && e.key !== 'ArrowUp') return; e.preventDefault(); } if (SIM && !SIM.dead && !a.counting && $('#gry-over').hidden) { inp.push(SIM.n); SIM.flap(); a.burst(SIM.B.x - 20, SIM.B.y + 10, '#ffcf4a', 4); } };
+        var flap = function (e) { if (e.type === 'keydown') { if (e.code !== 'Space' && e.key !== 'ArrowUp') return; e.preventDefault(); } if (SIM && !SIM.dead && !a.counting && $('#gry-over').hidden) { inp.push(SIM.n); SIM.flap(); SND.play('flap'); a.burst(SIM.B.x - 20, SIM.B.y + 10, '#ffcf4a', 4); } };
         cv.addEventListener('pointerdown', flap); document.addEventListener('keydown', flap);
         stopFns.push(function () { document.removeEventListener('keydown', flap); });
       },
@@ -1194,7 +1275,7 @@ var SliskaSim = (function () {
       init: function (a, cv) {
         var jump = function () { if (P && !a.counting && P.j < 2 && $('#gry-over').hidden) { P.vy = -540; P.j++; if (P.j === 2) P.spin = true; a.burst(a.W * .25, a.H * .74, '#fff', 6); } };
         var duck = function () { if (!P || a.counting || !$('#gry-over').hidden) return; if (P.y < -2) { P.vy = Math.max(P.vy, 1150); if (!P.dive) { P.dive = true; a.ev('dive'); } } else P.duck = Math.max(P.duck, .5); };
-        var pd = function (e) { var r = cv.getBoundingClientRect(); if (e.clientX - r.left < r.width * .32) duck(); else jump(); };
+        var pd = function (e) { var r = cv.getBoundingClientRect(); if (e.clientX - r.left < r.width * .32) { SND.play('duck'); duck(); } else { SND.play('jump'); jump(); } };
         var kd = function (e) { if (e.code === 'Space' || e.key === 'ArrowUp') { e.preventDefault(); jump(); } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { e.preventDefault(); duck(); } };
         cv.addEventListener('pointerdown', pd); document.addEventListener('keydown', kd);
         stopFns.push(function () { document.removeEventListener('keydown', kd); });
@@ -1356,7 +1437,7 @@ var SliskaSim = (function () {
     function respot() { pins = pins.filter(function (p) { return !p.down && !p.gone; }); pins.forEach(function (p) { var q = slotPos(p.i); p.x = q[0]; p.y = q[1]; p.vx = p.vy = 0; }); }
     function newBall() { ball = { x: L.cx, y: L.y0, vx: 0, vy: 0, live: false, gut: false, hook: 0, ready: true }; trail = []; }
     function finish(a) {
-      var k = pins.filter(function (p) { return p.down; }).length; lastK = k; rolls.push(k); a.ev('pins', k); a.setScore(bowlScore(rolls));
+      var k = pins.filter(function (p) { return p.down; }).length; lastK = k; rolls.push(k); a.ev('pins', k); if (k > 0) SND.play('crash', k / 10); a.setScore(bowlScore(rolls));
       var strike = k === 10 && rack0 === 10, spare = !strike && k === rack0 && rack0 < 10 && thrNo >= 2;
       var txt = strike ? 'STRIKE!' : (k === rack0 && rack0 > 0 && (thrNo >= 2 || frame === 10) && !strike ? 'SPARE!' : (k === 0 ? (ball.gut ? 'RYNNA…' : 'PUDŁO') : k + ' ' + (k === 1 ? 'kręgiel' : k < 5 ? 'kręgle' : 'kręgli')));
       if (strike) { a.ev('strike'); streak++; a.mx('turkey', streak); a.shake(12); a.burst(L.cx, L.yHead - L.sy * 1.5, '#ffcf4a', 26); if (Math.abs(ball.hook) > .5) a.ev('hookstrike'); } else { streak = 0; if (txt === 'SPARE!') { a.ev('spare'); a.burst(L.cx, L.yHead - L.sy * 1.5, '#7dd3fc', 16); } }
@@ -1390,7 +1471,7 @@ var SliskaSim = (function () {
           if (st !== 'aim') return; if (f.y - l.y < 50) { msg = 'Machnij mocniej w górę'; msgT = 1.1; return; }
           var w = P.filter(function (q) { return l.t - q.t < 140; }), q0 = w[0], dt = Math.max(16, l.t - q0.t) / 1000, vxf = (l.x - q0.x) / dt, vyf = (l.y - q0.y) / dt;
           var spd = Math.max(520, Math.min(1000, Math.hypot(vxf, vyf) * .42)), ang = Math.max(-.4, Math.min(.4, Math.atan2(vxf, -vyf))), mid = P[Math.floor(P.length / 2)], len = Math.hypot(l.x - f.x, l.y - f.y) || 1, dev = mid.x - (f.x + l.x) / 2;
-          ball.vx = spd * Math.sin(ang); ball.vy = -spd * Math.cos(ang); ball.hook = Math.max(-1, Math.min(1, dev / len * 6)); ball.live = true; ball.ready = false; st = 'roll'; tThrow = 0; settle = 0; hits = 0; rack0 = pins.length; trail = [];
+          ball.vx = spd * Math.sin(ang); ball.vy = -spd * Math.cos(ang); ball.hook = Math.max(-1, Math.min(1, dev / len * 6)); ball.live = true; ball.ready = false; st = 'roll'; SND.play('roll'); tThrow = 0; settle = 0; hits = 0; rack0 = pins.length; trail = [];
         };
         cv.addEventListener('pointerdown', dn); cv.addEventListener('pointermove', mv); cv.addEventListener('pointerup', upf); cv.addEventListener('pointercancel', function () { drag = null; });
       },
@@ -1511,7 +1592,7 @@ var SliskaSim = (function () {
           if (a.counting || !$('#gry-over').hidden) return;
           if (ph === 'wait') { lives--; a.setLives(lives); a.ev('early'); streak = 0; kind = 'early'; ph = 'res'; t = 0; msg = 'ZA WCZEŚNIE!'; a.shake(8); }
           else if (ph === 'go') {
-            rt = t; var w = rt < opp; ph = 'res'; t = 0; shot = w ? 'me' : 'opp';
+            SND.play('shot'); rt = t; var w = rt < opp; ph = 'res'; t = 0; shot = w ? 'me' : 'opp';
             if (w) { var pts = 10 + Math.min(15, Math.round((opp - rt) * 40)) + Math.min(streak, 5); streak++; lvl++; a.ev('win'); a.mx('streak', streak); a.mx('level', lvl); if (rt < .2) a.ev('fast'); a.setScore(a.score + pts); a.pop(a.W * .3, a.H * .3, '+' + pts, '#ffcf4a'); a.burst(a.W * .72, a.H * .5, '#ffcf4a', 14); msg = 'TRAFIONY!'; kind = 'win'; flash = .25; }
             else { lives--; a.setLives(lives); streak = 0; a.shake(10); msg = 'ZA WOLNO!'; kind = 'lose'; flash = .25; }
           }
@@ -1634,7 +1715,7 @@ var SliskaSim = (function () {
           if (!drag) return; var s = drag.s, p = pos(e); drag = null; if (st !== 'aim') return;
           var dx = p.x - s.x, dy = s.y - p.y; if (dy < 40) return;
           var len = Math.hypot(dx, dy), h = (len - 90) / 190, tx = G0.bx + dx * (G0.by - G0.gy) / dy;
-          kp = { tx: Math.max(G0.cx - G0.gw, Math.min(G0.cx + G0.gw, tx)), h: h, len: len }; st = 'fly'; stT = 0;
+          kp = { tx: Math.max(G0.cx - G0.gw, Math.min(G0.cx + G0.gw, tx)), h: h, len: len }; st = 'fly'; stT = 0; SND.play('kick');
           var L = lvl(), guess = Math.random() < Math.min(.7, .3 + L * .035), side = Math.random() < .5 ? -1 : 1;
           gk.dive = 1; gk.tx = guess ? kp.tx + (Math.random() - .5) * G0.gw * .12 : G0.cx + side * G0.gw * (.15 + Math.random() * .3); gk.reach = G0.gw * Math.min(.2, .13 + L * .007);
           gk.delay = Math.max(.05, .22 - L * .012);
