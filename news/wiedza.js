@@ -54,7 +54,7 @@
   }
   function html() {
     return '<div class="wz"><header class="wz-h"><span class="gry-eyebrow">Tylko dla Właściciela</span><h1>Centrum wiedzy</h1><p>Zasady, limity i sekrety całego serwisu w jednym miejscu. Dane o grach i osiągnięciach są czytane na żywo z kodu, więc zawsze są aktualne.</p></header>' +
-      '<nav class="wz-nav">' + [['xp', 'XP i poziomy'], ['gry', 'Gry'], ['osi', 'Osiągnięcia'], ['konta', 'Konta i role'], ['kom', 'Komentarze'], ['push', 'Powiadomienia'], ['studio', 'Studio'], ['adr', 'Adresy i wdrażanie']].map(function (x) { return '<a href="#" data-wz="' + x[0] + '">' + x[1] + '</a>'; }).join('') + '</nav>' +
+      '<nav class="wz-nav">' + [['xp', 'XP i poziomy'], ['gry', 'Gry'], ['osi', 'Osiągnięcia'], ['konta', 'Konta i role'], ['kom', 'Komentarze'], ['push', 'Powiadomienia'], ['studio', 'Studio'], ['lim', 'Limity i zabezpieczenia'], ['tre', 'Treści i reklamy'], ['adr', 'Adresy i wdrażanie']].map(function (x) { return '<a href="#" data-wz="' + x[0] + '">' + x[1] + '</a>'; }).join('') + '</nav>' +
       sec('xp', 'XP, limity i poziomy',
         tbl(['Za co', 'XP', 'Limit', 'Licznik sezonu'], XP.map(function (r) { return r.map(esc); })) +
         '<h3>Ogólne limity</h3>' + tbl(['Zasada', 'Szczegóły'], LIM.map(function (r) { return r.map(esc); })) +
@@ -74,8 +74,14 @@
         li(['Nowy artykuł i nowinka: ping do wszystkich urządzeń z włączonymi powiadomieniami (ok. 15 s po publikacji).', '<b>Dev + konto właściciela</b>: nie dostajesz pingów o artykułach i nowinkach, tylko powiadomienia redakcyjne.', 'Powiadomienia redakcyjne: zgłoszony temat/błąd (tylko Ty), reklamy, poczta, odpowiedzi na komentarze (każdy użytkownik).', 'Urządzenia z dev oznacza kolumna <code>push_subs.dev</code> (ustawiana przy włączeniu powiadomień).'])) +
       sec('studio', 'Studio i artykuły',
         li(['Zapis artykułu z konta właściciela otwiera okno wyboru redaktora (lista istniejących + „+” nowy bez konta). Autor to zwykły tekst na artykule; nowy redaktor dostaje notkę „Redaktor Śliska News.”.', 'Recenzja: ocena 0–10, okładka (jak zdjęcie główne albo własna), tagi małymi literami bez spacji i polskich znaków na końcu.', 'Tylko jeden artykuł może być Tematem dnia.'])) +
+      sec('lim', 'Limity zapytań i zabezpieczenia',
+        '<p>Liczniki liczą się na godzinę (zegar serwera), osobno dla sieci/adresu IP lub konta. Po przekroczeniu serwer odpowiada „rate” i strona pokazuje komunikat.</p>' +
+        tbl(['Akcja', 'Limit'], [['Komentarze (zalogowany)', '20 / h (gość 6 / h; Ty bez limitu)'], ['Głosy w recenzjach', '40 / h z jednej sieci'], ['Zgłoszenie tematu', '5 / h z jednej sieci i 80 / h łącznie'], ['Zgłoszenie reklamy (spot)', '3 / h z jednej sieci i 40 / h łącznie'], ['Logowanie', '30 / h z jednego IP, 10 / h na jeden e-mail'], ['Rejestracja', '5 / h i 12 / dobę z jednej sieci'], ['Reset hasła (mail)', '3 / h na jeden adres e-mail'], ['Zmiana nazwy / wejście nazwą', '20 / h z sieci, 10 / h na jedną nazwę'], ['Start gry (bilet)', '400 / h na konto'], ['XP: zapytania o nagrodę', '120 / h']].map(function (r) { return r.map(esc); })) +
+        li(['<b>Captcha</b>: Cloudflare Turnstile przy logowaniu, rejestracji i resecie hasła (gdy skonfigurowany sekret; awaria Cloudflare nie blokuje strony).', '<b>CORS</b>: API odpowiada tylko stronom news.sliska.pl i dev.sliska.pl.', '<b>Rekordy gier</b>: tylko z serwera (bilet startowy + kontrola przebiegu wyniku w czasie).', '<b>Ochrona komentarzy</b>: cenzura wulgaryzmów (Ty bez cenzury), zgłoszenia, ukrywanie, bany użytkowników, zarezerwowane nazwy.', '<b>Sesje</b>: podpisane tokeny (HS256), „wyloguj ze wszystkich urządzeń” unieważnia starsze.'])) +
+      sec('tre', 'Treści, zgłoszenia i reklamy',
+        li(['<b>Zgłoś temat</b> (#/zglos): zgłoszenie trafia do Ciebie jako powiadomienie i do panelu zgłoszeń; ma własny podgląd linku (zglos.html).', '<b>Reklamy</b>: wysyłają je zainteresowani przez „Wyślij reklamę” (#/spot); to „Miejsca na reklamę” plus grafiki reklamowe; zgłoszenia moderujesz w panelu Reklamy.', '<b>Recenzje</b>: ocena 0–10 (np. 6,4), okładka i winyl dopasowany kolorem do okładki; czytelnicy mogą głosować na ocenę na dole artykułu; recenzja jest na górze artykułu.', '<b>Nowinki</b> (szybkie newsy) nie wchodzą do listy redaktorów i mają własne powiadomienia.', '<b>Instagram i X</b>: grafiki generuje kod (PNG), Studio przygotowuje opis posta; podgląd linku (OG) robi Worker.', '<b>Wersje robocze</b>: Studio zapisuje je w chmurze i w przeglądarce; artykuł można zaplanować na przyszłą datę (publikuje się sam).', '<b>Udostępnianie wyniku gry</b>: grafika 9:16 (relacja) lub 4:5 (post) z prawdziwym logo.'])) +
       sec('adr', 'Adresy i wdrażanie',
-        li(['<b>news.sliska.pl</b> – wersja publiczna (repo sliska-news), <b>dev.sliska.pl</b> – wersja testowa (repo sliska-dev), <b>api.sliska.pl</b> – Worker Cloudflare „sliska-og”.', 'Zmiany idą na dev automatycznie, na public dopiero po Twoim „wrzuć na public”.', 'Worker wdrażasz ręcznie: Cloudflare → Workers &amp; Pages → sliska-og → Edit code → wklej → Deploy.', 'Baza: Neon (konta, XP, rekordy, osiągnięcia) + D1 (reszta). Nowe kolumny w Neonie dodaje się w NEON_SCHEMA.'])) +
+        li(['<b>news.sliska.pl</b> – wersja publiczna (repo sliska-news), <b>dev.sliska.pl</b> – wersja testowa (repo sliska-dev), <b>api.sliska.pl</b> – Worker Cloudflare „sliska-og”.', 'Zmiany idą na dev automatycznie, na public dopiero po Twoim „wrzuć na public”.', 'Worker wdrażasz ręcznie: Cloudflare → Workers &amp; Pages → sliska-og → Edit code → wklej → Deploy.', 'Baza: Neon (konta, XP, rekordy, osiągnięcia, powiadomienia) + D1 (reszta: reklamy, obrazy, liczniki). Nowe kolumny w Neonie dodaje się w NEON_SCHEMA – samo ALTER w kodzie jest tam pomijane.', 'Wersje stron mają numer w adresach plików (?v=…) i w service workerze (sw.js); po wdrożeniu odśwież z Cmd+Shift+R.', 'Dokumentacja serwisu: plik SLISKA_docs_N.zip (PDF + TXT + HTML) dostajesz po każdej zmianie.'])) +
       '</div>';
   }
   function render(el) {
@@ -83,7 +89,9 @@
     el.innerHTML = html();
     el.querySelector('.wz-nav').addEventListener('click', function (e) { var a = e.target.closest('[data-wz]'); if (!a) return; e.preventDefault(); var t = el.querySelector('#wz-' + a.dataset.wz); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
   }
-  var link = function () { var a = document.getElementById('wiedza-link'); if (a) a.hidden = !isOwner(); };
+  var link = function () { ['wiedza-link', 'nav-wiedza'].forEach(function (id) { var a = document.getElementById(id); if (a) a.hidden = !isOwner(); }); };
+  var tries = 0, iv = setInterval(function () { link(); if (isOwner() || ++tries > 40) clearInterval(iv); }, 1000);
+  window.addEventListener('hashchange', link);
   window.addEventListener('sn:reader', function () { link(); var el = document.getElementById('view-xp'); if (el && /^#\/wiedza/.test(location.hash)) render(el); });
   window.Wiedza = { render: render, isOwner: isOwner };
 })();
