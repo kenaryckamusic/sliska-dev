@@ -460,10 +460,19 @@ const ApiProvider = {
   last: '',
   async init() {},
   async _fetch() {
-    const r = await fetch(CONFIG.API_BASE + '/articles?limit=' + CONFIG.MAX_ARTICLES, { cache: 'no-store' });
-    if (!r.ok) throw new Error('Nie udało się pobrać artykułów (HTTP ' + r.status + ').');
-    const d = await r.json();
-    return Array.isArray(d.articles) ? d.articles : [];
+    /* limit czasu i 3 próby: chwilowe zawieszenie połączenia nie zostawia strony na „Ładowanie…” */
+    let lastErr;
+    for (let n = 1; n <= 3; n++) {
+      const ctl = typeof AbortController === 'function' ? new AbortController() : null, to = setTimeout(() => { if (ctl) ctl.abort(); }, 12000);
+      try {
+        const r = await fetch(CONFIG.API_BASE + '/articles?limit=' + CONFIG.MAX_ARTICLES, { cache: 'no-store', signal: ctl ? ctl.signal : undefined });
+        clearTimeout(to);
+        if (!r.ok) throw new Error('Nie udało się pobrać artykułów (HTTP ' + r.status + ').');
+        const d = await r.json();
+        return Array.isArray(d.articles) ? d.articles : [];
+      } catch (e) { clearTimeout(to); lastErr = e; if (n < 3) await new Promise(res => setTimeout(res, 800 * n)); }
+    }
+    throw lastErr;
   },
   async watch(onChange) {
     const list = await this._fetch();

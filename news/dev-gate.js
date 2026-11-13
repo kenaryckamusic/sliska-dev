@@ -195,8 +195,16 @@
   }
   function check(user) {
     ui('<h1>Sprawdzam uprawnienia…</h1><p>Chwileczkę.</p>');
+    var t0 = Date.now();
+    /* zapytanie z limitem czasu i 3 próbami: chwilowe zawieszenie połączenia z serwerem nie blokuje już wejścia */
+    function ask(t, n) {
+      var ctl = typeof AbortController === 'function' ? new AbortController() : null, to = setTimeout(function () { if (ctl) ctl.abort(); }, 10000);
+      return fetch(API + '/me', { headers: { authorization: 'Bearer ' + t }, cache: 'no-store', signal: ctl ? ctl.signal : undefined })
+        .then(function (r) { clearTimeout(to); if (r.status >= 500 && n < 3) throw new Error('http' + r.status); return r; })
+        .catch(function (e) { clearTimeout(to); if (n >= 3) { var x = new Error((e && e.name === 'AbortError' ? 'brak odpowiedzi w 10 s' : (e && e.message) || 'błąd sieci') + ', próby: 3, ' + Math.round((Date.now() - t0) / 1000) + ' s'); throw x; } return new Promise(function (res) { setTimeout(res, 700 * n); }).then(function () { return ask(t, n + 1); }); });
+    }
     user.getIdToken().then(function (t) {
-      return fetch(API + '/me', { headers: { authorization: 'Bearer ' + t }, cache: 'no-store' });
+      return ask(t, 1);
     }).then(function (r) {
       return r.json().catch(function () { return {}; }).then(function (d) {
         if (!r.ok) { if (d.error === 'banned') { showLogin('To konto jest zablokowane.'); auth.signOut(); return; } throw new Error(d.error || 'http'); }
