@@ -7308,11 +7308,7 @@ let settingsAvatar = '';
 /** Autorzy występujący w artykułach, których nazwa różni się od aktualnej nazwy i nie jest znanym aliasem. */
 /** Opublikowane artykuły podpisane cudzą nazwą (do ręcznego przypisania sobie). */
 function foreignArticles(src) {
-  const me = state.profile.name, known = new Set(state.profile.aliases || []), uid = Auth.uid();
-  return (src || state.articles)
-    .filter(a => !a.quick && a.title)
-    .map(a => Object.assign({}, a, { _mine: isMine(a) }))
-    .sort((x, y) => String(y.createdAt).localeCompare(String(x.createdAt)));
+  return (src || state.articles).filter(a => !a.quick && a.title).sort((x, y) => String(y.createdAt).localeCompare(String(x.createdAt)));
 }
 
 const myUsername = () => (typeof Readers !== 'undefined' && Readers.me && Readers.me.name) || '';
@@ -7335,7 +7331,6 @@ function syncAuthorName() {
 
 
 /** „Przypisz artykuły do siebie”: po 5 pozycji, przycisk „Pokaż więcej” dokłada kolejne 5; zaznaczenia zostają przy dokładaniu. */
-let ASSIGN_PICKED = new Set();
 let ASSIGN_ALL = null;
 /** Z wklejonego linku do artykułu wyciąga jego identyfikator (…#/artykul/ID, …/a/ID, samo ID). */
 function articleIdFromInput(v) {
@@ -7344,33 +7339,42 @@ function articleIdFromInput(v) {
   if (!m && /^https?:\/\//i.test(v)) { try { const u = new URL(v); const seg = u.pathname.split('/').filter(Boolean); m = [0, seg[seg.length - 1] || '']; } catch { /* ignoruj */ } }
   try { return decodeURIComponent((m && m[1]) || ''); } catch { return (m && m[1]) || ''; }
 }
+/** Artykuł zapisany na moje konto. */
+const ownedByMe = a => !!(a && a.authorUid && acctKey(a.authorUid) === Auth.uid());
+
+/** „Moje artykuły”: lista artykułów mojego konta + artykuły bez konta, które mogę przypisać sobie – pojedynczo, jednym kliknięciem. */
 function renderAssignList(list) {
   const box = $('#st-authors'), card = $('#st-authors-card'); if (!box || !card) return;
-  card.hidden = !list.length;
-  const checked = ASSIGN_PICKED;
-  box.onchange = e => { const i = e.target.closest('input[name="st-article"]'); if (i) { if (i.checked) checked.add(i.value); else checked.delete(i.value); } };
-  const STEP = 5; let shown = Math.max(STEP, box.querySelectorAll('.st-art').length);
-  const row = x => `<label class="check-row st-art"><input type="checkbox" name="st-article" value="${Utils.esc(x.id)}"${checked.has(x.id) ? ' checked' : ''}><span><b>${Utils.esc(x.title)}</b> <em class="muted">· ${Utils.esc((x.author || 'bez autora').trim() || 'bez autora')} · ${Utils.formatDate(x.createdAt)}</em>${x._mine ? ' <span class="st-mine">Twój</span>' : ''} <small class="muted">[konto: ${x.authorUid ? (acctKey(x.authorUid) === Auth.uid() ? 'moje' : 'inne …' + Utils.esc(String(x.authorUid).slice(-4))) : 'brak'}]</small></span></label>`;
   const flt = $('#st-art-filter');
+  const mine = list.filter(ownedByMe), free = list.filter(a => !a.authorUid);
+  card.hidden = !mine.length && !free.length;
+  const fold = t => (Utils.fold ? Utils.fold(t) : String(t).toLowerCase());
+  const row = (x, can) => `<div class="st-art2"><span><b>${Utils.esc(x.title)}</b> <em class="muted">· ${Utils.esc((x.author || 'bez autora').trim() || 'bez autora')} · ${Utils.formatDate(x.createdAt)}</em></span>${can ? `<button type="button" class="btn btn-sm" data-claim="${Utils.esc(x.id)}">To mój</button>` : ''}</div>`;
   const paint = () => {
-    const q = flt && flt.value ? (Utils.fold ? Utils.fold(flt.value) : flt.value.toLowerCase()) : '';
-    const hay = x => (Utils.fold ? Utils.fold(x.title + ' ' + (x.author || '')) : (x.title + ' ' + (x.author || '')).toLowerCase());
-    const linkId = articleIdFromInput(flt && flt.value);
-    let pool = q ? list.filter(x => hay(x).includes(q)) : list;
-    if (linkId && /^https?:|\/(artykul|a)\//.test(flt.value)) {
-      pool = (ASSIGN_ALL || list).filter(x => x.id === linkId && !x.quick);
-      if (!pool.length && !paint.asked) { paint.asked = linkId; DataService.getArticleById(linkId).then(a => { if (a && a.id) { (ASSIGN_ALL = ASSIGN_ALL || []).push(a); paint(); } }).catch(() => {}); }
-    }
-    const vis = (q || linkId) ? pool : pool.slice(0, shown);
-    box.querySelectorAll('input[name="st-article"]').forEach(i => { if (i.checked) checked.add(i.value); else checked.delete(i.value); });
-    box.innerHTML = vis.map(row).join('') || '<p class="muted">Brak pasujących artykułów. Możesz wkleić link do artykułu.</p>';
-    if (!q && !linkId && pool.length > shown) {
-      const left = pool.length - shown;
-      box.insertAdjacentHTML('beforeend', `<button type="button" class="btn btn-sm st-more" id="st-art-more">Pokaż więcej (jeszcze ${left})</button>`);
-      $('#st-art-more').onclick = () => { shown += STEP; paint(); };
-    }
+    const q = fold((flt && flt.value) || '');
+    const f = arr => q ? arr.filter(x => fold(x.title + ' ' + (x.author || '')).includes(q)) : arr;
+    const m = f(mine), fr = f(free);
+    box.innerHTML = `<h3 class="st-sub-h">Na moim koncie (${mine.length})</h3>` + (m.slice(0, 50).map(x => row(x, false)).join('') || '<p class="muted">Brak.</p>')
+      + `<h3 class="st-sub-h">Bez przypisanego konta (${free.length})</h3><p class="muted">Kliknij „To mój” tylko przy tym artykule, który jest Twój – inne się nie zmienią.</p>` + (fr.slice(0, 50).map(x => row(x, true)).join('') || '<p class="muted">Brak.</p>');
   };
-  if (flt) { flt.oninput = () => { paint(); }; }
+  box.onclick = async ev => {
+    const b = ev.target.closest('[data-claim]'); if (!b) return;
+    const id = b.dataset.claim; b.disabled = true;
+    try {
+      const full = await DataService.getArticleById(id);
+      if (!full) throw new Error('nie znaleziono artykułu');
+      if (full.authorUid) { toast('Ten artykuł jest już przypisany do konta.', 'error'); return; }
+      const photo = state.profile.avatar && state.profile.showPhoto !== false ? await shrinkAvatar(state.profile.avatar) : '';
+      const upd = { ...full, author: state.profile.name, authorUid: Auth.uid(), authorPhoto: photo };
+      await DataService.save(upd);
+      upsertLocalState(upd);
+      const k = list.findIndex(x => x.id === id); if (k >= 0) list[k] = { ...list[k], author: upd.author, authorUid: upd.authorUid };
+      const f2 = free.findIndex(x => x.id === id); if (f2 >= 0) free.splice(f2, 1);
+      mine.unshift(upd);
+      toast('Przypisano do Twojego konta.', 'success'); paint(); refreshViews();
+    } catch (ex) { toast('Nie udało się przypisać: ' + (ex.message || ex), 'error'); b.disabled = false; }
+  };
+  if (flt) flt.oninput = paint;
   paint();
 }
 
@@ -7393,7 +7397,6 @@ function renderSettings() {
   updateDevicePush();
   $('#st-error').hidden = true;
   $('#st-avatar-file').value = '';
-  ASSIGN_PICKED = new Set();
   renderAssignList(foreignArticles());
   // lista pełna: pobieramy wszystkie artykuły (nie tylko ostatnie wczytane na stronie)
   DataService.getAllArticles({ open: true }).then(all => { if (currentRoute().name === 'settings' || $('#st-authors')) { ASSIGN_ALL = all; renderAssignList(foreignArticles(all)); } }).catch(err => { console.warn('Pełna lista artykułów niedostępna:', err); const b = $('#st-authors'); if (b) b.insertAdjacentHTML('afterbegin', '<p class="muted st-warn">Nie udało się pobrać wszystkich artykułów – widać tylko ostatnie. Wklej link do artykułu w wyszukiwarce, żeby go znaleźć.</p>'); });
@@ -7435,25 +7438,22 @@ function updateSettingsAvatar() {
   $('#st-avatar-remove').hidden = !settingsAvatar;
 }
 
-/** Zmienia autora we wszystkich artykułach (i wersjach roboczych) należących do redaktora. */
-async function reassignAuthor(claim, nextName, avatar, showPhoto, ids = []) {
-  const uid = Auth.uid();
-  const names = new Set(claim), pick = new Set(ids);
+/** Po zmianie imienia/zdjęcia aktualizuje podpis tylko w artykułach MOJEGO KONTA (nic nie przypisuje, nic nie szuka po imieniu). */
+async function reassignAuthor(prevName, nextName, avatar, showPhoto) {
   let all = [];
   try { all = await DataService.getAllArticles(); } catch { all = state.articles; }
   const photo = avatar && showPhoto ? await shrinkAvatar(avatar) : '';
-  const todo = all.filter(a => a && (isMine(a) || (!a.authorUid && names.has((a.author || '').trim())) || pick.has(a.id))
-    && ((a.author || '') !== nextName || (a.authorPhoto || '') !== photo || a.authorUid !== uid));
+  const todo = all.filter(a => ownedByMe(a) && ((a.author || '') !== nextName || (a.authorPhoto || '') !== photo));
   let done = 0;
   for (const a of todo) {
-    const upd = { ...a, author: nextName, authorUid: uid, authorPhoto: photo };
+    const upd = { ...a, author: nextName, authorPhoto: photo };
     await DataService.save(upd);
     upsertLocalState(upd);
     done++;
   }
   try {
     const drafts = await DataService.getDrafts();
-    for (const d of drafts) if (names.has((d.author || '').trim())) await DataService.saveDraft({ ...d, author: nextName });
+    for (const d of drafts) if (prevName && (d.author || '').trim() === prevName) await DataService.saveDraft({ ...d, author: nextName });
   } catch (e) { console.warn('Wersje robocze – pominięto zmianę autora:', e); }
   return done;
 }
@@ -7465,14 +7465,12 @@ async function saveSettings(e) {
   err.hidden = true;
   const prev = state.profile;
   const name = $('#st-name').value.trim().slice(0, 60);
-  const pickedIds = [...new Set([...ASSIGN_PICKED, ...$$('input[name="st-article"]:checked').map(i => i.value)])];
   const next = normProfile({
     name, avatar: settingsAvatar,
     defaultCategory: $('#st-cat').value, showPhoto: $('#st-photo').checked,
     quickPush: $('#st-quick-push').checked, quickSource: $('#st-quick-source').value.trim(), panelTab: $('#st-panel-tab').value,
     aliases: [...new Set([...(prev.aliases || []), ...(prev.name && prev.name !== name ? [prev.name] : [])])].filter(n => n && n !== name)
   });
-  const claim = [prev.name].filter(n => n && n !== name);   // tylko poprzednie imię, nigdy dawne aliasy – nic nie przypisuje się samo
   const photoChanged = (prev.avatar || '') !== (next.avatar || '') || prev.showPhoto !== next.showPhoto;
   const btn = $('#st-save'), btn2 = $('#st-save-profile');
   btn.disabled = true; if (btn2) btn2.disabled = true;
@@ -7490,9 +7488,9 @@ async function saveSettings(e) {
     writeLocalProfile(next);
     renderProfile();
     let n = 0;
-    if (name && (claim.length || photoChanged || pickedIds.length)) {
+    if (name && ((prev.name && prev.name !== name) || photoChanged)) {
       btn.textContent = 'Aktualizuję artykuły…';
-      n = await reassignAuthor(claim, name, next.avatar, next.showPhoto, pickedIds);
+      n = await reassignAuthor(prev.name, name, next.avatar, next.showPhoto);
     }
     toast(bioFailed ? 'Ustawienia zapisane, ale biografia nie – wgraj najnowszy kod Workera.' : n ? `Zapisano. Zaktualizowano ${n} ${plural(n, 'artykuł', 'artykuły', 'artykułów')}.` : 'Ustawienia zapisane.');
     renderSettings();

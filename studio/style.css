@@ -3182,3 +3182,8 @@ figure.article-figure[data-size="l"] { --fw: 62%; --pw: 48%; --pm: 0%; }
 .article-body h2 { border-bottom: 1px solid var(--border); padding-bottom: 8px; margin: .5em 0 .4em; }
 .article-body p:has(> br:only-child):has(+ h2), .article-body p:has(> br:only-child):has(+ h3) { display: none; }
 .article-body h2 + p, .article-body h2 + p + p { margin-top: 0; }
+
+/* Moje artykuły: lista z przyciskiem „To mój” przy każdym artykule */
+.st-sub-h { margin: 14px 0 6px; font-size: .95rem; font-weight: 800; }
+.st-art2 { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; }
+.st-art2 .btn { flex: none; }
