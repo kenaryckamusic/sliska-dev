@@ -1687,8 +1687,8 @@ const acctKey = u => { u = String(u || ''); if (!u || u === 'local' || /^rd_/.te
 function isMine(a) {
   if (!a) return false;
   if (a.authorUid) return acctKey(a.authorUid) === Auth.uid();
-  const p = state.profile || {}, names = new Set([p.name, ...(p.aliases || [])].filter(Boolean).map(authorKey));
-  return !!a.author && names.has(authorKey(a.author));
+  const p = state.profile || {};
+  return !!a.author && !!p.name && authorKey(a.author) === authorKey(p.name);   // stary artykuł bez konta: tylko dokładnie moje imię, bez dawnych nazw
 }
 const Authors = {
   bios: new Map(), loaded: false,
@@ -5577,8 +5577,8 @@ function pickEditorDialog(roster, preset) {
 function keepAuthorUid(ex) {
   if (!ex) return Auth.uid();
   if (ex.authorUid) return acctKey(ex.authorUid);
-  const p = state.profile || {}, mine = [p.name, ...(p.aliases || [])].filter(Boolean).map(authorKey);
-  return ex.author && !mine.includes(authorKey(ex.author)) ? '' : Auth.uid();
+  const p = state.profile || {};
+  return ex.author && authorKey(ex.author) !== authorKey(p.name) ? '' : Auth.uid();
 }
 async function saveArticle(e) {
   e.preventDefault();
@@ -7311,7 +7311,7 @@ function foreignArticles(src) {
   const me = state.profile.name, known = new Set(state.profile.aliases || []), uid = Auth.uid();
   return (src || state.articles)
     .filter(a => !a.quick && a.title)
-    .map(a => Object.assign({}, a, { _mine: isMine(a) || known.has((a.author || '').trim()) || (a.author || '').trim() === me }))
+    .map(a => Object.assign({}, a, { _mine: isMine(a) }))
     .sort((x, y) => String(y.createdAt).localeCompare(String(x.createdAt)));
 }
 
@@ -7472,7 +7472,7 @@ async function saveSettings(e) {
     quickPush: $('#st-quick-push').checked, quickSource: $('#st-quick-source').value.trim(), panelTab: $('#st-panel-tab').value,
     aliases: [...new Set([...(prev.aliases || []), ...(prev.name && prev.name !== name ? [prev.name] : [])])].filter(n => n && n !== name)
   });
-  const claim = [...new Set([prev.name, ...(prev.aliases || [])])].filter(n => n && n !== name);
+  const claim = [prev.name].filter(n => n && n !== name);   // tylko poprzednie imię, nigdy dawne aliasy – nic nie przypisuje się samo
   const photoChanged = (prev.avatar || '') !== (next.avatar || '') || prev.showPhoto !== next.showPhoto;
   const btn = $('#st-save'), btn2 = $('#st-save-profile');
   btn.disabled = true; if (btn2) btn2.disabled = true;
