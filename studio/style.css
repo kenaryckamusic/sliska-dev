@@ -3177,3 +3177,8 @@ figure.article-figure[data-size="l"] { --fw: 62%; --pw: 48%; --pm: 0%; }
   .admin-actions { gap: 8px; }
   .admin-actions .btn-sm, .quick-item .admin-actions .btn-sm { min-height: 40px; padding: 8px 14px; font-size: .88rem; }
 }
+
+/* Śródtytuły w artykule: kreska pod spodem, bez wielkiej przerwy (pusty akapit przed nagłówkiem się nie liczy) */
+.article-body h2 { border-bottom: 1px solid var(--border); padding-bottom: 8px; margin: 1.1em 0 .45em; }
+.article-body p:has(> br:only-child):has(+ h2), .article-body p:has(> br:only-child):has(+ h3) { display: none; }
+.article-body h2 + p, .article-body h2 + p + p { margin-top: 0; }

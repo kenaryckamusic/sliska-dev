@@ -4249,3 +4249,8 @@ a.saga-t:hover span { color: var(--accent); }
 .acc-q-row small{display:block;color:var(--muted,#888)}
 .acc-q-add{padding:9px;border-radius:12px;border:1px dashed var(--border);background:none;color:var(--text);font:inherit;cursor:pointer}
 
+
+/* Śródtytuły w artykule: kreska pod spodem, bez wielkiej przerwy (pusty akapit przed nagłówkiem się nie liczy) */
+.article-body h2 { border-bottom: 1px solid var(--border); padding-bottom: 8px; margin: 1.1em 0 .45em; }
+.article-body p:has(> br:only-child):has(+ h2), .article-body p:has(> br:only-child):has(+ h3) { display: none; }
+.article-body h2 + p, .article-body h2 + p + p { margin-top: 0; }
