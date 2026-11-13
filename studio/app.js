@@ -1637,6 +1637,7 @@ function adminButtons(id) {
     <button type="button" class="btn btn-sm" data-action="edit" data-id="${safe}">Edytuj</button>
     <button type="button" class="btn btn-sm" data-action="ig-post" data-id="${safe}" title="Grafiki na Instagram, Story, X i recenzję – z opisem do wklejenia">Grafika</button>
     ${canManage() ? `<button type="button" class="btn btn-sm btn-push-send" data-action="push-send" data-id="${safe}" title="Wyślij powiadomienie push o tym artykule do wszystkich subskrybentów">🔔 Powiadom</button>` : ''}
+    ${canManage() ? `<button type="button" class="btn btn-sm" data-action="set-author" data-id="${safe}" title="Przypisz artykuł do innego konta redaktora">Autor</button>` : ''}
     ${socialButtons(id, false)}
     <button type="button" class="btn btn-sm btn-danger" data-action="delete" data-id="${safe}">Usuń</button>
   </span>`;
@@ -1680,6 +1681,15 @@ function fitTicker() {
 /** Podpis „Redaktor Imię Nazwisko” i samo „Imię Nazwisko” to ta sama osoba (starsze artykuły mają w polu autora przedrostek). */
 const authorBase = n => String(n || '').replace(/^Redaktor\s+/i, '').trim();
 const authorKey = n => Utils.fold(authorBase(n));
+/* Jedno konto = jeden identyfikator (rd_…). Konta czytelników z listy użytkowników mają „surowy” uid, a zalogowany redaktor ma uid z prefiksem rd_ – tu je ujednolicamy. */
+const acctKey = u => { u = String(u || ''); if (!u || u === 'local' || /^rd_/.test(u) || (typeof CONFIG !== 'undefined' && CONFIG.ADMIN_UID && u === CONFIG.ADMIN_UID)) return u; return 'rd_' + u.replace(/[^A-Za-z0-9]/g, '').slice(0, 40); };
+/** Czy artykuł należy do zalogowanego konta: decyduje konto (authorUid); samo imię liczy się tylko dla starych artykułów bez przypisanego konta. */
+function isMine(a) {
+  if (!a) return false;
+  if (a.authorUid) return acctKey(a.authorUid) === Auth.uid();
+  const p = state.profile || {}, names = new Set([p.name, ...(p.aliases || [])].filter(Boolean).map(authorKey));
+  return !!a.author && names.has(authorKey(a.author));
+}
 const Authors = {
   bios: new Map(), loaded: false,
   async load(force) {
@@ -3327,7 +3337,7 @@ function updatePanelCounts() {
   const set = (id, v) => { const el = $('#' + id); if (el) el.textContent = v; };
   const tipsOpen = (state.tips || []).filter(t => TIP_OPEN.includes(tipStatus(t))).length;
   set('kpi-drafts', n('panel-drafts')); set('kpi-sched', n('panel-scheduled')); set('kpi-tips', canManage() ? tipsOpen : 0);
-  set('kpi-mine', me ? publishedArticles().filter(a => authorKey(a.author) === authorKey(me)).length : publishedArticles().length);
+  set('kpi-mine', me ? publishedArticles().filter(isMine).length : publishedArticles().length);
   const kl = $('#kpi-mine') && $('#kpi-mine').closest('a'); if (kl) kl.setAttribute('href', me ? '#/redaktor/' + encodeURIComponent(me) : '#/redakcja');
   const tabs = { drafts: n('panel-drafts'), scheduled: n('panel-scheduled'), tips: canManage() ? tipsOpen : 0 };
   $$('#view-panel .ptab').forEach(b => { if (!(b.dataset.ptab in tabs)) return; const c = tabs[b.dataset.ptab]; b.dataset.count = c ? c : ''; });
@@ -5519,7 +5529,7 @@ async function editorRoster() {
   Authors.list().forEach(a => add(a.name, '', a.photo, a.n));
   try {
     const d = await adminApi('/admin/users?q=');
-    (d.users || []).filter(u => u.role === 'editor' || u.role === 'chief' || (u.staff && u.role !== 'owner')).forEach(u => add(u.name, u.uid, '', 0));
+    (d.users || []).filter(u => u.role === 'editor' || u.role === 'chief' || (u.staff && u.role !== 'owner')).forEach(u => add(u.name, acctKey(u.uid), '', 0));
   } catch { /* sama lista autorów wystarczy */ }
   const me = authorKey(state.profile.name);
   map.forEach((e, k) => { if (k === me) map.delete(k); });
@@ -5563,6 +5573,13 @@ function pickEditorDialog(roster, preset) {
 }
 
 /* ---------- Edytor: publikacja, podgląd, zdjęcia ---------- */
+/** Konto autora przy zapisie istniejącego artykułu: zostaje takie, jakie było (także puste = autor bez konta); nowy artykuł dostaje konto piszącego. */
+function keepAuthorUid(ex) {
+  if (!ex) return Auth.uid();
+  if (ex.authorUid) return acctKey(ex.authorUid);
+  const p = state.profile || {}, mine = [p.name, ...(p.aliases || [])].filter(Boolean).map(authorKey);
+  return ex.author && !mine.includes(authorKey(ex.author)) ? '' : Auth.uid();
+}
 async function saveArticle(e) {
   e.preventDefault();
   if (!editor.active) return;
@@ -5577,7 +5594,7 @@ async function saveArticle(e) {
     if (!title || !lead || !d.content || !d.categories.length) { toast('Najpierw uzupełnij tytuł, lead, treść i kategorię – potem wybierzesz redaktora.', 'error'); return; }
     const pick = await pickEditorDialog(await editorRoster(), author);
     if (!pick) return;
-    author = pick.name; pickedUid = pick.own ? Auth.uid() : (pick.uid || '');
+    author = pick.name; pickedUid = pick.own ? Auth.uid() : acctKey(pick.uid || '');
     editor.ownerPicked = author; editor.author = author;
     $('#editor-author').textContent = 'Autor: ' + author;
   } else if (isOwnerRole() && editor.ownerPicked) { author = editor.ownerPicked; }
@@ -5640,7 +5657,7 @@ async function saveArticle(e) {
     categories: d.categories,
     tags: Utils.parseTags(d.tags),
     author,
-    authorUid: pickedUid !== null ? pickedUid : ((editor.existing && editor.existing.authorUid) || Auth.uid()),
+    authorUid: pickedUid !== null ? pickedUid : keepAuthorUid(editor.existing),
     authorPhoto,
     image: d.image,
     imagePos: d.image && d.imagePos ? d.imagePos : null,
@@ -7258,7 +7275,7 @@ function renderProfileStats() {
   const pub = publishedArticles();
   const sched = scheduledArticles().length;
   const me = (state.profile && state.profile.name) || '';
-  $('#ps-mine').textContent = me ? pub.filter(a => authorKey(a.author) === authorKey(me)).length : pub.length;
+  $('#ps-mine').textContent = me ? pub.filter(isMine).length : pub.length;
   $('#ps-sched').textContent = sched;
   const b = $('#pa-sched'); b.hidden = !sched; b.textContent = sched;
 }
@@ -7294,7 +7311,7 @@ function foreignArticles(src) {
   const me = state.profile.name, known = new Set(state.profile.aliases || []), uid = Auth.uid();
   return (src || state.articles)
     .filter(a => !a.quick && a.title)
-    .map(a => Object.assign({}, a, { _mine: !!((uid && a.authorUid === uid) || known.has((a.author || '').trim()) || (a.author || '').trim() === me) }))
+    .map(a => Object.assign({}, a, { _mine: isMine(a) || known.has((a.author || '').trim()) || (a.author || '').trim() === me }))
     .sort((x, y) => String(y.createdAt).localeCompare(String(x.createdAt)));
 }
 
@@ -7425,7 +7442,7 @@ async function reassignAuthor(claim, nextName, avatar, showPhoto, ids = []) {
   let all = [];
   try { all = await DataService.getAllArticles(); } catch { all = state.articles; }
   const photo = avatar && showPhoto ? await shrinkAvatar(avatar) : '';
-  const todo = all.filter(a => a && ((a.authorUid && a.authorUid === uid) || names.has((a.author || '').trim()) || pick.has(a.id))
+  const todo = all.filter(a => a && (isMine(a) || (!a.authorUid && names.has((a.author || '').trim())) || pick.has(a.id))
     && ((a.author || '') !== nextName || (a.authorPhoto || '') !== photo || a.authorUid !== uid));
   let done = 0;
   for (const a of todo) {
@@ -7491,6 +7508,26 @@ async function saveSettings(e) {
 }
 
 /* ---------- Akcje (przyciski z data-action) ---------- */
+/** Właściciel: przypisuje opublikowany artykuł do wybranego konta redaktora (jedno miejsce zamiast zgadywania po imieniu). */
+async function changeArticleAuthor(id, btn) {
+  if (!canManage()) return;
+  if (btn) btn.disabled = true;
+  try {
+    const full = await DataService.getArticleById(id) || (state.articles || []).find(x => x.id === id);
+    if (!full) { toast('Nie znaleziono artykułu.', 'error'); return; }
+    const pick = await pickEditorDialog(await editorRoster(), full.author || '');
+    if (!pick) return;
+    const own = !!pick.own;
+    const photo = own ? (state.profile.avatar && state.profile.showPhoto !== false ? await shrinkAvatar(state.profile.avatar) : '') : (pick.photo || '');
+    const upd = { ...full, author: pick.name, authorUid: own ? Auth.uid() : acctKey(pick.uid || ''), authorPhoto: photo };
+    await DataService.save(upd);
+    upsertLocalState(upd);
+    toast(`Artykuł przypisany do: ${pick.name}.`, 'success');
+    refreshViews();
+  } catch (ex) { toast('Nie udało się zmienić autora: ' + (ex.message || ex), 'error'); }
+  finally { if (btn) btn.disabled = false; }
+}
+
 async function sendPushManual(id, btn) {
   if (!canManage()) return;
   const a = (state.articles || []).find(x => x.id === id);
@@ -7549,6 +7586,7 @@ function handleAction(action, id, btn) {
   if (action === 'quick-edit') { openQuickModal(id); return; }
   if (action === 'quick-delete') { deleteQuick(id); return; }
   if (action === 'push-send') { sendPushManual(id, btn); return; }
+  if (action === 'set-author') { changeArticleAuthor(id, btn); return; }
   if (action === 'quick-expand') { state.expandQuick = id; if (location.hash === '#/edytor') openEditor(null, null); else location.hash = '#/edytor'; return; }
   if (action === 'social-x' || action === 'social-discord' || action === 'social-ig') { sendSocial(id, ({ 'social-x': 'x', 'social-discord': 'discord', 'social-ig': 'ig' })[action], btn); return; }
   if (action === 'edit') location.hash = '#/edytor/' + encodeURIComponent(id);
