@@ -7350,7 +7350,7 @@ function renderAssignList(list) {
   const checked = ASSIGN_PICKED;
   box.onchange = e => { const i = e.target.closest('input[name="st-article"]'); if (i) { if (i.checked) checked.add(i.value); else checked.delete(i.value); } };
   const STEP = 5; let shown = Math.max(STEP, box.querySelectorAll('.st-art').length);
-  const row = x => `<label class="check-row st-art"><input type="checkbox" name="st-article" value="${Utils.esc(x.id)}"${checked.has(x.id) ? ' checked' : ''}><span><b>${Utils.esc(x.title)}</b> <em class="muted">· ${Utils.esc((x.author || 'bez autora').trim() || 'bez autora')} · ${Utils.formatDate(x.createdAt)}</em>${x._mine ? ' <span class="st-mine">Twój</span>' : ''}</span></label>`;
+  const row = x => `<label class="check-row st-art"><input type="checkbox" name="st-article" value="${Utils.esc(x.id)}"${checked.has(x.id) ? ' checked' : ''}><span><b>${Utils.esc(x.title)}</b> <em class="muted">· ${Utils.esc((x.author || 'bez autora').trim() || 'bez autora')} · ${Utils.formatDate(x.createdAt)}</em>${x._mine ? ' <span class="st-mine">Twój</span>' : ''} <small class="muted">[konto: ${x.authorUid ? (acctKey(x.authorUid) === Auth.uid() ? 'moje' : 'inne …' + Utils.esc(String(x.authorUid).slice(-4))) : 'brak'}]</small></span></label>`;
   const flt = $('#st-art-filter');
   const paint = () => {
     const q = flt && flt.value ? (Utils.fold ? Utils.fold(flt.value) : flt.value.toLowerCase()) : '';
