@@ -4251,6 +4251,6 @@ a.saga-t:hover span { color: var(--accent); }
 
 
 /* Śródtytuły w artykule: kreska pod spodem, bez wielkiej przerwy (pusty akapit przed nagłówkiem się nie liczy) */
-.article-body h2 { border-bottom: 1px solid var(--border); padding-bottom: 8px; margin: 1.1em 0 .45em; }
+.article-body h2 { border-bottom: 1px solid var(--border); padding-bottom: 8px; margin: .5em 0 .4em; }
 .article-body p:has(> br:only-child):has(+ h2), .article-body p:has(> br:only-child):has(+ h3) { display: none; }
 .article-body h2 + p, .article-body h2 + p + p { margin-top: 0; }
