@@ -6197,7 +6197,7 @@ const Readers = {
   async resend() { await this.sendVerify(true); },
   async refresh() { if (!this.user) return; await this.user.reload(); await this.user.getIdToken(true); await this.loadMe(); this.render(); await this.joinEditor(); },
   async saveName(name) { this.me = await this.api('/me', { method: 'POST', body: JSON.stringify({ name }) }); this.render(); },
-  async saveBadge(v) { this.me = await this.api('/me', { method: 'POST', body: JSON.stringify({ nobadge: !!v }) }); this.render(); },
+  async saveBadge(v, c) { const b = {}; if (v !== undefined) b.nobadge = !!v; if (c !== undefined) b.nocrown = !!c; this.me = await this.api('/me', { method: 'POST', body: JSON.stringify(b) }); this.render(); },
   async saveBio(bio) { this.me = await this.api('/me', { method: 'POST', body: JSON.stringify({ bio }) }); this.render(); },
   async saveAvatar(dataUrl) { this.me = await this.api('/me', { method: 'POST', body: JSON.stringify({ avatar: dataUrl || null }) }); this.render(); },
   render() {
@@ -6651,6 +6651,7 @@ function renderAccount() {
         <label class="field"><span class="field-label">Krótka biografia <small class="hint" id="acc-bio-n">${Array.from(me.bio || '').length}/150</small></span>
           <textarea id="acc-bio" rows="3" maxlength="150" placeholder="Kilka słów o sobie – zobaczą je inni na Twoim profilu publicznym.">${Utils.esc(me.bio || '')}</textarea></label>
         ${['editor', 'chief', 'owner'].includes(me.role) ? `<label class="check"><input type="checkbox" id="acc-nobadge" ${me.nobadge ? 'checked' : ''}> <span>Ukryj moją plakietkę (${Utils.esc(ROLE_LABEL[me.role] || 'Redaktor')}) w komentarzach i na profilu</span></label>` : ''}
+        ${me.crown ? `<label class="check"><input type="checkbox" id="acc-nocrown" ${me.nocrown ? 'checked' : ''}> <span>Ukryj moją plakietkę (Moderator) w komentarzach i na profilu</span></label>` : ''}
         <div class="st-actions"><button type="button" class="btn btn-primary" id="acc-save">Zapisz profil</button></div>
         <p class="form-error" id="acc-error" hidden></p>
       </section>
@@ -6797,7 +6798,7 @@ function bindReaderEvents() {
         const nm = $('#acc-name'), bio = ($('#acc-bio').value || '').trim().replace(/\s+/g, ' ').slice(0, 150);
         if (nm && !nm.disabled && nm.value.trim() !== ((Readers.me && Readers.me.name) || '')) await Readers.saveName(nm.value.trim());
         if (bio !== ((Readers.me && Readers.me.bio) || '')) await Readers.saveBio(bio);
-        { const nb = $('#acc-nobadge'); if (nb && nb.checked !== !!(Readers.me && Readers.me.nobadge)) await Readers.saveBadge(nb.checked); }
+        { const nb = $('#acc-nobadge'), nc = $('#acc-nocrown'), m0 = Readers.me || {}; const dv = nb && nb.checked !== !!m0.nobadge, dc = nc && nc.checked !== !!m0.nocrown; if (dv || dc) await Readers.saveBadge(dv ? nb.checked : undefined, dc ? nc.checked : undefined); }
         toast('Profil zapisany.');
       } catch (ex) { er.textContent = readerErr(ex); er.hidden = false; }
     } else if (e.target.id === 'acc-avatar-remove') { try { await Readers.saveAvatar(null); toast('Zdjęcie usunięte.'); } catch (ex) { toast(readerErr(ex), 'error'); } }
