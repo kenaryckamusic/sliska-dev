@@ -12,7 +12,7 @@
     ['Nowy rekord w grze (bonus)', '+10', '6 / dobę', '–'],
     ['Ślizgle (słowo dnia)', '8–25 (1 próba 25, 2: 20, 3: 16, 4: 13, 5: 10, 6: 8)', '1 / dobę', 'gry'],
     ['Krzyżówka tygodnia', '15', '1 / dobę', 'gry'],
-    ['Drama Simulator / Redaktor Naczelny', '10', '6 / dobę', 'gry'],
+    ['Drama Simulator', '10', '6 / dobę', 'gry'],
     ['Komentarz', '5', '30 / dobę', 'komentarze'],
     ['Bonus dzienny (pierwsze wejście danego dnia)', '5', '1 / dobę', '–'],
     ['Odsłonięcie Knagi (reveal; po usunięciu gadającej Knagi nieużywane)', '20', 'raz w życiu konta', '–']

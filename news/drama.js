@@ -609,14 +609,16 @@
     var run = null, R = Math.random;
     /* ikonka: Knaga w stroju + odznaka na gradiencie (id afery albo zakończenia) */
     function tile(id, kind) { var c = COL[id] || ['#ffc4a8', '#e0407a']; return '<span class="dr-ico is-' + (kind || 'sc') + '" style="--a:' + c[0] + ';--b:' + c[1] + '"><svg class="dr-art" viewBox="0 0 48 48" aria-hidden="true">' + (ART[id] || '') + '</svg></span>'; }
-    H.shell(el, g, '<div class="dr" id="dr"></div>', { side: '<section class="gp-box"><h3>Twoje dramy <small id="dr-ec"></small></h3><div id="dr-ends"></div></section>' });
+    H.shell(el, g, '<div class="dr" id="dr"></div>', { side: '<section class="gp-box"><h3>Zakończenia <small id="dr-ec"></small></h3><div class="dr-ends" id="dr-ends"></div></section><details class="gp-box dr-fold" id="dr-fold"><summary><h3>Osiągnięcia <small id="dr-ac"></small></h3><span class="dr-chev" aria-hidden="true"></span></summary><ul class="dr-ach" id="dr-ach"></ul></details>' });
     var d0 = H.load();
     (function () { var f = $('#dr-fold'); if (!f) return; try { f.open = localStorage.getItem('sn-dr-fold') === '1'; } catch (e) { /* - */ } f.addEventListener('toggle', function () { try { localStorage.setItem('sn-dr-fold', f.open ? '1' : '0'); } catch (e) { /* - */ } }); })();
     function data() { var d = H.load(); d.endings = d.endings || []; d.dramaAch = d.dramaAch || []; d.dramaDone = d.dramaDone || []; d.dramaNick = d.dramaNick || ''; return d; }
     function endsBox() {
-      var d = data(), fe = d.dramaEnd || {}, L = window.DramaFacts ? window.DramaFacts.LIST : [], tot = 0;
-      $('#dr-ends').innerHTML = L.map(function (x) { var n = (fe[x.id] || []).length; tot += n; return '<div class="dv-row' + (n ? ' is-on' : '') + '"><span>' + esc(x.t) + '</span><b>' + n + '/9</b></div>'; }).join('');
-      $('#dr-ec').textContent = tot + '/' + (L.length * 9);
+      var d = data(), got = d.endings;
+      $('#dr-ec').textContent = got.length + '/' + ENDS.length;
+      $('#dr-ends').innerHTML = ENDS.map(function (e) { var on = got.indexOf(e[1]) >= 0; return '<span class="dr-end' + (on ? ' is-on' : '') + (SPECIAL.indexOf(e[0]) >= 0 ? ' is-sp' : '') + '" title="' + (on ? esc(e[1]) : 'Jeszcze nie odkryte') + '">' + (on ? tile(e[0], 'end') : '<i>?</i>') + '<b>' + (on ? e[1] : '???') + '</b></span>'; }).join('');
+      $('#dr-ac').textContent = d.dramaAch.length + '/' + ACH.length;
+      $('#dr-ach').innerHTML = ACH.map(function (a) { var on = d.dramaAch.indexOf(a[0]) >= 0; return '<li class="' + (on ? 'is-on' : '') + '"><span>' + ic(on ? 'check' : 'lock', 14) + '</span><div><b>' + a[1] + '</b><small>' + a[2] + '</small></div></li>'; }).join('');
     }
     function saveRun() { try { if (run && !run.done) localStorage.setItem(RUN_KEY, JSON.stringify(run)); else localStorage.removeItem(RUN_KEY); } catch (e) { /* - */ } }
     function loadRun() { try { var r = JSON.parse(localStorage.getItem(RUN_KEY)); return r && r.sc && !r.done ? r : null; } catch (e) { return null; } }
@@ -627,12 +629,17 @@
 
     /* ----- ekran wyboru: postać + afera ----- */
     function pick() {
-      try { localStorage.removeItem(RUN_KEY); } catch (er) { /* - */ }
-      window.scrollTo(0, 0);
-      if (window.DramaFacts) window.DramaFacts.hub($('#dr'), H, pick);
-      endsBox();
+      var d = data(), saved = loadRun(), role = d.dramaRole || 'raper', diff = d.dramaDiff || 'norm';
+      $('#dr').innerHTML = '<div class="dr-pick">' +
+        (saved ? '<button type="button" class="dr-cont" data-act="cont"><span class="dr-cont-k">' + tile(saved.sc, 'sc') + '</span><span><small>Masz niedokończoną aferę</small><b>' + esc(SC(saved.sc).name) + ' · dzień ' + Math.min(7, saved.beat + 1) + '/7</b><em>' + esc(saved.nick) + ' – ' + esc(ROLE(saved.role).name) + '</em></span><i>' + ic('play', 18) + ' Kontynuuj</i></button>' : '') +
+        '<h2>Twoja postać</h2><div class="dr-who"><label class="dr-nick"><span>Ksywka</span><input type="text" id="dr-nick" maxlength="16" placeholder="np. Mokry Mati" value="' + esc(d.dramaNick) + '" autocomplete="off"></label></div>' +
+        '<div class="dr-roles" role="radiogroup" aria-label="Typ artysty">' + ROLES.map(function (r) {
+          return '<button type="button" class="dr-role' + (r.id === role ? ' is-on' : '') + '" data-role="' + r.id + '" role="radio" aria-checked="' + (r.id === role) + '"><span class="dr-role-k">' + AV(r.id) + '</span><b>' + r.name + '</b><small>' + r.d + '</small><span class="dr-role-st">' + STATS.map(function (s) { return '<i title="' + s[1] + '">' + ic(s[2], 12) + r.st[s[0]] + '</i>'; }).join('') + '</span></button>';
+        }).join('') + '</div>' +
+        '<h2>Poziom trudności</h2><div class="dr-diff" id="dr-diff" role="radiogroup" aria-label="Poziom trudności">' + DIFFS.map(function (x) { return '<button type="button" class="dr-df' + (x[0] === diff ? ' is-on' : '') + '" data-diff="' + x[0] + '" role="radio" aria-checked="' + (x[0] === diff) + '"><b>' + x[1] + '</b><small>' + x[2] + '</small></button>'; }).join('') + '</div>' +
+        '<h2>Wybierz aferę</h2><p class="dr-lead">7 dni, decyzje, losowe wydarzenia i 4 paski. Jeśli Szacunek albo Kasa spadną do zera, a Nerwy dojdą do 100 – koniec gry.</p><div class="dr-sc">' +
+        SCEN.map(function (s, i) { var done = d.dramaDone.indexOf(s.id) >= 0; return '<button type="button" class="dr-scb" data-sc="' + s.id + '"><span class="dr-scb-k">' + tile(s.id, 'sc') + '</span><span><b>' + (i + 1) + '. ' + s.name + (done ? ' <em>' + ic('check', 12) + ' ukończona</em>' : '') + '</b><small>' + s.sub + '</small></span></button>'; }).join('') + '</div></div>';
     }
-
 
     /* ----- gra ----- */
     function begin(scId) {
@@ -786,5 +793,5 @@
     });
     endsBox(); pick();
   }
-  window.DramaSim = { mount: mount, ENDS: ENDS.length, AV: AV };
+  window.DramaSim = { mount: mount, ENDS: ENDS.length };
 })();

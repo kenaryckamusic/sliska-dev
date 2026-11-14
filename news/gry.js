@@ -203,11 +203,8 @@
       how: 'Zacznij palec tam, gdzie ma ruszyć kula, i machnij w górę. Zakręć palcem, żeby nadać kuli efekt. 10 ramek po dwa rzuty, strike i spare dają bonusy jak w prawdziwych kręglach (maksimum 300).' },
     { id: 'ukladanka', name: 'Śliska Układanka', knaga: 'detektyw', sub: 'Ułóż zdjęcie z artykułu.', tag: 'Logiczna', unit: 'ruchów', low: true, c: ['#7a3d00', '#ffae2b'],
       how: 'Przesuwaj kafelki na puste pole, aż ułożysz zdjęcie z artykułu. Rekordem jest najmniejsza liczba ruchów. „Podgląd” pokazuje całe zdjęcie.' },
-    { id: 'drama', name: 'Drama Simulator', knaga: 'wsciekla', sub: 'Kariera reportera: 9 prawdziwych dram, 81 zakończeń.', tag: 'Fabularna', kind: 'story', c: ['#5c0716', '#ff3b3b'],
-      how: 'Jesteś reporterem Śliskiej. Zagraj pojedynczą sprawę albo cały sezon (3, 6 lub 9 spraw pod rząd). Każdy dzień to dylemat o tym, co publikujesz, wątek z redakcją (Szef, Ola, Wrona, Marta, sponsor) i losowe wydarzenia. Paski: Klikalność, Wiarygodność, Pozwy, Nerwy oraz relacje z ekipą decydują o jednym z 9 zakończeń każdej dramy (81 w całej grze) i o zakończeniu kariery. Po każdym wyborze dostajesz prawdziwy fakt ze źródłem. Ranking liczy odkryte zakończenia (max 30).' },
-    { id: 'naczelny', name: 'Redaktor Naczelny', knaga: 'redaktor', sub: 'Tydzień w redakcji: klik czy prawda?', tag: 'Fabularna', kind: 'sim', unit: 'pkt', c: ['#0c3b66', '#2fa8ff'],
-      how: 'Przez 5 dni dostajesz 10 tematów i za każdym razem wybierasz: opublikować od razu, sprawdzić albo odpuścić. Cztery paski: Klikalność, Wiarygodność, Pozwy i Nerwy. Zero Klikalności lub Wiarygodności, 100 Pozwów albo 100 Nerwów kończą grę. Na koniec dostajesz wynik (maks. 100) i jedno z 12 zakończeń.' },
-    { id: 'gabin', name: 'Gabin', knaga: 'wsciekla', sub: 'Odc. 1: Zły numer. Thriller w czacie.', tag: 'Tylko dla właściciela', kind: 'story', c: ['#0b1f1e', '#0f766e'], how: 'Czat-thriller. Odpowiadaj mieszkańcom Gabina i szukaj zaginionej Zenobii.' },
+    { id: 'drama', name: 'Drama Simulator', knaga: 'wsciekla', sub: '10 afer, 7 dni, 30 zakończeń. Przetrwasz?', tag: 'Fabularna', kind: 'story', c: ['#5c0716', '#ff3b3b'],
+      how: 'Stwórz postać (ksywka i typ artysty), wybierz jedną z 10 afer i przetrwaj 7 dni. Każda decyzja zmienia Hype, Szacunek, Kasę i Nerwy oraz liczbę obserwujących. Po drugim dniu zatrudnisz prawnika, PR-owca albo terapeutę – odblokują nowe opcje. Uważaj: zero Szacunku albo Kasy, czy 100 Nerwów to natychmiastowy koniec. 30 zakończeń i 13 osiągnięć do zdobycia, gra zapisuje się w trakcie.' },
     { id: 'slizgawka', name: 'Ślizgawka', knaga: 'surfer', sub: 'Surfuj, skacz i rób triki.', tag: 'Nowość', unit: 'm', c: ['#b33a1a', '#ffb36b'],
       how: 'Spacja albo stuknięcie – skok (drugi raz w powietrzu = podwójny skok i salto). Strzałka w dół albo lewa strona ekranu – schylasz się pod dronami z pozwami lub nurkujesz. Fale-rampy wyrzucają Cię wysoko, za salta są bonusy. Zbieraj krople (+10 m). Co 400 m zmienia się pora: zachód, noc, neon, zorza.' }
   ];
@@ -227,7 +224,7 @@
     return v + ' ' + (G(g).unit || '');
   }
   /* ---- ukończenie gry: JEDNO zgłoszenie do serwera (wynik + rekord + XP). Serwer sprawdza bilet startowy, czas i wiarygodność wyniku. ---- */
-  var TICKETED = ['krople', 'flappy', 'waz', 'slizgawka', 'kregle', 'pojedynek', 'ratunek', 'karny', 'ukladanka', 'drama', 'naczelny', 'krzyzowka'];
+  var TICKETED = ['krople', 'flappy', 'waz', 'slizgawka', 'kregle', 'pojedynek', 'ratunek', 'karny', 'ukladanka', 'drama', 'krzyzowka'];
   var TK = {}, TLS = {}, RPS = {}, RUNS = {}, lastFin = {};
   var REPLAY = { flappy: 1, waz: 1 };         // gry odtwarzane na serwerze z zapisu ruchów (ziarno losowania dostaje się razem z biletem)
   /* ---- wspólna symulacja gier (ten sam kod liczy wynik na serwerze) ---- */
@@ -388,9 +385,6 @@ var SliskaSim = (function () {
     return nb;
   }
   function played(g) { if (Date.now() - (lastFin[g] || 0) < 4000) return; try { fetch(API + '/gry/play', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ game: g }), keepalive: true }).catch(function () {}); } catch (e) { /* ignoruj */ } }
-  /* rola Właściciela dociąga się po zalogowaniu: gdy zmieni się widoczność GABINA, odśwież widok gier */
-  var gabinSeen = window.GabinGame ? GabinGame.owner() : false;
-  window.addEventListener('sn:reader', function () { setTimeout(function () { var o = window.GabinGame ? GabinGame.owner() : false; if (o !== gabinSeen) { gabinSeen = o; if (/^#\/gry(\/gabin)?$/.test(location.hash)) window.dispatchEvent(new HashChangeEvent('hashchange')); } }, 400); });
   window.addEventListener('sn:reader', function () { acc = null; accAch = null; accAchUid = ''; var cg = $('.gp[data-game]'); if (cg) mint(cg.dataset.game); accLoad().then(function () { var b = $('#gry-best'), cur = $('.gp[data-game]'); if (b && cur) b.textContent = fmt(cur.dataset.game, best(cur.dataset.game)); }); });
 
   /* ---------- najlepsi gracze ---------- */
@@ -523,7 +517,7 @@ var SliskaSim = (function () {
       feat(G('slizgle'), 'Słowo dnia #' + (dayIndex() + 1), sl && sl.end ? (sl.win ? 'Dziś zgadnięte w ' + sl.rows.length + '/6 ✓' : 'Dziś bez trafienia – jutro nowe słowo') : 'Nowe słowo czeka. 6 prób.', sl && sl.end ? 'Zobacz wynik' : 'Zgaduj') +
       feat(G('krzyzowka'), 'Tydzień #' + weekIndex(), kz ? 'Rozwiązana ✓ – nowa w poniedziałek' : 'Hasło tygodnia czeka na odkrycie.', kz ? 'Zobacz' : 'Rozwiąż') + '</div>' +
       '<h2 class="gh-h">Zręcznościowe</h2><div class="gh-grid">' + ['krople', 'flappy', 'waz', 'slizgawka', 'kregle', 'pojedynek', 'ratunek', 'karny'].map(function (id) { return tile(G(id)); }).join('') + '</div>' +
-      '<h2 class="gh-h">Na spokojnie</h2><div class="gh-grid">' + ['drama', 'naczelny', 'ukladanka'].concat(window.GabinGame && GabinGame.owner() ? ['gabin'] : []).map(function (id) { return tile(G(id)); }).join('') + '</div>' +
+      '<h2 class="gh-h">Na spokojnie</h2><div class="gh-grid">' + ['drama', 'ukladanka'].map(function (id) { return tile(G(id)); }).join('') + '</div>' +
       '<div id="gh-meta"></div>' +
       '<nav class="gh-more" aria-label="Śliska strefa"><a href="#/sezon">' + ICO.cup + '<span><b>Ranking sezonu</b><small>Kto zebrał najwięcej XP w tym miesiącu</small></span></a><a href="#/dramy">' + ICO.fire + '<span><b>Osie czasu dram</b><small>Afery krok po kroku</small></span></a></nav></div>';
     metaBox(); achSync();
@@ -1926,13 +1920,6 @@ var SliskaSim = (function () {
     DramaSim.mount(el, { G: G, K: K, esc: esc, shell: shell, submit: submit, played: played, share: share, load: load, save: save, toast: toast, LINK: LINK + '/drama' });
   }
 
-  /* ============== REDAKTOR NACZELNY (news/naczelny.js) ============== */
-  function naczelny(el) {
-    if (!window.NaczelnySim) { shell(el, G('naczelny'), '<p class="gp-empty">Nie udało się wczytać gry. Odśwież stronę.</p>'); return; }
-    SND.game('naczelny'); el.addEventListener('click', function (e) { if (e.target.closest('button,a.btn')) SND.play('click'); SND.unlock(); }); SND.want = 'office'; SND.amb('office'); stopFns.push(function () { SND.want = ''; SND.ambStop(); });
-    NaczelnySim.mount(el, { G: G, K: K, esc: esc, shell: shell, submit: submit, played: played, share: share, load: load, save: save, toast: toast, LINK: LINK + '/naczelny' });
-  }
-
   /* ============== KRZYŻÓWKA TYGODNIA (krzyżówka z hasłem) ============== */
   // [wyraz, podpowiedź, pozycja litery hasła w wyrazie] – używane, gdy właściciel nie ułożył krzyżówki na dany tydzień
   var KRZ = [
@@ -2053,7 +2040,7 @@ var SliskaSim = (function () {
   window.addEventListener('hashchange', function () { setTimeout(zone, 0); });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', zone); else zone();
 
-  var RUN = { krzyzowka: krzyzowka, slizgle: slizgle, krople: krople, flappy: flappy, waz: waz, ukladanka: ukladanka, drama: drama, naczelny: naczelny, slizgawka: slizgawka, kregle: kregle, pojedynek: pojedynek, ratunek: ratunek, karny: karny, gabin: function (el) { if (window.GabinGame) GabinGame.mount(el); else hub(el); } };
+  var RUN = { krzyzowka: krzyzowka, slizgle: slizgle, krople: krople, flappy: flappy, waz: waz, ukladanka: ukladanka, drama: drama, slizgawka: slizgawka, kregle: kregle, pojedynek: pojedynek, ratunek: ratunek, karny: karny, gabin: function (el) { if (window.GabinGame) GabinGame.mount(el); else hub(el); } };
   window.SliskieGry = {
     shareCard: shareCard,
     mount: function (el, sub, ctx) {

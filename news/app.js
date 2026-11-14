@@ -4166,7 +4166,7 @@ function routeCore() {
   } else if (r.name === 'games') {
     showView('games');
     document.title = `Śliskie Gry – ${CONFIG.SITE_NAME}`;
-    setMeta('Śliskie Gry', 'Ślizgle, Łap Krople, Super Knaga, Śliskiego Węża, Układankę, Drama Simulator i Redaktora Naczelnego – gry Śliskiej News.');
+    setMeta('Śliskie Gry', 'Ślizgle, Łap Krople, Super Knaga, Śliskiego Węża, Układankę, Drama Simulator – gry Śliskiej News.');
     if (window.SliskieGry) SliskieGry.mount($('#view-games'), r.sub, { articles: state.articles });
     else $('#view-games').innerHTML = notFoundHtml('Nie udało się wczytać gier. Odśwież stronę.');
   } else if (r.name === 'season' || r.name === 'summary') {
