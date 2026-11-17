@@ -521,6 +521,15 @@ var SliskaSim = (function () {
       '<div id="gh-meta"></div>' +
       '<nav class="gh-more" aria-label="Śliska strefa"><a href="#/sezon">' + ICO.cup + '<span><b>Ranking sezonu</b><small>Kto zebrał najwięcej XP w tym miesiącu</small></span></a><a href="#/dramy">' + ICO.fire + '<span><b>Osie czasu dram</b><small>Afery krok po kroku</small></span></a></nav></div>';
     metaBox(); achSync();
+    cfg().then(function (c) {   // krzyżówka bez wersji od redakcji = nieaktywna
+      var on = !!(c && c.krzyz && c.krzyz.week === weekIndex() && c.krzyz.h), a = el.querySelector('.gh-feat[href="#/gry/krzyzowka"]');
+      if (on || !a) return;
+      a.classList.add('is-off');
+      var m = a.querySelector('small'), cta = a.querySelector('.gh-cta'), t = a.querySelector('.gh-tag');
+      if (t) t.textContent = 'Tydzień #' + weekIndex() + ' · nieaktywna';
+      if (m) m.textContent = 'Czeka na krzyżówkę od redakcji.';
+      if (cta) cta.textContent = 'Archiwum →';
+    });
     var clicks = 0, kb = $('#gry-hero-k', el);
     kb.addEventListener('click', function () {
       clicks++; kb.classList.remove('is-poke'); void kb.offsetWidth; kb.classList.add('is-poke');
@@ -1935,9 +1944,13 @@ var SliskaSim = (function () {
       if (!$('.gp[data-game="krzyzowka"]')) return;
       if (!arts.length && typeof state !== 'undefined') arts = state.articles || [];
       var own = !!(c && c.krzyz && c.krzyz.week === weekIndex() && c.krzyz.h);
-      var set = own ? c.krzyz : (window.KrzGen && KrzGen.generate(arts, weekIndex())) || KRZ[((weekIndex() % KRZ.length) + KRZ.length) % KRZ.length];
-      if (own || arts.length) lsSet('sn-krzyz-set-' + weekIndex(), set);   // zapamiętany zestaw trafia potem do archiwum
-      krzRun(set, own ? 'Ułożona przez redakcję' : set.gen ? 'Z artykułów tygodnia' : 'Krzyżówka z hasłem');
+      if (!own) {   // redakcja nie ułożyła krzyżówki na ten tydzień – gra jest nieaktywna (nic nie generujemy automatycznie)
+        $('.kz').innerHTML = '<div class="kz-paper kz-off"><div class="kz-head"><div><span class="gm-eye">Nieaktywna</span><p><b>Krzyżówka tego tygodnia jeszcze nie została ułożona.</b> Pojawi się, gdy tylko redakcja ją opublikuje. Do tego czasu możesz zagrać w krzyżówki z poprzednich tygodni.</p></div></div><div class="kz-act"><a class="btn btn-primary" href="#/gry/krzyzowka-arch">Archiwum krzyżówek</a><a class="btn" href="#/gry">Wróć do gier</a></div></div>';
+        return;
+      }
+      var set = c.krzyz;
+      lsSet('sn-krzyz-set-' + weekIndex(), set);   // zapamiętany zestaw trafia potem do archiwum
+      krzRun(set, 'Ułożona przez redakcję');
     });
   }
   /* archiwum: poprzednie tygodnie (najstarszy startowy zestaw: tydzień −3) */

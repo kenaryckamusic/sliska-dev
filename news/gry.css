@@ -1078,3 +1078,7 @@ kbd { padding: 2px 7px; border: 1px solid var(--border); border-bottom-width: 3p
 /* przycisk dźwięku obok pauzy */
 .gry-hud .hud-btn.gry-snd { margin-right: 54px; }
 .gry-hud .hud-btn.gry-snd[aria-pressed="false"] { opacity: .7; }
+
+/* Krzyżówka nieaktywna, gdy redakcja nie ułożyła jej na ten tydzień */
+.gh-feat.is-off { filter: grayscale(.9); opacity: .7; }
+.kz-off .kz-act { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
